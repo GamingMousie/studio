@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,7 +17,14 @@ export default function TrailerShipmentsPage() {
   const params = useParams();
   const trailerId = params.trailerId as string;
 
-  const { getTrailerById, getShipmentsByTrailerId, deleteShipment, updateShipmentLocation } = useWarehouse();
+  const { 
+    getTrailerById, 
+    getShipmentsByTrailerId, 
+    deleteShipment, 
+    updateShipmentLocation,
+    updateShipmentReleasedStatus,
+    updateShipmentClearedStatus 
+  } = useWarehouse();
   
   const [trailer, setTrailer] = useState<Trailer | null>(null);
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -29,13 +37,11 @@ export default function TrailerShipmentsPage() {
         setTrailer(currentTrailer);
         setShipments(getShipmentsByTrailerId(trailerId));
       } else {
-        // Handle trailer not found, e.g., redirect or show error
-        // For now, just log and potentially redirect
         console.error("Trailer not found");
-        router.push('/'); // Redirect to home if trailer not found
+        router.push('/'); 
       }
     }
-  }, [trailerId, getTrailerById, getShipmentsByTrailerId, router]);
+  }, [trailerId, getTrailerById, getShipmentsByTrailerId, router, shipments]); // Added shipments to dependency array to refresh list
 
 
   if (!trailer) {
@@ -98,6 +104,8 @@ export default function TrailerShipmentsPage() {
                   shipment={shipment}
                   onDelete={() => deleteShipment(shipment.id)}
                   onUpdateLocation={(newLocation) => updateShipmentLocation(shipment.id, newLocation)}
+                  onToggleReleased={() => updateShipmentReleasedStatus(shipment.id, !shipment.released)}
+                  onToggleCleared={() => updateShipmentClearedStatus(shipment.id, !shipment.cleared)}
                 />
               ))}
             </div>
@@ -113,3 +121,4 @@ export default function TrailerShipmentsPage() {
     </div>
   );
 }
+

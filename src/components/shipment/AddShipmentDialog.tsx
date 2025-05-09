@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,8 @@ const shipmentSchema = z.object({
   locationName: z.string().optional(),
   releaseDocument: z.instanceof(FileList).optional(),
   clearanceDocument: z.instanceof(FileList).optional(),
+  released: z.boolean().optional(),
+  cleared: z.boolean().optional(),
 });
 
 type ShipmentFormData = z.infer<typeof shipmentSchema>;
@@ -39,6 +42,10 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
   const { toast } = useToast();
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ShipmentFormData>({
     resolver: zodResolver(shipmentSchema),
+    defaultValues: {
+      released: false,
+      cleared: false,
+    }
   });
 
   const onSubmit: SubmitHandler<ShipmentFormData> = (data) => {
@@ -53,6 +60,8 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       locationName: data.locationName,
       releaseDocumentName,
       clearanceDocumentName,
+      released: data.released,
+      cleared: data.cleared,
     });
     toast({
       title: "Success!",
@@ -110,6 +119,18 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             <Input id="clearanceDocument" type="file" {...register('clearanceDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
             {errors.clearanceDocument && <p className="text-sm text-destructive mt-1">{errors.clearanceDocument.message}</p>}
           </div>
+          
+          <div className="grid grid-cols-2 gap-4 pt-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox id="released" {...register('released')} />
+              <Label htmlFor="released" className="font-normal">Mark as Released</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox id="cleared" {...register('cleared')} />
+              <Label htmlFor="cleared" className="font-normal">Mark as Cleared</Label>
+            </div>
+          </div>
+
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => { setIsOpen(false); reset(); }}>Cancel</Button>
@@ -122,3 +143,4 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
     </Dialog>
   );
 }
+

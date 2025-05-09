@@ -3,7 +3,7 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText } from 'lucide-react';
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff } from 'lucide-react';
 import AssignLocationDialog from './AssignLocationDialog';
 import {
   DropdownMenu,
@@ -18,9 +18,11 @@ interface ShipmentCardProps {
   shipment: Shipment;
   onDelete: () => void;
   onUpdateLocation: (newLocation: string) => void;
+  onToggleReleased: () => void;
+  onToggleCleared: () => void;
 }
 
-export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: ShipmentCardProps) {
+export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onToggleReleased, onToggleCleared }: ShipmentCardProps) {
   const [isAssignLocationOpen, setIsAssignLocationOpen] = useState(false);
 
   return (
@@ -45,6 +47,15 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
                   <Edit3 className="mr-2 h-4 w-4" />
                   Assign/Edit Location
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={onToggleReleased}>
+                  {shipment.released ? <CircleOff className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />}
+                  {shipment.released ? 'Mark as Not Released' : 'Mark as Released'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onToggleCleared}>
+                  {shipment.cleared ? <CircleOff className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />}
+                  {shipment.cleared ? 'Mark as Not Cleared' : 'Mark as Cleared'}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive focus:bg-destructive/10">
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Shipment
@@ -64,6 +75,18 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
               {shipment.locationName}
             </Badge>
           </div>
+
+          <div className="flex items-center pt-1">
+            {shipment.released ? <CheckCircle2 className="mr-1.5 h-4 w-4 text-green-600" /> : <CircleOff className="mr-1.5 h-4 w-4 text-muted-foreground" />}
+            <span className="font-medium text-muted-foreground">Released:</span>
+            <span className="ml-1.5 font-semibold">{shipment.released ? 'Yes' : 'No'}</span>
+          </div>
+          <div className="flex items-center">
+            {shipment.cleared ? <CheckCircle2 className="mr-1.5 h-4 w-4 text-green-600" /> : <CircleOff className="mr-1.5 h-4 w-4 text-muted-foreground" />}
+            <span className="font-medium text-muted-foreground">Cleared:</span>
+            <span className="ml-1.5 font-semibold">{shipment.cleared ? 'Yes' : 'No'}</span>
+          </div>
+
           {shipment.releaseDocumentName && (
             <div className="flex items-center pt-1">
               <FileText className="mr-1.5 h-4 w-4 text-muted-foreground" />
@@ -95,3 +118,4 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
     </>
   );
 }
+

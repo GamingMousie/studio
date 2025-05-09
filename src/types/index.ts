@@ -16,5 +16,7 @@ export interface Shipment {
   locationName: string; // Warehouse location name, e.g., "Bay A1", "Shelf 3-C"
   releaseDocumentName?: string; // Optional: Name of the release document
   clearanceDocumentName?: string; // Optional: Name of the clearance document
+  released: boolean; // New field: Indicates if the shipment is released
+  cleared: boolean; // New field: Indicates if the shipment is cleared
 }
 

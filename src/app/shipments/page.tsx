@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -10,14 +11,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { PackageSearch, Search, ListFilter, LayoutGrid, Package as PackageIcon } from 'lucide-react';
 import type { Shipment } from '@/types';
-import { Badge } from '@/components/ui/badge'; // Added import for Badge
+import { Badge } from '@/components/ui/badge';
 
 export default function AllShipmentsPage() {
-  const { shipments, trailers, deleteShipment, updateShipmentLocation } = useWarehouse();
+  const { shipments, trailers, deleteShipment, updateShipmentLocation, updateShipmentReleasedStatus, updateShipmentClearedStatus } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [trailerFilter, setTrailerFilter] = useState<string | 'all'>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid'); // Default to grid or list
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid'); 
 
   useEffect(() => {
     setIsClient(true);
@@ -56,6 +57,12 @@ export default function AllShipmentsPage() {
                 <Skeleton className="h-4 w-1/4" />
                 <Skeleton className="h-5 w-20 ml-2" /> {/* Location Badge */}
               </div>
+              <div className="flex items-center mt-2 space-x-2">
+                <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-20" />
+              </div>
+              <div className="flex items-center mt-1 space-x-2">
+                <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-20" />
+              </div>
             </CardContent>
             <div className="p-4 pt-0 border-t mt-auto">
               <Skeleton className="h-9 w-full" /> {/* Assign Location Button */}
@@ -72,6 +79,12 @@ export default function AllShipmentsPage() {
                   <Skeleton className="h-4 w-28" />
                   <Skeleton className="h-5 w-24" />
                 </div>
+                 <div className="flex items-center mt-1 space-x-2">
+                    <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-24" />
+                 </div>
+                 <div className="flex items-center mt-1 space-x-2">
+                    <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-24" />
+                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <Skeleton className="h-9 w-32" /> 
@@ -146,6 +159,8 @@ export default function AllShipmentsPage() {
               shipment={shipment} 
               onDelete={() => deleteShipment(shipment.id)}
               onUpdateLocation={(newLocation) => updateShipmentLocation(shipment.id, newLocation)}
+              onToggleReleased={() => updateShipmentReleasedStatus(shipment.id, !shipment.released)}
+              onToggleCleared={() => updateShipmentClearedStatus(shipment.id, !shipment.cleared)}
             />
           ))}
         </div>
@@ -153,3 +168,4 @@ export default function AllShipmentsPage() {
     </div>
   );
 }
+

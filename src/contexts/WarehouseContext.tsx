@@ -14,10 +14,12 @@ interface WarehouseContextType {
   deleteTrailer: (trailerId: string) => void;
   shipments: Shipment[];
   getShipmentsByTrailerId: (trailerId: string) => Shipment[];
-  addShipment: (shipment: Omit<Shipment, 'id' | 'locationName'> & { locationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string }) => void;
+  addShipment: (shipment: Omit<Shipment, 'id' | 'locationName' | 'released' | 'cleared'> & { locationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?: boolean, cleared?: boolean }) => void;
   updateShipmentLocation: (shipmentId: string, locationName: string) => void;
   deleteShipment: (shipmentId: string) => void;
   getTrailerById: (trailerId: string) => Trailer | undefined;
+  updateShipmentReleasedStatus: (shipmentId: string, released: boolean) => void;
+  updateShipmentClearedStatus: (shipmentId: string, cleared: boolean) => void;
 }
 
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
@@ -29,9 +31,9 @@ const initialTrailers: Trailer[] = [
 ];
 
 const initialShipments: Shipment[] = [
-  { id: uuidv4(), trailerId: 'T-001', contentDescription: 'Electronics Batch #123', quantity: 50, destination: 'City Retail Hub', locationName: 'Bay A1', releaseDocumentName: 'release_electronics_123.pdf', clearanceDocumentName: 'clearance_electronics_123.pdf' },
-  { id: uuidv4(), trailerId: 'T-001', contentDescription: 'Apparel Stock Lot', quantity: 200, destination: 'Regional Outlet', locationName: 'Shelf B7' },
-  { id: uuidv4(), trailerId: 'T-002', contentDescription: 'Industrial Parts', quantity: 10, destination: 'Factory Zone', locationName: 'Dock 3', releaseDocumentName: 'industrial_release.docx' },
+  { id: uuidv4(), trailerId: 'T-001', contentDescription: 'Electronics Batch #123', quantity: 50, destination: 'City Retail Hub', locationName: 'Bay A1', releaseDocumentName: 'release_electronics_123.pdf', clearanceDocumentName: 'clearance_electronics_123.pdf', released: true, cleared: true },
+  { id: uuidv4(), trailerId: 'T-001', contentDescription: 'Apparel Stock Lot', quantity: 200, destination: 'Regional Outlet', locationName: 'Shelf B7', released: false, cleared: false },
+  { id: uuidv4(), trailerId: 'T-002', contentDescription: 'Industrial Parts', quantity: 10, destination: 'Factory Zone', locationName: 'Dock 3', releaseDocumentName: 'industrial_release.docx', released: true, cleared: false },
 ];
 
 
@@ -63,13 +65,15 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
     return shipments.filter((s) => s.trailerId === trailerId);
   }, [shipments]);
 
-  const addShipment = useCallback((shipmentData: Omit<Shipment, 'id' | 'locationName'> & { locationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string }) => {
+  const addShipment = useCallback((shipmentData: Omit<Shipment, 'id' | 'locationName' | 'released' | 'cleared'> & { locationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?:boolean, cleared?: boolean }) => {
     const newShipment: Shipment = { 
       ...shipmentData, 
       id: uuidv4(),
       locationName: shipmentData.locationName || 'Pending Assignment',
       releaseDocumentName: shipmentData.releaseDocumentName,
       clearanceDocumentName: shipmentData.clearanceDocumentName,
+      released: shipmentData.released ?? false,
+      cleared: shipmentData.cleared ?? false,
     };
     setShipments((prev) => [...prev, newShipment]);
   }, [setShipments]);
@@ -77,6 +81,18 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   const updateShipmentLocation = useCallback((shipmentId: string, locationName: string) => {
     setShipments((prev) =>
       prev.map((s) => (s.id === shipmentId ? { ...s, locationName } : s))
+    );
+  }, [setShipments]);
+
+  const updateShipmentReleasedStatus = useCallback((shipmentId: string, released: boolean) => {
+    setShipments((prev) =>
+      prev.map((s) => (s.id === shipmentId ? { ...s, released } : t))
+    );
+  }, [setShipments]);
+
+  const updateShipmentClearedStatus = useCallback((shipmentId: string, cleared: boolean) => {
+    setShipments((prev) =>
+      prev.map((s) => (s.id === shipmentId ? { ...s, cleared } : t))
     );
   }, [setShipments]);
 
@@ -100,7 +116,9 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
         addShipment,
         updateShipmentLocation,
         deleteShipment,
-        getTrailerById
+        getTrailerById,
+        updateShipmentReleasedStatus,
+        updateShipmentClearedStatus,
       }}
     >
       {children}
@@ -115,3 +133,4 @@ export const useWarehouse = (): WarehouseContextType => {
   }
   return context;
 };
+

@@ -171,10 +171,18 @@ export default function SingleShipmentPage() {
           )}
           
           <div className="space-y-1 col-span-1 md:col-span-2">
-            <h3 className="font-semibold text-muted-foreground flex items-center"><MapPin className="mr-2 h-4 w-4" />Warehouse Location</h3>
-            <Badge variant={shipment.locationName === "Pending Assignment" ? "outline" : "secondary"} className="text-base">
-              {shipment.locationName}
-            </Badge>
+            <h3 className="font-semibold text-muted-foreground flex items-center"><MapPin className="mr-2 h-4 w-4" />Warehouse Locations</h3>
+            <div className="flex flex-wrap gap-2 mt-1">
+            {(shipment.locationNames && shipment.locationNames.length > 0 && !(shipment.locationNames.length === 1 && shipment.locationNames[0] === 'Pending Assignment')) ? (
+                shipment.locationNames.map((loc, index) => (
+                  <Badge key={index} variant="secondary" className="text-base">
+                    {loc}
+                  </Badge>
+                ))
+              ) : (
+                <Badge variant="outline" className="text-base">Pending Assignment</Badge>
+              )}
+            </div>
           </div>
 
           <div className="space-y-1 col-span-1 md:col-span-2 border-t pt-4 mt-2">

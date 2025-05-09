@@ -16,13 +16,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Users } from 'lucide-react'; // Removed UserCircle
+import { FileText, Weight, Box, Users, MapPin } from 'lucide-react'; 
 
 const shipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'),
-  locationName: z.string().optional(),
+  locationNameInput: z.string().optional(), // Changed from locationName to locationNameInput
   releaseDocument: z.any().optional(), 
   clearanceDocument: z.any().optional(), 
   released: z.boolean().optional(),
@@ -49,6 +49,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       cleared: false,
       weight: null,
       palletSpace: null,
+      locationNameInput: '',
     }
   });
 
@@ -61,7 +62,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       stsJob: data.stsJob,
       quantity: data.quantity,
       importer: data.importer,
-      locationName: data.locationName,
+      initialLocationName: data.locationNameInput || undefined, // Pass as initialLocationName
       releaseDocumentName,
       clearanceDocumentName,
       released: data.released,
@@ -125,9 +126,11 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
           </div>
 
            <div>
-            <Label htmlFor="locationName">Initial Location (Optional)</Label>
-            <Input id="locationName" {...register('locationName')} placeholder="e.g., Bay C2" />
-            {errors.locationName && <p className="text-sm text-destructive mt-1">{errors.locationName.message}</p>}
+            <Label htmlFor="locationNameInput" className="flex items-center">
+              <MapPin className="mr-2 h-4 w-4 text-muted-foreground" /> Initial Location (Optional)
+            </Label>
+            <Input id="locationNameInput" {...register('locationNameInput')} placeholder="e.g., Bay C2" />
+            {errors.locationNameInput && <p className="text-sm text-destructive mt-1">{errors.locationNameInput.message}</p>}
           </div>
 
           <div className="space-y-2">

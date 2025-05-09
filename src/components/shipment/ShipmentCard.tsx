@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import Link from 'next/link'; // Import Link
+import Link from 'next/link'; 
 import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,11 +24,12 @@ import { useToast } from '@/hooks/use-toast';
 interface ShipmentCardProps {
   shipment: Shipment;
   onDelete: () => void; 
+  // onUpdateLocation is now effectively onAddLocation
   onUpdateLocation: (newLocation: string) => void; 
 }
 
 export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: ShipmentCardProps) {
-  const { updateShipment } = useWarehouse();
+  const { updateShipment, addShipmentLocation } = useWarehouse(); // addShipmentLocation from context
   const { toast } = useToast();
 
   const [isAssignLocationOpen, setIsAssignLocationOpen] = useState(false);
@@ -44,7 +45,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
       setAttachDocumentType('release');
       setIsAttachDocumentOpen(true);
     } else { 
-      updateShipment(shipment.id, { released: false, releaseDocumentName: undefined }); // Clear document name if un-permitting
+      updateShipment(shipment.id, { released: false, releaseDocumentName: undefined }); 
       toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not permitted. Release document removed.` });
     }
   };
@@ -54,7 +55,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
       setAttachDocumentType('clearance');
       setIsAttachDocumentOpen(true);
     } else { 
-      updateShipment(shipment.id, { cleared: false, clearanceDocumentName: undefined }); // Clear document name if un-clearing
+      updateShipment(shipment.id, { cleared: false, clearanceDocumentName: undefined }); 
       toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not cleared. Clearance document removed.` });
     }
   };
@@ -70,6 +71,11 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
       updateShipment(attachedShipmentId, { clearanceDocumentName: documentName, cleared: true });
     }
     setIsAttachDocumentOpen(false); 
+  };
+
+  const handleAddLocation = (newLocation: string) => {
+    addShipmentLocation(shipment.id, newLocation);
+    // Toast is handled by AssignLocationDialog now with more context
   };
   
 
@@ -104,7 +110,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsAssignLocationOpen(true)}>
                   <Edit3 className="mr-2 h-4 w-4" />
-                  Assign/Edit Location
+                  Add Location
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleMarkAsPermitted}>
                   {shipment.released ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
@@ -149,12 +155,20 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
             </div>
           )}
 
-          <div className="flex items-center pt-1">
-            <MapPin className="mr-1 h-4 w-4 text-muted-foreground" />
-            <span className="font-medium text-muted-foreground">Location:</span>
-            <Badge variant={shipment.locationName === "Pending Assignment" ? "outline" : "secondary"} className="ml-2">
-              {shipment.locationName}
-            </Badge>
+          <div className="flex items-start pt-1">
+            <MapPin className="mr-1 h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <span className="font-medium text-muted-foreground mr-1">Locations:</span>
+            <div className="flex flex-wrap gap-1">
+              {(shipment.locationNames && shipment.locationNames.length > 0 && !(shipment.locationNames.length === 1 && shipment.locationNames[0] === 'Pending Assignment')) ? (
+                shipment.locationNames.map((loc, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">
+                    {loc}
+                  </Badge>
+                ))
+              ) : (
+                <Badge variant="outline" className="text-xs">Pending Assignment</Badge>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center pt-1">
@@ -185,7 +199,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
         </CardContent>
         <CardFooter className="pt-3">
           <Button variant="outline" size="sm" className="w-full" onClick={() => setIsAssignLocationOpen(true)}>
-            <Edit3 className="mr-2 h-4 w-4" /> Assign/Update Location
+            <MapPin className="mr-2 h-4 w-4" /> Add Location
           </Button>
         </CardFooter>
       </Card>
@@ -193,8 +207,8 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
       <AssignLocationDialog
         isOpen={isAssignLocationOpen}
         setIsOpen={setIsAssignLocationOpen}
-        currentLocation={shipment.locationName}
-        onSubmit={onUpdateLocation}
+        currentLocationsDisplay={shipment.locationNames.join(', ')}
+        onSubmit={handleAddLocation} // This will now add to the list via context
         shipmentIdentifier={shipmentIdentifier}
       />
 

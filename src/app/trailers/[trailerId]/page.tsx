@@ -22,7 +22,7 @@ export default function TrailerShipmentsPage() {
     getTrailerById,
     getShipmentsByTrailerId,
     deleteShipment,
-    updateShipmentLocation,
+    addShipmentLocation, // Changed from updateShipmentLocation
   } = useWarehouse();
 
   const [trailer, setTrailer] = useState<Trailer | null>(null);
@@ -51,7 +51,7 @@ export default function TrailerShipmentsPage() {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
     try {
-      return format(parseISO(dateString), 'PPpp'); // e.g., Sep 20, 2023, 10:00 AM
+      return format(parseISO(dateString), 'PPpp'); 
     } catch (error) {
       console.error("Error formatting date:", dateString, error);
       return "Invalid Date";
@@ -153,7 +153,7 @@ export default function TrailerShipmentsPage() {
                   key={shipment.id}
                   shipment={shipment}
                   onDelete={() => deleteShipment(shipment.id)}
-                  onUpdateLocation={(newLocation) => updateShipmentLocation(shipment.id, newLocation)}
+                  onUpdateLocation={(newLocation) => addShipmentLocation(shipment.id, newLocation)} // Use addShipmentLocation
                 />
               ))}
             </div>

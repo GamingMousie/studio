@@ -18,13 +18,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Edit, Users } from 'lucide-react'; // Removed UserCircle
+import { FileText, Weight, Box, Edit, Users, MapPin } from 'lucide-react'; 
 
 const editShipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'),
-  locationName: z.string().min(1, 'Location name is required').max(30, 'Location name too long'),
+  locationNamesInput: z.string().optional(), // For comma-separated input
   releaseDocument: z.any().optional(), 
   clearanceDocument: z.any().optional(), 
   released: z.boolean().optional(),
@@ -51,7 +51,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
       stsJob: shipmentToEdit.stsJob,
       quantity: shipmentToEdit.quantity,
       importer: shipmentToEdit.importer,
-      locationName: shipmentToEdit.locationName,
+      locationNamesInput: shipmentToEdit.locationNames.join(', '),
       released: shipmentToEdit.released,
       cleared: shipmentToEdit.cleared,
       weight: shipmentToEdit.weight ?? null,
@@ -67,7 +67,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
         stsJob: shipmentToEdit.stsJob,
         quantity: shipmentToEdit.quantity,
         importer: shipmentToEdit.importer,
-        locationName: shipmentToEdit.locationName,
+        locationNamesInput: shipmentToEdit.locationNames.join(', '),
         released: shipmentToEdit.released,
         cleared: shipmentToEdit.cleared,
         weight: shipmentToEdit.weight ?? null,
@@ -81,11 +81,15 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     const newReleaseDocumentFile = data.releaseDocument && data.releaseDocument.length > 0 ? data.releaseDocument[0] : null;
     const newClearanceDocumentFile = data.clearanceDocument && data.clearanceDocument.length > 0 ? data.clearanceDocument[0] : null;
 
+    const locationNamesArray = data.locationNamesInput
+      ? data.locationNamesInput.split(',').map(name => name.trim()).filter(Boolean)
+      : [];
+
     const updatedData: ShipmentUpdateData = {
       stsJob: data.stsJob,
       quantity: data.quantity,
       importer: data.importer,
-      locationName: data.locationName || shipmentToEdit.locationName,
+      locationNames: locationNamesArray.length > 0 ? locationNamesArray : ['Pending Assignment'],
       releaseDocumentName: newReleaseDocumentFile ? newReleaseDocumentFile.name : shipmentToEdit.releaseDocumentName,
       clearanceDocumentName: newClearanceDocumentFile ? newClearanceDocumentFile.name : shipmentToEdit.clearanceDocumentName,
       released: data.released ?? false,
@@ -109,7 +113,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
           stsJob: shipmentToEdit.stsJob,
           quantity: shipmentToEdit.quantity,
           importer: shipmentToEdit.importer,
-          locationName: shipmentToEdit.locationName,
+          locationNamesInput: shipmentToEdit.locationNames.join(', '),
           released: shipmentToEdit.released,
           cleared: shipmentToEdit.cleared,
           weight: shipmentToEdit.weight ?? null,
@@ -169,9 +173,11 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
           </div>
 
            <div>
-            <Label htmlFor="locationName">Location Name</Label>
-            <Input id="locationName" {...register('locationName')} />
-            {errors.locationName && <p className="text-sm text-destructive mt-1">{errors.locationName.message}</p>}
+            <Label htmlFor="locationNamesInput" className="flex items-center">
+              <MapPin className="mr-2 h-4 w-4 text-muted-foreground" /> Location Names (comma-separated)
+            </Label>
+            <Input id="locationNamesInput" {...register('locationNamesInput')} placeholder="e.g., Bay A1, Shelf C2, Zone 3" />
+            {errors.locationNamesInput && <p className="text-sm text-destructive mt-1">{errors.locationNamesInput.message}</p>}
           </div>
 
           <div className="space-y-2">

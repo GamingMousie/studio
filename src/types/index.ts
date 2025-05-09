@@ -14,8 +14,8 @@ export interface Shipment {
   trailerId: string;
   stsJob: number; // STS job number
   quantity: number;
-  importer: string; // Added Importer
-  locationName: string; // Warehouse location name, e.g., "Bay A1", "Shelf 3-C"
+  importer: string; 
+  locationNames: string[]; // Changed from locationName: string
   releaseDocumentName?: string; // Optional: Name of the release document
   clearanceDocumentName?: string; // Optional: Name of the clearance document
   released: boolean; // Indicates if the shipment has permission to be released
@@ -28,8 +28,8 @@ export interface Shipment {
 export interface ShipmentFormData {
   stsJob: number;
   quantity: number;
-  importer: string; // Added Importer
-  locationName?: string;
+  importer: string; 
+  locationNameInput?: string; // For initial single location input, will be processed into locationNames
   releaseDocument?: FileList | File | null; 
   clearanceDocument?: FileList | File | null;
   released?: boolean;
@@ -39,12 +39,11 @@ export interface ShipmentFormData {
 }
 
 // Specifically for updating an existing shipment via context
-// Made all fields optional to support partial updates (e.g. just status and document name)
 export interface ShipmentUpdateData {
   stsJob?: number;
   quantity?: number;
-  importer?: string; // Added Importer
-  locationName?: string;
+  importer?: string; 
+  locationNames?: string[]; // Changed from locationName: string
   releaseDocumentName?: string;
   clearanceDocumentName?: string;
   released?: boolean;
@@ -67,7 +66,7 @@ export interface TrailerFormData {
   id: string;
   name: string;
   company?: string;
-  status: TrailerStatus; // Default to 'Scheduled' now
-  arrivalDate?: Date | null; // Use Date for picker, convert to string on submit
-  storageExpiryDate?: Date | null; // Use Date for picker, convert to string on submit
+  status: TrailerStatus; 
+  arrivalDate?: Date | null; 
+  storageExpiryDate?: Date | null; 
 }

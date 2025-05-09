@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,11 +15,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, AlertTriangle } from 'lucide-react';
+import { Camera, AlertTriangle, MapPin } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const locationSchema = z.object({
-  locationName: z.string().min(1, 'Location name is required').max(30, 'Location name too long'),
+  newLocationName: z.string().min(1, 'New location name is required').max(30, 'Location name too long'),
 });
 
 type LocationFormData = z.infer<typeof locationSchema>;
@@ -26,23 +27,23 @@ type LocationFormData = z.infer<typeof locationSchema>;
 interface AssignLocationDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  currentLocation: string;
-  onSubmit: (newLocation: string) => void;
-  shipmentIdentifier: string; // Changed from shipmentContent
+  currentLocationsDisplay: string; // Changed from currentLocation to show current list
+  onSubmit: (newLocationToAdd: string) => void; // onSubmit now signifies adding a location
+  shipmentIdentifier: string; 
 }
 
 export default function AssignLocationDialog({
   isOpen,
   setIsOpen,
-  currentLocation,
+  currentLocationsDisplay,
   onSubmit,
-  shipmentIdentifier, // Changed from shipmentContent
+  shipmentIdentifier, 
 }: AssignLocationDialogProps) {
   const { toast } = useToast();
   const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<LocationFormData>({
     resolver: zodResolver(locationSchema),
     defaultValues: {
-      locationName: currentLocation === "Pending Assignment" ? "" : currentLocation,
+      newLocationName: "", // Always start fresh for adding a new location
     },
   });
 
@@ -53,12 +54,12 @@ export default function AssignLocationDialog({
 
   useEffect(() => {
     if (isOpen) {
-      setValue('locationName', currentLocation === "Pending Assignment" ? "" : currentLocation);
+      setValue('newLocationName', ''); // Reset field when dialog opens
     } else {
       setIsScanning(false);
       setHasCameraPermission(null);
     }
-  }, [isOpen, currentLocation, setValue]);
+  }, [isOpen, setValue]);
 
   useEffect(() => {
     if (isScanning) {
@@ -107,11 +108,11 @@ export default function AssignLocationDialog({
         activeStream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [isScanning, toast]); // removed activeStream from deps
+  }, [isScanning, toast]); 
 
   const handleSimulateScan = () => {
     const scannedValue = `SCANNED-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
-    setValue('locationName', scannedValue, { shouldValidate: true });
+    setValue('newLocationName', scannedValue, { shouldValidate: true });
     toast({
       title: "Barcode Scanned (Simulated)",
       description: `Location set to ${scannedValue}. You can now save.`,
@@ -120,10 +121,10 @@ export default function AssignLocationDialog({
   };
 
   const handleFormSubmit: SubmitHandler<LocationFormData> = (data) => {
-    onSubmit(data.locationName);
+    onSubmit(data.newLocationName); // Pass the new location to be added
     toast({
-      title: "Location Updated!",
-      description: `Location for "${shipmentIdentifier}" set to ${data.locationName}.`,
+      title: "Location Added!",
+      description: `Location "${data.newLocationName}" added to shipment "${shipmentIdentifier}".`,
     });
     closeDialogCleanup();
   };
@@ -131,18 +132,22 @@ export default function AssignLocationDialog({
   const closeDialogCleanup = () => {
     setIsOpen(false);
     setIsScanning(false);
-    reset({ locationName: currentLocation === "Pending Assignment" ? "" : currentLocation });
+    reset({ newLocationName: "" });
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) closeDialogCleanup(); else setIsOpen(true); }}>
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>{isScanning ? 'Scan Location Barcode' : 'Assign Warehouse Location'}</DialogTitle>
+          <DialogTitle className="flex items-center">
+            <MapPin className="mr-2 h-5 w-5" /> {isScanning ? 'Scan Location Barcode' : 'Add New Location'}
+          </DialogTitle>
           {!isScanning && (
             <DialogDescription>
-              Update the location for shipment: <span className="font-semibold">{shipmentIdentifier}</span>.
-              Current location: <span className="font-semibold">{currentLocation}</span>.
+              Shipment: <span className="font-semibold">{shipmentIdentifier}</span>.
+              <br/>
+              Current locations: <span className="font-semibold">{currentLocationsDisplay || 'None'}</span>.
+              Enter a new location to add.
             </DialogDescription>
           )}
         </DialogHeader>
@@ -180,13 +185,13 @@ export default function AssignLocationDialog({
         ) : (
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 py-4">
             <div>
-              <Label htmlFor="locationName">New Location Name</Label>
+              <Label htmlFor="newLocationName">New Location Name to Add</Label>
               <Input
-                id="locationName"
-                {...register('locationName')}
+                id="newLocationName"
+                {...register('newLocationName')}
                 placeholder="e.g., Shelf A1, Bay 5, or scan barcode"
               />
-              {errors.locationName && <p className="text-sm text-destructive mt-1">{errors.locationName.message}</p>}
+              {errors.newLocationName && <p className="text-sm text-destructive mt-1">{errors.newLocationName.message}</p>}
             </div>
             <Button type="button" variant="outline" onClick={() => setIsScanning(true)} className="w-full">
               <Camera className="mr-2 h-4 w-4" /> Scan Barcode for Location
@@ -194,7 +199,7 @@ export default function AssignLocationDialog({
             <DialogFooter className="pt-4">
               <Button type="button" variant="outline" onClick={closeDialogCleanup}>Cancel</Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : 'Save Location'}
+                {isSubmitting ? 'Adding...' : 'Add Location'}
               </Button>
             </DialogFooter>
           </form>

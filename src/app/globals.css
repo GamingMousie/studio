@@ -95,37 +95,124 @@
 }
 
 @media print {
+  html, body {
+    height: auto !important;
+    font-size: 10pt !important; /* Base font size for print */
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #fff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   .no-print {
     display: none !important;
   }
-  .printable-area {
+
+  /* Reset main container for print */
+  main.container {
+    max-width: none !important;
     margin: 0 !important;
-    padding: 1em !important; /* Adjust padding for print layout */
-    border: none !important;
-    box-shadow: none !important;
-    width: 100% !important; /* Ensure it takes full width of print page */
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
-   .printable-area .no-print-in-area {
-      display: none !important;
-  }
-  body {
-    background-color: #fff !important; 
-    -webkit-print-color-adjust: exact; /* Ensures background colors and images are printed in Chrome/Safari */
-    print-color-adjust: exact; /* Standard property */
-  }
-  /* Ensure card content is visible correctly */
-   .printable-area .card-content-print {
-    padding-top: 1.5rem !important; /* Replicate CardContent pt-6 */
-  }
-  /* Hide scrollbars during print if any part of printable area might scroll */
-  ::-webkit-scrollbar {
-    display: none;
+    padding: 0 !important;
   }
 
-  .print-only-block {
+  .printable-area {
+    margin: 0.5in !important; /* Standard print margins */
+    padding: 0 !important; /* Padding will be handled by inner elements or specific needs */
+    border: none !important;
+    box-shadow: none !important;
+    width: auto !important; /* Take available width within margins */
+    height: auto !important;
+    min-height: 0 !important;
+    position: static !important; /* Crucial for normal document flow in print */
+    page-break-inside: avoid !important; /* Try to keep the whole card on one page */
+  }
+
+  /* Font size adjustments within printable area */
+  .printable-area h1, .printable-area .text-3xl, .printable-area .md\:text-3xl { font-size: 18pt !important; line-height: 1.2 !important; }
+  .printable-area h2, .printable-area .text-2xl, .printable-area .md\:text-2xl { font-size: 16pt !important; line-height: 1.2 !important; }
+  .printable-area h3, .printable-area .text-xl { font-size: 14pt !important; line-height: 1.2 !important; }
+  .printable-area h4, .printable-area .text-lg { font-size: 12pt !important; line-height: 1.3 !important; }
+  .printable-area p, .printable-area div, .printable-area span, .printable-area .text-base { font-size: 10pt !important; line-height: 1.4 !important; }
+  .printable-area .text-sm { font-size: 9pt !important; line-height: 1.4 !important; }
+  .printable-area .text-xs { font-size: 8pt !important; line-height: 1.4 !important; }
+  
+  /* Spacing adjustments for Card components & general elements within printable area */
+  .printable-area .p-6 { padding: 0.2in 0 !important; } /* For CardContent etc. */
+  .printable-area .px-6 { padding-left: 0 !important; padding-right: 0 !important; }
+  .printable-area .pb-6 { padding-bottom: 0.2in !important; }
+  .printable-area .pt-6 { padding-top: 0.2in !important; } /* Affects CardContent's default pt-6 */
+  .printable-area .pb-4 { padding-bottom: 0.15in !important; } /* Affects CardHeader's default pb-4 */
+  .printable-area .pt-4 { padding-top: 0.15in !important; } /* Affects CardFooter's default pt-4 */
+
+  /* Margin adjustments */
+  .printable-area .mt-8 { margin-top: 0.4in !important; }
+  .printable-area .mt-6 { margin-top: 0.3in !important; }
+  .printable-area .mt-4 { margin-top: 0.2in !important; }
+  .printable-area .mt-2 { margin-top: 0.1in !important; }
+  .printable-area .mt-1 { margin-top: 0.05in !important; }
+  .printable-area .mb-8 { margin-bottom: 0.4in !important; }
+  .printable-area .mb-6 { margin-bottom: 0.3in !important; }
+  .printable-area .mb-4 { margin-bottom: 0.2in !important; }
+  .printable-area .mb-2 { margin-bottom: 0.1in !important; }
+  .printable-area .mb-1 { margin-bottom: 0.05in !important; }
+
+  /* Gap adjustments */
+  .printable-area [class*="gap-x-"] { column-gap: 0.2in !important; }
+  .printable-area [class*="gap-y-"] { row-gap: 0.1in !important; }
+  .printable-area .gap-8 { gap: 0.3in !important; }
+  .printable-area .gap-6 { gap: 0.2in !important; }
+  .printable-area .gap-4 { gap: 0.15in !important; }
+  .printable-area .gap-2 { gap: 0.1in !important; }
+  .printable-area .space-y-1 > * + * { margin-top: 0.05in !important; }
+  .printable-area .space-y-2 > * + * { margin-top: 0.1in !important; }
+  .printable-area .space-y-3 > * + * { margin-top: 0.15in !important; }
+  .printable-area .space-y-4 > * + * { margin-top: 0.2in !important; }
+  .printable-area .space-y-6 > * + * { margin-top: 0.3in !important; }
+  
+  /* Specific to Card components if they add their own padding internally */
+  .printable-area > .card > .p-6, 
+  .printable-area > .card > div[class*="p-"], 
+  .printable-area > .card > header[class*="p-"],
+  .printable-area > .card > footer[class*="p-"] {
+    padding-top: 0.15in !important;
+    padding-bottom: 0.15in !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .printable-area .border-b, .printable-area .border-t {
+    border-width: 1px !important; /* Ensure borders are thin */
+  }
+
+
+  .printable-area .no-print-in-area {
+    display: none !important;
+  }
+
+  /* Signature Block specific */
+  .printable-area .print-only-block {
     display: block !important;
+    margin-top: 0.3in !important; 
+    padding-top: 0.2in !important;
+  }
+  .printable-area .print-only-block .text-lg { /* "Driver's Acknowledgment..." */
+    font-size: 11pt !important;
+    margin-bottom: 0.3in !important; /* Was mb-8 */
+  }
+   .printable-area .print-only-block .h-12 { /* Signature lines */
+     height: 0.4in !important; 
+     margin-bottom: 0.15in !important;
+   }
+  .printable-area .print-only-block .grid { /* Grid for signature fields */
+     row-gap: 0.2in !important; /* was gap-y-12 */
+     column-gap: 0.5in !important; /* was gap-x-12 */
+  }
+  .printable-area .print-only-block label.block { /* Signature labels */
+      font-size: 8pt !important;
+  }
+
+  /* Hide scrollbars just in case */
+  ::-webkit-scrollbar {
+    display: none !important;
   }
 }

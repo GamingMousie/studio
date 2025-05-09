@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid'; // Using uuid for unique shipment IDs
 
 interface WarehouseContextType {
   trailers: Trailer[];
-  addTrailer: (trailer: Omit<Trailer, 'status'> & { status?: TrailerStatus; company?: string }) => void;
+  addTrailer: (trailer: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string }) => void;
   updateTrailerStatus: (trailerId: string, status: TrailerStatus) => void;
   updateTrailer: (trailerId: string, data: TrailerUpdateData) => void;
   deleteTrailer: (trailerId: string) => void;
@@ -27,9 +27,9 @@ interface WarehouseContextType {
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
 
 const initialTrailers: Trailer[] = [
-  { id: 'T-001', name: 'Alpha Transporter', status: 'Docked', company: 'Logistics Inc.' },
-  { id: 'T-002', name: 'Beta Hauler', status: 'In-Transit', company: 'QuickShip Co.' },
-  { id: 'T-003', name: 'Gamma Carrier', status: 'Empty' }, // Example without company
+  { id: 'T-001', name: 'Alpha Transporter', status: 'Docked', company: 'Logistics Inc.', arrivalDate: new Date('2024-07-20T10:00:00Z').toISOString(), storageExpiryDate: new Date('2024-08-20T10:00:00Z').toISOString() },
+  { id: 'T-002', name: 'Beta Hauler', status: 'In-Transit', company: 'QuickShip Co.', arrivalDate: new Date('2024-07-22T14:30:00Z').toISOString() },
+  { id: 'T-003', name: 'Gamma Carrier', status: 'Empty' }, // Example without company or dates
 ];
 
 const initialShipments: Shipment[] = [
@@ -43,11 +43,13 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   const [trailers, setTrailers] = useLocalStorageState<Trailer[]>('trailers', initialTrailers);
   const [shipments, setShipments] = useLocalStorageState<Shipment[]>('shipments', initialShipments);
 
-  const addTrailer = useCallback((trailerData: Omit<Trailer, 'status'> & { status?: TrailerStatus; company?: string }) => {
+  const addTrailer = useCallback((trailerData: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string }) => {
     const newTrailer: Trailer = {
       ...trailerData,
       status: trailerData.status || 'Empty',
-      company: trailerData.company || undefined // Ensure company is handled, defaults to undefined if not provided
+      company: trailerData.company || undefined,
+      arrivalDate: trailerData.arrivalDate || undefined,
+      storageExpiryDate: trailerData.storageExpiryDate || undefined,
     };
     setTrailers((prev) => [...prev, newTrailer]);
   }, [setTrailers]);

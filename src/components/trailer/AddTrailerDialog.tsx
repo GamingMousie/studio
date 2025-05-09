@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm, type SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWarehouse } from '@/contexts/WarehouseContext';
-import type { TrailerStatus } from '@/types';
+import type { TrailerStatus, TrailerFormData as ExternalTrailerFormData } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,16 +16,36 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
+
+// Internal form data type to handle Date objects from picker
+type TrailerFormData = Omit<ExternalTrailerFormData, 'arrivalDate' | 'storageExpiryDate'> & {
+  arrivalDate?: Date | null;
+  storageExpiryDate?: Date | null;
+};
 
 const trailerSchema = z.object({
   id: z.string().min(1, 'Trailer ID is required').max(20, 'Trailer ID too long'),
   name: z.string().min(1, 'Trailer Name is required').max(50, 'Trailer Name too long'),
   company: z.string().max(50, 'Company name too long').optional(),
   status: z.enum(['Docked', 'In-Transit', 'Empty', 'Loading', 'Unloading']).default('Empty'),
+  arrivalDate: z.date().nullable().optional(),
+  storageExpiryDate: z.date().nullable().optional(),
+}).refine(data => {
+  if (data.arrivalDate && data.storageExpiryDate && data.storageExpiryDate < data.arrivalDate) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Storage expiry date cannot be before arrival date.",
+  path: ["storageExpiryDate"],
 });
 
-type TrailerFormData = z.infer<typeof trailerSchema>;
 
 interface AddTrailerDialogProps {
   isOpen: boolean;
@@ -37,15 +57,16 @@ const allStatuses: TrailerStatus[] = ['Docked', 'In-Transit', 'Empty', 'Loading'
 export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialogProps) {
   const { addTrailer, trailers } = useWarehouse();
   const { toast } = useToast();
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting }, setValue, watch } = useForm<TrailerFormData>({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting }, setValue, watch, control } = useForm<TrailerFormData>({
     resolver: zodResolver(trailerSchema),
     defaultValues: {
       status: 'Empty',
       company: '',
+      arrivalDate: null,
+      storageExpiryDate: null,
     }
   });
   
-  // Ensure status is registered for react-hook-form with Select
   useEffect(() => {
     register('status');
   }, [register]);
@@ -61,7 +82,14 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
       });
       return;
     }
-    addTrailer(data);
+    addTrailer({
+      id: data.id,
+      name: data.name,
+      company: data.company,
+      status: data.status,
+      arrivalDate: data.arrivalDate ? data.arrivalDate.toISOString() : undefined,
+      storageExpiryDate: data.storageExpiryDate ? data.storageExpiryDate.toISOString() : undefined,
+    });
     toast({
       title: "Success!",
       description: `Trailer "${data.name}" (ID: ${data.id}) added.`,
@@ -72,14 +100,14 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) reset(); }}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add New Trailer</DialogTitle>
           <DialogDescription>
             Enter the details for the new trailer. Trailer ID must be unique.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
           <div>
             <Label htmlFor="id">Trailer ID</Label>
             <Input id="id" {...register('id')} placeholder="e.g., T-101" />
@@ -112,6 +140,78 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
             </Select>
             {errors.status && <p className="text-sm text-destructive mt-1">{errors.status.message}</p>}
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="arrivalDate">Arrival Date (Optional)</Label>
+              <Controller
+                name="arrivalDate"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={field.value || undefined}
+                        onSelect={(date) => field.onChange(date || null)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.arrivalDate && <p className="text-sm text-destructive mt-1">{errors.arrivalDate.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="storageExpiryDate">Storage Expiry Date (Optional)</Label>
+               <Controller
+                name="storageExpiryDate"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={field.value || undefined}
+                        onSelect={(date) => field.onChange(date || null)}
+                        disabled={(date) =>
+                          watch("arrivalDate") ? date < watch("arrivalDate")! : false
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.storageExpiryDate && <p className="text-sm text-destructive mt-1">{errors.storageExpiryDate.message}</p>}
+            </div>
+          </div>
+
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => { setIsOpen(false); reset(); }}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>

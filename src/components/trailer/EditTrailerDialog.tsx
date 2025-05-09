@@ -1,6 +1,5 @@
-
 import { useEffect } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm, type SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWarehouse } from '@/contexts/WarehouseContext';
@@ -17,16 +16,38 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon, Edit } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
-import { Edit } from 'lucide-react';
+
+// Internal form data type to handle Date objects from picker
+type EditTrailerFormDataInternal = {
+  name: string;
+  company?: string;
+  status: TrailerStatus;
+  arrivalDate?: Date | null;
+  storageExpiryDate?: Date | null;
+};
 
 const editTrailerSchema = z.object({
   name: z.string().min(1, 'Trailer Name is required').max(50, 'Trailer Name too long'),
   company: z.string().max(50, 'Company name too long').optional(),
   status: z.enum(['Docked', 'In-Transit', 'Empty', 'Loading', 'Unloading']),
+  arrivalDate: z.date().nullable().optional(),
+  storageExpiryDate: z.date().nullable().optional(),
+}).refine(data => {
+  if (data.arrivalDate && data.storageExpiryDate && data.storageExpiryDate < data.arrivalDate) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Storage expiry date cannot be before arrival date.",
+  path: ["storageExpiryDate"],
 });
 
-type EditTrailerFormData = z.infer<typeof editTrailerSchema>;
 
 interface EditTrailerDialogProps {
   isOpen: boolean;
@@ -40,33 +61,35 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
   const { updateTrailer } = useWarehouse();
   const { toast } = useToast();
   
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<EditTrailerFormData>({
+  const { register, handleSubmit, reset, setValue, watch, control, formState: { errors, isSubmitting } } = useForm<EditTrailerFormDataInternal>({
     resolver: zodResolver(editTrailerSchema),
   });
 
-  // Populate form with trailerToEdit data when dialog opens or trailerToEdit changes
   useEffect(() => {
     if (trailerToEdit && isOpen) {
       reset({
         name: trailerToEdit.name,
         company: trailerToEdit.company || '',
         status: trailerToEdit.status,
+        arrivalDate: trailerToEdit.arrivalDate ? parseISO(trailerToEdit.arrivalDate) : null,
+        storageExpiryDate: trailerToEdit.storageExpiryDate ? parseISO(trailerToEdit.storageExpiryDate) : null,
       });
     }
   }, [trailerToEdit, isOpen, reset]);
 
-  // Ensure status is registered for react-hook-form with Select
    useEffect(() => {
     register('status');
   }, [register]);
 
   const selectedStatus = watch('status');
 
-  const onSubmit: SubmitHandler<EditTrailerFormData> = (data) => {
+  const onSubmit: SubmitHandler<EditTrailerFormDataInternal> = (data) => {
     const updateData: TrailerUpdateData = {
       name: data.name,
-      company: data.company || undefined, // Send undefined if empty string, so it can be cleared
+      company: data.company || undefined, 
       status: data.status,
+      arrivalDate: data.arrivalDate ? data.arrivalDate.toISOString() : null, // Send null to clear
+      storageExpiryDate: data.storageExpiryDate ? data.storageExpiryDate.toISOString() : null, // Send null to clear
     };
 
     updateTrailer(trailerToEdit.id, updateData);
@@ -79,28 +102,29 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
 
   const handleClose = () => {
     setIsOpen(false);
-    // Reset form to initial state of the trailer when dialog is closed without saving
      if (trailerToEdit) {
       reset({
         name: trailerToEdit.name,
         company: trailerToEdit.company || '',
         status: trailerToEdit.status,
+        arrivalDate: trailerToEdit.arrivalDate ? parseISO(trailerToEdit.arrivalDate) : null,
+        storageExpiryDate: trailerToEdit.storageExpiryDate ? parseISO(trailerToEdit.storageExpiryDate) : null,
       });
     }
   }
 
-  if (!trailerToEdit) return null; // Should not happen if managed correctly by parent
+  if (!trailerToEdit) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); else setIsOpen(true); }}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center"><Edit className="mr-2 h-5 w-5" /> Edit Trailer</DialogTitle>
           <DialogDescription>
             Modify the details for trailer ID: {trailerToEdit.id}.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
           <div>
             <Label htmlFor="trailerIdDisplay">Trailer ID (Read-only)</Label>
             <Input id="trailerIdDisplay" value={trailerToEdit.id} readOnly className="bg-muted/50 cursor-not-allowed" />
@@ -132,6 +156,77 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
             </Select>
             {errors.status && <p className="text-sm text-destructive mt-1">{errors.status.message}</p>}
           </div>
+
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="arrivalDate">Arrival Date (Optional)</Label>
+              <Controller
+                name="arrivalDate"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={field.value || undefined}
+                        onSelect={(date) => field.onChange(date || null)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.arrivalDate && <p className="text-sm text-destructive mt-1">{errors.arrivalDate.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="storageExpiryDate">Storage Expiry Date (Optional)</Label>
+               <Controller
+                name="storageExpiryDate"
+                control={control}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={field.value || undefined}
+                        onSelect={(date) => field.onChange(date || null)}
+                         disabled={(date) =>
+                          watch("arrivalDate") ? date < watch("arrivalDate")! : false
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.storageExpiryDate && <p className="text-sm text-destructive mt-1">{errors.storageExpiryDate.message}</p>}
+            </div>
+          </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>

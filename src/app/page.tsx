@@ -46,8 +46,10 @@ export default function HomePage() {
                 <Skeleton className="h-6 w-3/4" />
                 <Skeleton className="h-8 w-8 rounded-full" />
               </div>
-              <Skeleton className="h-4 w-1/2 mt-1 mb-1" />
-              <Skeleton className="h-4 w-1/3 mt-1 mb-4" /> {/* Placeholder for company if it were always visible */}
+              <Skeleton className="h-4 w-1/2 mt-1 mb-1" /> {/* ID */}
+              <Skeleton className="h-4 w-1/3 mt-1 mb-1" /> {/* Company */}
+              <Skeleton className="h-3 w-2/5 mt-1 mb-1" /> {/* Arrival Date */}
+              <Skeleton className="h-3 w-2/5 mt-1 mb-4" /> {/* Storage Expiry Date */}
               
               <div className="mt-4 space-y-2">
                 <div className="flex items-center justify-between text-sm">
@@ -72,17 +74,19 @@ export default function HomePage() {
             <div className="p-4 flex items-center justify-between">
               <div className="flex-grow">
                 <Skeleton className="h-6 w-3/5 mb-1" />
-                <Skeleton className="h-4 w-2/5 mb-1" />
-                 <Skeleton className="h-3 w-1/3 mt-1 mb-2" /> {/* Placeholder for company */}
+                <Skeleton className="h-4 w-2/5 mb-1" /> {/* ID */}
+                <Skeleton className="h-3 w-1/3 mt-1 mb-1" /> {/* Company */}
+                <Skeleton className="h-3 w-1/4 mt-1 mb-1" /> {/* Arrival Date */}
+                <Skeleton className="h-3 w-1/4 mt-1 mb-2" /> {/* Storage Expiry Date */}
                 <div className="mt-2 flex items-center gap-4 text-sm">
-                  <Skeleton className="h-5 w-20" />
-                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-5 w-20" /> {/* Status Badge */}
+                  <Skeleton className="h-4 w-28" /> {/* Shipment Count */}
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Skeleton className="h-9 w-[130px] hidden sm:flex" />
-                <Skeleton className="h-9 w-20" /> 
-                <Skeleton className="h-8 w-8" />
+                <Skeleton className="h-9 w-[130px] hidden sm:flex" /> {/* Status Select */}
+                <Skeleton className="h-9 w-32" /> {/* Manage Shipments button */}
+                <Skeleton className="h-8 w-8" /> {/* MoreVertical Dropdown */}
               </div>
             </div>
           </Card>

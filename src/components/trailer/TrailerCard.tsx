@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import Link from 'next/link';
 import type { Trailer, TrailerStatus } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Package, Edit, Trash2, MoreVertical, ChevronRight, Briefcase } from 'lucide-react';
+import { Truck, Package, Edit, Trash2, MoreVertical, ChevronRight, Briefcase, CalendarDays } from 'lucide-react';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import {
   DropdownMenu,
@@ -17,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import EditTrailerDialog from './EditTrailerDialog'; // Import the new dialog
+import { format, parseISO } from 'date-fns';
 
 
 interface TrailerCardProps {
@@ -42,6 +42,26 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
   const shipmentCount = shipments.length;
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    try {
+      return format(parseISO(dateString), 'MMM d, yyyy');
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return "Invalid Date";
+    }
+  };
+
+  const DateDisplay = ({ label, dateString, icon: Icon }: { label: string, dateString?: string, icon: React.ElementType }) => {
+    if (!dateString) return null;
+    return (
+      <div className="flex items-center text-xs text-muted-foreground mt-1">
+        <Icon className="mr-1.5 h-3.5 w-3.5" />
+        <span>{label}: {formatDate(dateString)}</span>
+      </div>
+    );
+  }
+
   const GridViewContent = () => (
     <>
       <div className="flex items-center justify-between">
@@ -55,6 +75,8 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           <span>{trailer.company}</span>
         </div>
       )}
+      <DateDisplay label="Arrived" dateString={trailer.arrivalDate} icon={CalendarDays} />
+      <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />
       
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between text-sm">
@@ -129,6 +151,8 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
                     <span>{trailer.company}</span>
                   </div>
                 )}
+                <DateDisplay label="Arrived" dateString={trailer.arrivalDate} icon={CalendarDays} />
+                <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />
               </Link>
               <div className="mt-2 flex items-center gap-4 text-sm">
                 <div className="flex items-center">
@@ -173,7 +197,6 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
   return (
     <>
       <Card className="group transition-all hover:shadow-lg flex flex-col h-full">
-        {/* Make the CardHeader and CardContent part of the link for consistent click behavior */}
         <Link href={`/trailers/${trailer.id}`} className="block flex-grow flex flex-col">
           <CardHeader className="pb-2">
             <Badge className={`${statusColors[trailer.status]} text-white text-xs px-1.5 py-0.5 self-start`}>{trailer.status}</Badge>

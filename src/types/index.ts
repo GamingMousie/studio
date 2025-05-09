@@ -5,6 +5,8 @@ export interface Trailer {
   name: string; // Optional descriptive name
   status: TrailerStatus;
   company?: string; // Optional: Company associated with the trailer
+  arrivalDate?: string; // Optional: Date of arrival, ISO string format
+  storageExpiryDate?: string; // Optional: Date when storage expires, ISO string format
 }
 
 export interface Shipment {
@@ -58,4 +60,16 @@ export interface TrailerUpdateData {
   name?: string;
   company?: string;
   status?: TrailerStatus;
+  arrivalDate?: string | null; // Allow null to clear the date
+  storageExpiryDate?: string | null; // Allow null to clear the date
+}
+
+// For AddTrailerDialog form
+export interface TrailerFormData {
+  id: string;
+  name: string;
+  company?: string;
+  status: TrailerStatus;
+  arrivalDate?: Date | null; // Use Date for picker, convert to string on submit
+  storageExpiryDate?: Date | null; // Use Date for picker, convert to string on submit
 }

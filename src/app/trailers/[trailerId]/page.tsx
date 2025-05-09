@@ -9,8 +9,9 @@ import ShipmentCard from '@/components/shipment/ShipmentCard';
 import AddShipmentDialog from '@/components/shipment/AddShipmentDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, Package, Truck, Briefcase } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
+import { format, parseISO } from 'date-fns';
 
 export default function TrailerShipmentsPage() {
   const router = useRouter();
@@ -46,6 +47,16 @@ export default function TrailerShipmentsPage() {
     if (!trailerId || !isTrailerFound) return []; 
     return getShipmentsByTrailerId(trailerId);
   }, [trailerId, isTrailerFound, getShipmentsByTrailerId]);
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    try {
+      return format(parseISO(dateString), 'PPpp'); // e.g., Sep 20, 2023, 10:00 AM
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return "Invalid Date";
+    }
+  };
 
 
   if (isTrailerFound === null) { 
@@ -104,6 +115,18 @@ export default function TrailerShipmentsPage() {
                   Company: <span className="font-semibold ml-1">{trailer.company}</span>
                 </CardDescription>
               )}
+               {trailer.arrivalDate && (
+                <CardDescription className="mt-1 flex items-center">
+                  <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Arrival: <span className="font-semibold ml-1">{formatDate(trailer.arrivalDate)}</span>
+                </CardDescription>
+              )}
+              {trailer.storageExpiryDate && (
+                <CardDescription className="mt-1 flex items-center">
+                  <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Storage Expiry: <span className="font-semibold ml-1">{formatDate(trailer.storageExpiryDate)}</span>
+                </CardDescription>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -131,7 +154,6 @@ export default function TrailerShipmentsPage() {
                   shipment={shipment}
                   onDelete={() => deleteShipment(shipment.id)}
                   onUpdateLocation={(newLocation) => updateShipmentLocation(shipment.id, newLocation)}
-                  // onToggleReleased and onToggleCleared are handled internally by ShipmentCard now
                 />
               ))}
             </div>
@@ -147,4 +169,3 @@ export default function TrailerShipmentsPage() {
     </div>
   );
 }
-

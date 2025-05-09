@@ -42,8 +42,8 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   const [shipments, setShipments] = useLocalStorageState<Shipment[]>('shipments', initialShipments);
 
   const addTrailer = useCallback((trailerData: Omit<Trailer, 'status'> & { status?: TrailerStatus; company?: string }) => {
-    const newTrailer: Trailer = { 
-      ...trailerData, 
+    const newTrailer: Trailer = {
+      ...trailerData,
       status: trailerData.status || 'Empty',
       company: trailerData.company || undefined // Ensure company is handled, defaults to undefined if not provided
     };
@@ -55,7 +55,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
       prev.map((t) => (t.id === trailerId ? { ...t, status } : t))
     );
   }, [setTrailers]);
-  
+
   const deleteTrailer = useCallback((trailerId: string) => {
     setTrailers(prev => prev.filter(t => t.id !== trailerId));
     setShipments(prev => prev.filter(s => s.trailerId !== trailerId)); // Also delete associated shipments
@@ -66,8 +66,8 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   }, [shipments]);
 
   const addShipment = useCallback((shipmentData: Omit<Shipment, 'id' | 'locationName' | 'released' | 'cleared'> & { locationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?:boolean, cleared?: boolean }) => {
-    const newShipment: Shipment = { 
-      ...shipmentData, 
+    const newShipment: Shipment = {
+      ...shipmentData,
       id: uuidv4(),
       locationName: shipmentData.locationName || 'Pending Assignment',
       releaseDocumentName: shipmentData.releaseDocumentName,
@@ -86,13 +86,13 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
 
   const updateShipmentReleasedStatus = useCallback((shipmentId: string, released: boolean) => {
     setShipments((prev) =>
-      prev.map((s) => (s.id === shipmentId ? { ...s, released } : t))
+      prev.map((s) => (s.id === shipmentId ? { ...s, released } : s)) // Fixed: changed 't' to 's'
     );
   }, [setShipments]);
 
   const updateShipmentClearedStatus = useCallback((shipmentId: string, cleared: boolean) => {
     setShipments((prev) =>
-      prev.map((s) => (s.id === shipmentId ? { ...s, cleared } : t))
+      prev.map((s) => (s.id === shipmentId ? { ...s, cleared } : s)) // Fixed: changed 't' to 's'
     );
   }, [setShipments]);
 

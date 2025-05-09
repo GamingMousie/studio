@@ -30,7 +30,6 @@ export default function AllShipmentsPage() {
       const matchesSearch = 
         shipment.id.toLowerCase().includes(searchLower) ||
         shipment.stsJob.toString().toLowerCase().includes(searchLower) || // Search by STS Job
-        shipment.exporter.toLowerCase().includes(searchLower) || 
         shipment.importer.toLowerCase().includes(searchLower) || // Search by Importer
         (shipment.locationName && shipment.locationName.toLowerCase().includes(searchLower));
       
@@ -52,7 +51,6 @@ export default function AllShipmentsPage() {
               </div>
               <Skeleton className="h-4 w-1/2" /> {/* ID */}
               <Skeleton className="h-4 w-1/3 mt-1" /> {/* Quantity */}
-              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Exporter */}
               <Skeleton className="h-4 w-2/5 mt-1" /> {/* Importer */}
               <div className="grid grid-cols-2 gap-2 mt-1">
                 <Skeleton className="h-4 w-3/4" /> {/* Weight */}
@@ -82,7 +80,6 @@ export default function AllShipmentsPage() {
                 <Skeleton className="h-4 w-2/5" /> {/* ID */}
                 <div className="flex items-center gap-4 text-sm">
                   <Skeleton className="h-4 w-20" /> {/* Quantity */}
-                  <Skeleton className="h-4 w-28" /> {/* Exporter */}
                   <Skeleton className="h-4 w-28" /> {/* Importer */}
                   <Skeleton className="h-5 w-24" /> {/* Location */}
                 </div>
@@ -124,7 +121,7 @@ export default function AllShipmentsPage() {
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input 
-              placeholder="Search by ID, STS Job, Exporter, Importer, Location..."
+              placeholder="Search by ID, STS Job, Importer, Location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, UserCircle, Users, Weight, Box, Truck, Hash } from 'lucide-react';
+import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
 export default function SingleShipmentPage() {
@@ -151,10 +151,12 @@ export default function SingleShipmentPage() {
             <p className="text-base font-medium">{shipment.quantity} pieces</p>
           </div>
 
-          <div className="space-y-1">
-            <h3 className="font-semibold text-muted-foreground flex items-center"><UserCircle className="mr-2 h-4 w-4" />Exporter</h3>
-            <p>{shipment.exporter}</p>
-          </div>
+          {shipment.palletSpace !== undefined && shipment.palletSpace !== null && (
+            <div className="space-y-1">
+              <h3 className="font-semibold text-muted-foreground flex items-center"><Box className="mr-2 h-4 w-4" />Pallet Spaces</h3>
+              <p>{shipment.palletSpace}</p>
+            </div>
+          )}
 
           <div className="space-y-1">
             <h3 className="font-semibold text-muted-foreground flex items-center"><Users className="mr-2 h-4 w-4" />Importer</h3>
@@ -165,13 +167,6 @@ export default function SingleShipmentPage() {
              <div className="space-y-1">
               <h3 className="font-semibold text-muted-foreground flex items-center"><Weight className="mr-2 h-4 w-4" />Weight</h3>
               <p>{shipment.weight} kg</p>
-            </div>
-          )}
-
-          {shipment.palletSpace !== undefined && shipment.palletSpace !== null && (
-            <div className="space-y-1">
-              <h3 className="font-semibold text-muted-foreground flex items-center"><Box className="mr-2 h-4 w-4" />Pallet Spaces</h3>
-              <p>{shipment.palletSpace}</p>
             </div>
           )}
           
@@ -249,4 +244,3 @@ export default function SingleShipmentPage() {
     </div>
   );
 }
-

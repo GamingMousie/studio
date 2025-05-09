@@ -14,7 +14,6 @@ export interface Shipment {
   trailerId: string;
   stsJob: number; // STS job number
   quantity: number;
-  exporter: string;
   importer: string; // Added Importer
   locationName: string; // Warehouse location name, e.g., "Bay A1", "Shelf 3-C"
   releaseDocumentName?: string; // Optional: Name of the release document
@@ -29,7 +28,6 @@ export interface Shipment {
 export interface ShipmentFormData {
   stsJob: number;
   quantity: number;
-  exporter: string;
   importer: string; // Added Importer
   locationName?: string;
   releaseDocument?: FileList | File | null; 
@@ -45,7 +43,6 @@ export interface ShipmentFormData {
 export interface ShipmentUpdateData {
   stsJob?: number;
   quantity?: number;
-  exporter?: string;
   importer?: string; // Added Importer
   locationName?: string;
   releaseDocumentName?: string;
@@ -74,4 +71,3 @@ export interface TrailerFormData {
   arrivalDate?: Date | null; // Use Date for picker, convert to string on submit
   storageExpiryDate?: Date | null; // Use Date for picker, convert to string on submit
 }
-

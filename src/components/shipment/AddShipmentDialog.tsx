@@ -16,13 +16,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, UserCircle, Users } from 'lucide-react'; // Added UserCircle, Users
+import { FileText, Weight, Box, Users } from 'lucide-react'; // Removed UserCircle
 
 const shipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
-  exporter: z.string().min(1, 'Exporter is required').max(50, 'Exporter name too long'),
-  importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'), // Added importer
+  importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'),
   locationName: z.string().optional(),
   releaseDocument: z.any().optional(), 
   clearanceDocument: z.any().optional(), 
@@ -61,7 +60,6 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       trailerId,
       stsJob: data.stsJob,
       quantity: data.quantity,
-      exporter: data.exporter,
       importer: data.importer,
       locationName: data.locationName,
       releaseDocumentName,
@@ -101,21 +99,12 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             {errors.quantity && <p className="text-sm text-destructive mt-1">{errors.quantity.message}</p>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="exporter" className="flex items-center">
-                <UserCircle className="mr-2 h-4 w-4 text-muted-foreground" /> Exporter
-              </Label>
-              <Input id="exporter" {...register('exporter')} placeholder="e.g., Acme Exporters Inc." />
-              {errors.exporter && <p className="text-sm text-destructive mt-1">{errors.exporter.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="importer" className="flex items-center">
-                <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer
-              </Label>
-              <Input id="importer" {...register('importer')} placeholder="e.g., Global Importers LLC" />
-              {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
-            </div>
+          <div>
+            <Label htmlFor="importer" className="flex items-center">
+              <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer
+            </Label>
+            <Input id="importer" {...register('importer')} placeholder="e.g., Global Importers LLC" />
+            {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

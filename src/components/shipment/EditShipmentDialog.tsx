@@ -18,13 +18,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Edit, UserCircle, Users } from 'lucide-react'; // Added UserCircle, Users
+import { FileText, Weight, Box, Edit, Users } from 'lucide-react'; // Removed UserCircle
 
 const editShipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
-  exporter: z.string().min(1, 'Exporter is required').max(50, 'Exporter name too long'),
-  importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'), // Added importer
+  importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'),
   locationName: z.string().min(1, 'Location name is required').max(30, 'Location name too long'),
   releaseDocument: z.any().optional(), 
   clearanceDocument: z.any().optional(), 
@@ -51,7 +50,6 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     defaultValues: {
       stsJob: shipmentToEdit.stsJob,
       quantity: shipmentToEdit.quantity,
-      exporter: shipmentToEdit.exporter,
       importer: shipmentToEdit.importer,
       locationName: shipmentToEdit.locationName,
       released: shipmentToEdit.released,
@@ -68,7 +66,6 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
       reset({
         stsJob: shipmentToEdit.stsJob,
         quantity: shipmentToEdit.quantity,
-        exporter: shipmentToEdit.exporter,
         importer: shipmentToEdit.importer,
         locationName: shipmentToEdit.locationName,
         released: shipmentToEdit.released,
@@ -87,7 +84,6 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     const updatedData: ShipmentUpdateData = {
       stsJob: data.stsJob,
       quantity: data.quantity,
-      exporter: data.exporter,
       importer: data.importer,
       locationName: data.locationName || shipmentToEdit.locationName,
       releaseDocumentName: newReleaseDocumentFile ? newReleaseDocumentFile.name : shipmentToEdit.releaseDocumentName,
@@ -112,7 +108,6 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
       reset({
           stsJob: shipmentToEdit.stsJob,
           quantity: shipmentToEdit.quantity,
-          exporter: shipmentToEdit.exporter,
           importer: shipmentToEdit.importer,
           locationName: shipmentToEdit.locationName,
           released: shipmentToEdit.released,
@@ -146,22 +141,13 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
             <Input id="quantity" type="number" {...register('quantity')} />
             {errors.quantity && <p className="text-sm text-destructive mt-1">{errors.quantity.message}</p>}
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="exporter" className="flex items-center">
-                <UserCircle className="mr-2 h-4 w-4 text-muted-foreground" /> Exporter
-              </Label>
-              <Input id="exporter" {...register('exporter')} />
-              {errors.exporter && <p className="text-sm text-destructive mt-1">{errors.exporter.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="importer" className="flex items-center">
-                <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer
-              </Label>
-              <Input id="importer" {...register('importer')} />
-              {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
-            </div>
+          
+          <div>
+            <Label htmlFor="importer" className="flex items-center">
+              <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer
+            </Label>
+            <Input id="importer" {...register('importer')} />
+            {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
           </div>
 
 

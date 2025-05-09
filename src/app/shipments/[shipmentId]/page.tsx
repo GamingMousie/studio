@@ -127,17 +127,12 @@ export default function SingleShipmentPage() {
             )}
           </div>
         </CardHeader>
-        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm card-content-print"> {/* Increased gap-y */}
+        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm card-content-print">
           
-          <div className="space-y-1">
-            <h3 className="font-semibold text-muted-foreground flex items-center"><Hash className="mr-2 h-4 w-4" />STS Job Number</h3>
-            <p className="text-xl font-bold text-foreground">{shipment.stsJob}</p>
-          </div>
-
           {trailer && (
-            <div className="space-y-1">
+            <div className="space-y-1 md:col-span-1">
               <h3 className="font-semibold text-muted-foreground flex items-center"><Truck className="mr-2 h-4 w-4" />Associated Trailer ID</h3>
-              <p className="text-xl font-bold text-foreground">
+              <p className="text-2xl font-bold text-foreground">
                 <Link href={`/trailers/${trailer.id}`} className="hover:underline">
                   {trailer.id}
                 </Link>
@@ -145,6 +140,11 @@ export default function SingleShipmentPage() {
               </p>
             </div>
           )}
+
+          <div className="space-y-1 md:col-span-1">
+            <h3 className="font-semibold text-muted-foreground flex items-center"><Hash className="mr-2 h-4 w-4" />STS Job Number</h3>
+            <p className="text-2xl font-bold text-foreground">{shipment.stsJob}</p>
+          </div>
           
           <div className="space-y-1">
             <h3 className="font-semibold text-muted-foreground flex items-center"><Package className="mr-2 h-4 w-4" />Quantity</h3>

@@ -1,3 +1,4 @@
+
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -23,8 +24,8 @@ const shipmentSchema = z.object({
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   destination: z.string().min(1, 'Destination is required').max(50, 'Destination too long'),
   locationName: z.string().optional(),
-  releaseDocument: z.instanceof(FileList).optional(),
-  clearanceDocument: z.instanceof(FileList).optional(),
+  releaseDocument: z.any().optional(), // Changed from z.instanceof(FileList)
+  clearanceDocument: z.any().optional(), // Changed from z.instanceof(FileList)
   released: z.boolean().optional(),
   cleared: z.boolean().optional(),
 });
@@ -49,8 +50,9 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
   });
 
   const onSubmit: SubmitHandler<ShipmentFormData> = (data) => {
-    const releaseDocumentName = data.releaseDocument?.[0]?.name;
-    const clearanceDocumentName = data.clearanceDocument?.[0]?.name;
+    // Accessing FileList properties needs to be careful as it's now z.any()
+    const releaseDocumentName = data.releaseDocument && data.releaseDocument.length > 0 ? data.releaseDocument[0]?.name : undefined;
+    const clearanceDocumentName = data.clearanceDocument && data.clearanceDocument.length > 0 ? data.clearanceDocument[0]?.name : undefined;
 
     addShipment({ 
       trailerId,
@@ -109,7 +111,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
               <FileText className="mr-2 h-4 w-4 text-muted-foreground" /> Release Document (Optional)
             </Label>
             <Input id="releaseDocument" type="file" {...register('releaseDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
-            {errors.releaseDocument && <p className="text-sm text-destructive mt-1">{errors.releaseDocument.message}</p>}
+            {errors.releaseDocument && <p className="text-sm text-destructive mt-1">{(errors.releaseDocument as any)?.message}</p>}
           </div>
 
           <div className="space-y-2">
@@ -117,7 +119,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
               <FileText className="mr-2 h-4 w-4 text-muted-foreground" /> Clearance Document (Optional)
             </Label>
             <Input id="clearanceDocument" type="file" {...register('clearanceDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
-            {errors.clearanceDocument && <p className="text-sm text-destructive mt-1">{errors.clearanceDocument.message}</p>}
+            {errors.clearanceDocument && <p className="text-sm text-destructive mt-1">{(errors.clearanceDocument as any)?.message}</p>}
           </div>
           
           <div className="grid grid-cols-2 gap-4 pt-2">

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import Link from 'next/link';
 import type { Trailer, TrailerStatus } from '@/types';
@@ -15,7 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import EditTrailerDialog from './EditTrailerDialog'; // Import the new dialog
+import EditTrailerDialog from './EditTrailerDialog'; 
+import ConfirmationDialog from '@/components/shared/ConfirmationDialog'; // Import ConfirmationDialog
 import { format, parseISO } from 'date-fns';
 
 
@@ -41,6 +43,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
   const shipments = getShipmentsByTrailerId(trailer.id);
   const shipmentCount = shipments.length;
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for delete confirmation
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -127,7 +130,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
             <Edit className="mr-2 h-4 w-4" />
             Edit Trailer
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+          <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Trailer
           </DropdownMenuItem>
@@ -189,6 +192,17 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
             trailerToEdit={trailer} 
           />
         )}
+        {isDeleteDialogOpen && (
+          <ConfirmationDialog
+            isOpen={isDeleteDialogOpen}
+            setIsOpen={setIsDeleteDialogOpen}
+            onConfirm={onDelete}
+            title="Delete Trailer?"
+            description={`Are you sure you want to delete trailer "${trailer.name}" (ID: ${trailer.id})? This will also delete all its ${shipmentCount} associated shipments. This action cannot be undone.`}
+            confirmText="Delete"
+            confirmButtonVariant="destructive"
+          />
+        )}
       </>
     );
   }
@@ -214,6 +228,17 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           isOpen={isEditDialogOpen} 
           setIsOpen={setIsEditDialogOpen} 
           trailerToEdit={trailer} 
+        />
+      )}
+      {isDeleteDialogOpen && (
+        <ConfirmationDialog
+          isOpen={isDeleteDialogOpen}
+          setIsOpen={setIsDeleteDialogOpen}
+          onConfirm={onDelete}
+          title="Delete Trailer?"
+          description={`Are you sure you want to delete trailer "${trailer.name}" (ID: ${trailer.id})? This will also delete all its ${shipmentCount} associated shipments. This action cannot be undone.`}
+          confirmText="Delete"
+          confirmButtonVariant="destructive"
         />
       )}
     </>

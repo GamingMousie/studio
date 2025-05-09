@@ -4,10 +4,11 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, UserCircle, Users, Hash } from 'lucide-react'; // Added Hash, UserCircle, Users
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, UserCircle, Users, Hash } from 'lucide-react'; 
 import AssignLocationDialog from './AssignLocationDialog';
 import EditShipmentDialog from './EditShipmentDialog';
 import AttachDocumentDialog from './AttachDocumentDialog'; 
+import ConfirmationDialog from '@/components/shared/ConfirmationDialog'; // Import ConfirmationDialog
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import {
   DropdownMenu,
@@ -33,6 +34,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
   const [isEditShipmentOpen, setIsEditShipmentOpen] = useState(false);
   const [isAttachDocumentOpen, setIsAttachDocumentOpen] = useState(false);
   const [attachDocumentType, setAttachDocumentType] = useState<'release' | 'clearance' | null>(null);
+  const [isShipmentDeleteDialogOpen, setIsShipmentDeleteDialogOpen] = useState(false); // State for delete confirmation
 
   const shipmentIdentifier = `STS Job: ${shipment.stsJob}`;
 
@@ -69,10 +71,6 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
     setIsAttachDocumentOpen(false); 
   };
   
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete();
-  };
 
   return (
     <>
@@ -109,7 +107,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
                   {shipment.cleared ? 'Mark as Not Cleared' : 'Mark as Cleared (Attach Doc)'}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                <DropdownMenuItem onClick={() => setIsShipmentDeleteDialogOpen(true)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete Shipment
                 </DropdownMenuItem>
@@ -214,6 +212,18 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
           shipmentIdentifier={shipmentIdentifier}
           documentType={attachDocumentType}
           onDocumentAttached={handleDocumentAttached}
+        />
+      )}
+
+      {isShipmentDeleteDialogOpen && (
+        <ConfirmationDialog
+          isOpen={isShipmentDeleteDialogOpen}
+          setIsOpen={setIsShipmentDeleteDialogOpen}
+          onConfirm={onDelete}
+          title="Delete Shipment?"
+          description={`Are you sure you want to delete shipment STS Job: ${shipment.stsJob} (ID: ${shipment.id.substring(0,8)}...)? This action cannot be undone.`}
+          confirmText="Delete"
+          confirmButtonVariant="destructive"
         />
       )}
     </>

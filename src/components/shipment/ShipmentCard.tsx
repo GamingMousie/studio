@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash } from 'lucide-react'; 
-import ManageLocationsDialog from './ManageLocationsDialog'; // Changed from AssignLocationDialog
+import ManageLocationsDialog from './ManageLocationsDialog';
 import EditShipmentDialog from './EditShipmentDialog';
 import AttachDocumentDialog from './AttachDocumentDialog'; 
 import ConfirmationDialog from '@/components/shared/ConfirmationDialog';
@@ -30,7 +30,7 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
   const { updateShipment } = useWarehouse();
   const { toast } = useToast();
 
-  const [isManageLocationsOpen, setIsManageLocationsOpen] = useState(false); // Renamed state
+  const [isManageLocationsOpen, setIsManageLocationsOpen] = useState(false);
   const [isEditShipmentOpen, setIsEditShipmentOpen] = useState(false);
   const [isAttachDocumentOpen, setIsAttachDocumentOpen] = useState(false);
   const [attachDocumentType, setAttachDocumentType] = useState<'release' | 'clearance' | null>(null);
@@ -71,6 +71,9 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
     setIsAttachDocumentOpen(false); 
   };
   
+  const locations = shipment.locationNames;
+  const isPendingAssignment = !locations || locations.length === 0 || (locations.length === 1 && locations[0] === 'Pending Assignment');
+
 
   return (
     <>
@@ -152,14 +155,14 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
             <MapPin className="mr-1 h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
             <span className="font-medium text-muted-foreground mr-1">Locations:</span>
             <div className="flex flex-wrap gap-1">
-              {(shipment.locationNames && shipment.locationNames.length > 0 && !(shipment.locationNames.length === 1 && shipment.locationNames[0] === 'Pending Assignment')) ? (
-                shipment.locationNames.map((loc, index) => (
+              {isPendingAssignment ? (
+                <Badge variant="outline" className="text-xs">Pending Assignment</Badge>
+              ) : (
+                locations.map((loc, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">
-                    {loc}
+                    {loc} ({index + 1} of {locations.length})
                   </Badge>
                 ))
-              ) : (
-                <Badge variant="outline" className="text-xs">Pending Assignment</Badge>
               )}
             </div>
           </div>
@@ -238,5 +241,3 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
     </>
   );
 }
-
-```

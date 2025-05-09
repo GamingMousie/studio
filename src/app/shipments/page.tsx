@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { PackageSearch, Search, ListFilter, LayoutGrid, Package as PackageIcon } from 'lucide-react';
 import type { Shipment } from '@/types';
+import { Badge } from '@/components/ui/badge'; // Added import for Badge
 
 export default function AllShipmentsPage() {
   const { shipments, trailers, deleteShipment, updateShipmentLocation } = useWarehouse();

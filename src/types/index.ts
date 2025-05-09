@@ -1,4 +1,4 @@
-export type TrailerStatus = 'Docked' | 'In-Transit' | 'Empty' | 'Loading' | 'Unloading';
+export type TrailerStatus = 'Scheduled' | 'Arrived' | 'Loading' | 'Offloading' | 'Empty';
 
 export interface Trailer {
   id: string; // User-defined unique ID
@@ -70,7 +70,8 @@ export interface TrailerFormData {
   id: string;
   name: string;
   company?: string;
-  status: TrailerStatus;
+  status: TrailerStatus; // Default to 'Scheduled' now
   arrivalDate?: Date | null; // Use Date for picker, convert to string on submit
   storageExpiryDate?: Date | null; // Use Date for picker, convert to string on submit
 }
+

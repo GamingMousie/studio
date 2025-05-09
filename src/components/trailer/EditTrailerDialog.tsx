@@ -32,10 +32,12 @@ type EditTrailerFormDataInternal = {
   storageExpiryDate?: Date | null;
 };
 
+const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Empty'];
+
 const editTrailerSchema = z.object({
   name: z.string().min(1, 'Trailer Name is required').max(50, 'Trailer Name too long'),
   company: z.string().max(50, 'Company name too long').optional(),
-  status: z.enum(['Docked', 'In-Transit', 'Empty', 'Loading', 'Unloading']),
+  status: z.enum(allStatuses as [TrailerStatus, ...TrailerStatus[]]),
   arrivalDate: z.date().nullable().optional(),
   storageExpiryDate: z.date().nullable().optional(),
 }).refine(data => {
@@ -55,7 +57,6 @@ interface EditTrailerDialogProps {
   trailerToEdit: Trailer;
 }
 
-const allStatuses: TrailerStatus[] = ['Docked', 'In-Transit', 'Empty', 'Loading', 'Unloading'];
 
 export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: EditTrailerDialogProps) {
   const { updateTrailer } = useWarehouse();
@@ -238,3 +239,4 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
     </Dialog>
   );
 }
+

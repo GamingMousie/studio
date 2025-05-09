@@ -27,10 +27,12 @@ interface WarehouseContextType {
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
 
 const initialTrailers: Trailer[] = [
-  { id: 'T-001', name: 'Alpha Transporter', status: 'Docked', company: 'Logistics Inc.', arrivalDate: new Date('2024-07-20T10:00:00Z').toISOString(), storageExpiryDate: new Date('2024-08-20T10:00:00Z').toISOString() },
-  { id: 'T-002', name: 'Beta Hauler', status: 'In-Transit', company: 'QuickShip Co.', arrivalDate: new Date('2024-07-22T14:30:00Z').toISOString() },
+  { id: 'T-001', name: 'Alpha Transporter', status: 'Arrived', company: 'Logistics Inc.', arrivalDate: new Date('2024-07-20T10:00:00Z').toISOString(), storageExpiryDate: new Date('2024-08-20T10:00:00Z').toISOString() },
+  { id: 'T-002', name: 'Beta Hauler', status: 'Scheduled', company: 'QuickShip Co.', arrivalDate: new Date('2024-07-22T14:30:00Z').toISOString() },
   { id: 'T-003', name: 'Gamma Carrier', status: 'Empty', company: 'Cargo Movers' },
   { id: 'T-004', name: 'Delta Freighter', status: 'Loading', company: 'Logistics Inc.' },
+  { id: 'T-005', name: 'Epsilon Mover', status: 'Offloading', company: 'QuickShip Co.', arrivalDate: new Date('2024-07-25T09:00:00Z').toISOString()},
+  { id: 'T-006', name: 'Zeta Voyager', status: 'Scheduled', company: 'Cargo Movers', arrivalDate: new Date('2024-07-28T16:00:00Z').toISOString()},
 ];
 
 const initialShipments: Shipment[] = [
@@ -44,6 +46,8 @@ const initialShipments: Shipment[] = [
   { id: uuidv4(), trailerId: 'T-002', stsJob: 66778, quantity: 150, exporter: 'Auto Parts Global', importer: 'Mechanics United', locationName: 'Pending Assignment', released: false, cleared: false, weight: 1800, palletSpace: 12 },
   { id: uuidv4(), trailerId: 'T-004', stsJob: 77889, quantity: 25, exporter: 'Fine Wines LLC', importer: 'Luxury Imports', locationName: 'Climate Control Zone', released: true, cleared: true, weight: 400, palletSpace: 2 },
   { id: uuidv4(), trailerId: 'T-003', stsJob: 88990, quantity: 500, exporter: 'Bulk Goods Co.', importer: 'Warehouse Direct', locationName: 'Section D, Row 10', released: false, cleared: false, weight: 2200, palletSpace: 15 },
+  { id: uuidv4(), trailerId: 'T-005', stsJob: 99001, quantity: 60, exporter: 'Fresh Produce Inc.', importer: 'Gourmet Foods', locationName: 'Refrigerated Bay 1', released: true, cleared: true, weight: 700, palletSpace: 5 },
+  { id: uuidv4(), trailerId: 'T-006', stsJob: 10101, quantity: 200, exporter: 'Building Supplies Ltd.', importer: 'Constructors Choice', locationName: 'Pending Assignment', released: false, cleared: false, weight: 3000, palletSpace: 20 },
 ];
 
 
@@ -54,7 +58,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   const addTrailer = useCallback((trailerData: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string }) => {
     const newTrailer: Trailer = {
       ...trailerData,
-      status: trailerData.status || 'Empty',
+      status: trailerData.status || 'Scheduled', // Default to 'Scheduled'
       company: trailerData.company || undefined,
       arrivalDate: trailerData.arrivalDate || undefined,
       storageExpiryDate: trailerData.storageExpiryDate || undefined,

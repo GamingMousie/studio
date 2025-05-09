@@ -29,11 +29,13 @@ type TrailerFormData = Omit<ExternalTrailerFormData, 'arrivalDate' | 'storageExp
   storageExpiryDate?: Date | null;
 };
 
+const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Empty'];
+
 const trailerSchema = z.object({
   id: z.string().min(1, 'Trailer ID is required').max(20, 'Trailer ID too long'),
   name: z.string().min(1, 'Trailer Name is required').max(50, 'Trailer Name too long'),
   company: z.string().max(50, 'Company name too long').optional(),
-  status: z.enum(['Docked', 'In-Transit', 'Empty', 'Loading', 'Unloading']).default('Empty'),
+  status: z.enum(allStatuses as [TrailerStatus, ...TrailerStatus[]]).default('Scheduled'),
   arrivalDate: z.date().nullable().optional(),
   storageExpiryDate: z.date().nullable().optional(),
 }).refine(data => {
@@ -52,7 +54,6 @@ interface AddTrailerDialogProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-const allStatuses: TrailerStatus[] = ['Docked', 'In-Transit', 'Empty', 'Loading', 'Unloading'];
 
 export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialogProps) {
   const { addTrailer, trailers } = useWarehouse();
@@ -60,7 +61,7 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
   const { register, handleSubmit, reset, formState: { errors, isSubmitting }, setValue, watch, control } = useForm<TrailerFormData>({
     resolver: zodResolver(trailerSchema),
     defaultValues: {
-      status: 'Empty',
+      status: 'Scheduled', // Default to 'Scheduled'
       company: '',
       arrivalDate: null,
       storageExpiryDate: null,
@@ -223,3 +224,4 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
     </Dialog>
   );
 }
+

@@ -29,13 +29,13 @@ interface TrailerCardProps {
 }
 
 const statusColors: Record<TrailerStatus, string> = {
-  Docked: 'bg-blue-500',
-  'In-Transit': 'bg-yellow-500',
-  Empty: 'bg-gray-500',
+  Scheduled: 'bg-orange-500',
+  Arrived: 'bg-blue-500',
   Loading: 'bg-green-500',
-  Unloading: 'bg-purple-500',
+  Offloading: 'bg-purple-500',
+  Empty: 'bg-gray-500',
 };
-const allStatuses: TrailerStatus[] = ['Docked', 'In-Transit', 'Empty', 'Loading', 'Unloading'];
+const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Empty'];
 
 
 export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChange }: TrailerCardProps) {

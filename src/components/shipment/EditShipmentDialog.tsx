@@ -4,11 +4,10 @@ import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWarehouse } from '@/contexts/WarehouseContext';
-import type { Shipment, ShipmentFormData, ShipmentUpdateData } from '@/types';
+import type { Shipment, ShipmentUpdateData } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
@@ -19,22 +18,22 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Edit } from 'lucide-react';
+import { FileText, Weight, Box, Edit, UserCircle, Users } from 'lucide-react'; // Added UserCircle, Users
 
 const editShipmentSchema = z.object({
-  contentDescription: z.string().min(1, 'Content description is required').max(100, 'Description too long'),
+  stsJob: z.coerce.number().positive('STS Job must be a positive number'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   exporter: z.string().min(1, 'Exporter is required').max(50, 'Exporter name too long'),
-  locationName: z.string().min(1, 'Location name is required').max(30, 'Location name too long'), // Made required for edit
-  releaseDocument: z.any().optional(), // FileList or File or null
-  clearanceDocument: z.any().optional(), // FileList or File or null
+  importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'), // Added importer
+  locationName: z.string().min(1, 'Location name is required').max(30, 'Location name too long'),
+  releaseDocument: z.any().optional(), 
+  clearanceDocument: z.any().optional(), 
   released: z.boolean().optional(),
   cleared: z.boolean().optional(),
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
   palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(),
 });
 
-// This type is for the form state
 type EditShipmentFormDataType = z.infer<typeof editShipmentSchema>;
 
 interface EditShipmentDialogProps {
@@ -50,33 +49,32 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
   const { register, handleSubmit, reset, control, formState: { errors, isSubmitting }, watch, setValue } = useForm<EditShipmentFormDataType>({
     resolver: zodResolver(editShipmentSchema),
     defaultValues: {
-      contentDescription: shipmentToEdit.contentDescription,
+      stsJob: shipmentToEdit.stsJob,
       quantity: shipmentToEdit.quantity,
       exporter: shipmentToEdit.exporter,
+      importer: shipmentToEdit.importer,
       locationName: shipmentToEdit.locationName,
       released: shipmentToEdit.released,
       cleared: shipmentToEdit.cleared,
       weight: shipmentToEdit.weight ?? null,
       palletSpace: shipmentToEdit.palletSpace ?? null,
-      releaseDocument: null, // Will be handled by useEffect or set manually
-      clearanceDocument: null, // Will be handled by useEffect or set manually
+      releaseDocument: null, 
+      clearanceDocument: null, 
     }
   });
 
-  // Populate form with shipmentToEdit data when dialog opens or shipmentToEdit changes
   useEffect(() => {
     if (shipmentToEdit && isOpen) {
       reset({
-        contentDescription: shipmentToEdit.contentDescription,
+        stsJob: shipmentToEdit.stsJob,
         quantity: shipmentToEdit.quantity,
         exporter: shipmentToEdit.exporter,
+        importer: shipmentToEdit.importer,
         locationName: shipmentToEdit.locationName,
         released: shipmentToEdit.released,
         cleared: shipmentToEdit.cleared,
         weight: shipmentToEdit.weight ?? null,
         palletSpace: shipmentToEdit.palletSpace ?? null,
-        // Do not reset file inputs here to allow users to keep existing files or upload new ones
-        // Existing file names are displayed separately
       });
     }
   }, [shipmentToEdit, isOpen, reset]);
@@ -87,10 +85,11 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     const newClearanceDocumentFile = data.clearanceDocument && data.clearanceDocument.length > 0 ? data.clearanceDocument[0] : null;
 
     const updatedData: ShipmentUpdateData = {
-      contentDescription: data.contentDescription,
+      stsJob: data.stsJob,
       quantity: data.quantity,
       exporter: data.exporter,
-      locationName: data.locationName || shipmentToEdit.locationName, // Fallback to existing if somehow empty
+      importer: data.importer,
+      locationName: data.locationName || shipmentToEdit.locationName,
       releaseDocumentName: newReleaseDocumentFile ? newReleaseDocumentFile.name : shipmentToEdit.releaseDocumentName,
       clearanceDocumentName: newClearanceDocumentFile ? newClearanceDocumentFile.name : shipmentToEdit.clearanceDocumentName,
       released: data.released ?? false,
@@ -102,27 +101,28 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     updateShipment(shipmentToEdit.id, updatedData);
     toast({
       title: "Success!",
-      description: `Shipment "${data.contentDescription}" updated.`,
+      description: `Shipment STS Job "${data.stsJob}" updated.`,
     });
     setIsOpen(false);
-    // Do not reset here, useEffect will handle it if component re-renders with new props or isOpen changes.
   };
 
   const handleClose = () => {
     setIsOpen(false);
-    // Reset form to initial state of the shipment when dialog is closed without saving
-    reset({
-        contentDescription: shipmentToEdit.contentDescription,
-        quantity: shipmentToEdit.quantity,
-        exporter: shipmentToEdit.exporter,
-        locationName: shipmentToEdit.locationName,
-        released: shipmentToEdit.released,
-        cleared: shipmentToEdit.cleared,
-        weight: shipmentToEdit.weight ?? null,
-        palletSpace: shipmentToEdit.palletSpace ?? null,
-        releaseDocument: null,
-        clearanceDocument: null,
-    });
+    if (shipmentToEdit) {
+      reset({
+          stsJob: shipmentToEdit.stsJob,
+          quantity: shipmentToEdit.quantity,
+          exporter: shipmentToEdit.exporter,
+          importer: shipmentToEdit.importer,
+          locationName: shipmentToEdit.locationName,
+          released: shipmentToEdit.released,
+          cleared: shipmentToEdit.cleared,
+          weight: shipmentToEdit.weight ?? null,
+          palletSpace: shipmentToEdit.palletSpace ?? null,
+          releaseDocument: null,
+          clearanceDocument: null,
+      });
+    }
   }
 
   return (
@@ -136,22 +136,34 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
           <div>
-            <Label htmlFor="contentDescription">Content Description</Label>
-            <Textarea id="contentDescription" {...register('contentDescription')} />
-            {errors.contentDescription && <p className="text-sm text-destructive mt-1">{errors.contentDescription.message}</p>}
+            <Label htmlFor="stsJob">STS Job Number</Label>
+            <Input id="stsJob" type="number" {...register('stsJob')} />
+            {errors.stsJob && <p className="text-sm text-destructive mt-1">{errors.stsJob.message}</p>}
           </div>
+          
+          <div>
+            <Label htmlFor="quantity">Quantity</Label>
+            <Input id="quantity" type="number" {...register('quantity')} />
+            {errors.quantity && <p className="text-sm text-destructive mt-1">{errors.quantity.message}</p>}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="quantity">Quantity</Label>
-              <Input id="quantity" type="number" {...register('quantity')} />
-              {errors.quantity && <p className="text-sm text-destructive mt-1">{errors.quantity.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="exporter">Exporter</Label>
+              <Label htmlFor="exporter" className="flex items-center">
+                <UserCircle className="mr-2 h-4 w-4 text-muted-foreground" /> Exporter
+              </Label>
               <Input id="exporter" {...register('exporter')} />
               {errors.exporter && <p className="text-sm text-destructive mt-1">{errors.exporter.message}</p>}
             </div>
+            <div>
+              <Label htmlFor="importer" className="flex items-center">
+                <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer
+              </Label>
+              <Input id="importer" {...register('importer')} />
+              {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
+            </div>
           </div>
+
 
           <div className="grid grid-cols-2 gap-4">
             <div>

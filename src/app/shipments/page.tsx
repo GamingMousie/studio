@@ -29,8 +29,9 @@ export default function AllShipmentsPage() {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch = 
         shipment.id.toLowerCase().includes(searchLower) ||
-        shipment.contentDescription.toLowerCase().includes(searchLower) ||
+        shipment.stsJob.toString().toLowerCase().includes(searchLower) || // Search by STS Job
         shipment.exporter.toLowerCase().includes(searchLower) || 
+        shipment.importer.toLowerCase().includes(searchLower) || // Search by Importer
         (shipment.locationName && shipment.locationName.toLowerCase().includes(searchLower));
       
       const matchesTrailer = trailerFilter === 'all' || shipment.trailerId === trailerFilter;
@@ -46,12 +47,13 @@ export default function AllShipmentsPage() {
           <Card className="shadow-md flex flex-col h-full" key={i}>
             <CardContent className="p-6 flex-grow space-y-3">
               <div className="flex items-start justify-between">
-                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-6 w-3/4" /> {/* STS Job */}
                 <Skeleton className="h-7 w-7 rounded-md" />
               </div>
               <Skeleton className="h-4 w-1/2" /> {/* ID */}
               <Skeleton className="h-4 w-1/3 mt-1" /> {/* Quantity */}
               <Skeleton className="h-4 w-2/5 mt-1" /> {/* Exporter */}
+              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Importer */}
               <div className="grid grid-cols-2 gap-2 mt-1">
                 <Skeleton className="h-4 w-3/4" /> {/* Weight */}
                 <Skeleton className="h-4 w-3/4" /> {/* Pallet Space */}
@@ -62,10 +64,10 @@ export default function AllShipmentsPage() {
                 <Skeleton className="h-5 w-20 ml-2" /> {/* Location Badge */}
               </div>
               <div className="flex items-center mt-2 space-x-2">
-                <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-20" /> {/* Released Status */}
               </div>
               <div className="flex items-center mt-1 space-x-2">
-                <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-20" /> {/* Cleared Status */}
               </div>
             </CardContent>
             <div className="p-4 pt-0 border-t mt-auto">
@@ -76,22 +78,23 @@ export default function AllShipmentsPage() {
            <Card className="shadow-md w-full" key={i}>
             <div className="p-4 flex items-center justify-between">
               <div className="flex-grow space-y-2">
-                <Skeleton className="h-6 w-3/5" />
-                <Skeleton className="h-4 w-2/5" />
+                <Skeleton className="h-6 w-3/5" /> {/* STS Job */}
+                <Skeleton className="h-4 w-2/5" /> {/* ID */}
                 <div className="flex items-center gap-4 text-sm">
-                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-20" /> {/* Quantity */}
                   <Skeleton className="h-4 w-28" /> {/* Exporter */}
-                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-4 w-28" /> {/* Importer */}
+                  <Skeleton className="h-5 w-24" /> {/* Location */}
                 </div>
                 <div className="flex items-center gap-4 text-sm mt-1">
                   <Skeleton className="h-4 w-24" /> {/* Weight */}
                   <Skeleton className="h-4 w-24" /> {/* Pallet Space */}
                 </div>
                  <div className="flex items-center mt-1 space-x-2">
-                    <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-24" /> {/* Released */}
                  </div>
                  <div className="flex items-center mt-1 space-x-2">
-                    <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-24" /> {/* Cleared */}
                  </div>
               </div>
               <div className="flex items-center gap-2">
@@ -121,7 +124,7 @@ export default function AllShipmentsPage() {
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input 
-              placeholder="Search shipments by ID, Content, Exporter, Location..."
+              placeholder="Search by ID, STS Job, Exporter, Importer, Location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -167,7 +170,6 @@ export default function AllShipmentsPage() {
               shipment={shipment} 
               onDelete={() => deleteShipment(shipment.id)}
               onUpdateLocation={(newLocation) => updateShipmentLocation(shipment.id, newLocation)}
-              // onToggleReleased and onToggleCleared are handled internally by ShipmentCard now
             />
           ))}
         </div>

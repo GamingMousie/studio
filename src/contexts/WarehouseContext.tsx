@@ -15,7 +15,7 @@ interface WarehouseContextType {
   deleteTrailer: (trailerId: string) => void;
   shipments: Shipment[];
   getShipmentsByTrailerId: (trailerId: string) => Shipment[];
-  addShipment: (shipment: Omit<Shipment, 'id' | 'locationName' | 'released' | 'cleared' | 'exporter'> & { exporter: string; locationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?: boolean, cleared?: boolean, weight?: number, palletSpace?: number }) => void;
+  addShipment: (shipment: Omit<Shipment, 'id' | 'locationName' | 'released' | 'cleared' | 'exporter' | 'importer' | 'stsJob'> & { stsJob: number; exporter: string; importer: string; locationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?: boolean, cleared?: boolean, weight?: number, palletSpace?: number }) => void;
   updateShipmentLocation: (shipmentId: string, locationName: string) => void;
   deleteShipment: (shipmentId: string) => void;
   getTrailerById: (trailerId: string) => Trailer | undefined;
@@ -33,9 +33,9 @@ const initialTrailers: Trailer[] = [
 ];
 
 const initialShipments: Shipment[] = [
-  { id: uuidv4(), trailerId: 'T-001', contentDescription: 'Electronics Batch #123', quantity: 50, exporter: 'City Retail Hub', locationName: 'Bay A1', releaseDocumentName: 'release_electronics_123.pdf', clearanceDocumentName: 'clearance_electronics_123.pdf', released: true, cleared: true, weight: 1200, palletSpace: 4 },
-  { id: uuidv4(), trailerId: 'T-001', contentDescription: 'Apparel Stock Lot', quantity: 200, exporter: 'Regional Outlet', locationName: 'Shelf B7', released: false, cleared: false, weight: 800, palletSpace: 6 },
-  { id: uuidv4(), trailerId: 'T-002', contentDescription: 'Industrial Parts', quantity: 10, exporter: 'Factory Zone', locationName: 'Dock 3', releaseDocumentName: 'industrial_release.docx', released: true, cleared: false, weight: 2500, palletSpace: 2 },
+  { id: uuidv4(), trailerId: 'T-001', stsJob: 12345, quantity: 50, exporter: 'City Retail Hub', importer: 'National Importers Ltd.', locationName: 'Bay A1', releaseDocumentName: 'release_electronics_123.pdf', clearanceDocumentName: 'clearance_electronics_123.pdf', released: true, cleared: true, weight: 1200, palletSpace: 4 },
+  { id: uuidv4(), trailerId: 'T-001', stsJob: 67890, quantity: 200, exporter: 'Regional Outlet', importer: 'Global Goods Inc.', locationName: 'Shelf B7', released: false, cleared: false, weight: 800, palletSpace: 6 },
+  { id: uuidv4(), trailerId: 'T-002', stsJob: 11223, quantity: 10, exporter: 'Factory Zone', importer: 'Cross-Border Traders', locationName: 'Dock 3', releaseDocumentName: 'industrial_release.docx', released: true, cleared: false, weight: 2500, palletSpace: 2 },
 ];
 
 
@@ -77,11 +77,13 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
     return shipments.filter((s) => s.trailerId === trailerId);
   }, [shipments]);
 
-  const addShipment = useCallback((shipmentData: Omit<Shipment, 'id' | 'locationName' | 'released' | 'cleared' | 'exporter'> & { exporter: string; locationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?:boolean, cleared?: boolean, weight?: number, palletSpace?: number }) => {
+  const addShipment = useCallback((shipmentData: Omit<Shipment, 'id' | 'locationName' | 'released' | 'cleared' | 'exporter' | 'importer' | 'stsJob'> & { stsJob: number; exporter: string; importer: string; locationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?:boolean, cleared?: boolean, weight?: number, palletSpace?: number }) => {
     const newShipment: Shipment = {
       ...shipmentData,
       id: uuidv4(),
+      stsJob: shipmentData.stsJob,
       exporter: shipmentData.exporter,
+      importer: shipmentData.importer,
       locationName: shipmentData.locationName || 'Pending Assignment',
       releaseDocumentName: shipmentData.releaseDocumentName,
       clearanceDocumentName: shipmentData.clearanceDocumentName,

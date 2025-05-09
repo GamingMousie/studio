@@ -6,7 +6,6 @@ import { useWarehouse } from '@/contexts/WarehouseContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
@@ -17,15 +16,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box } from 'lucide-react';
+import { FileText, Weight, Box, UserCircle, Users } from 'lucide-react'; // Added UserCircle, Users
 
 const shipmentSchema = z.object({
-  contentDescription: z.string().min(1, 'Content description is required').max(100, 'Description too long'),
+  stsJob: z.coerce.number().positive('STS Job must be a positive number'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   exporter: z.string().min(1, 'Exporter is required').max(50, 'Exporter name too long'),
+  importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'), // Added importer
   locationName: z.string().optional(),
-  releaseDocument: z.any().optional(), // Changed from z.instanceof(FileList)
-  clearanceDocument: z.any().optional(), // Changed from z.instanceof(FileList)
+  releaseDocument: z.any().optional(), 
+  clearanceDocument: z.any().optional(), 
   released: z.boolean().optional(),
   cleared: z.boolean().optional(),
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
@@ -54,15 +54,15 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
   });
 
   const onSubmit: SubmitHandler<ShipmentFormData> = (data) => {
-    // Accessing FileList properties needs to be careful as it's now z.any()
     const releaseDocumentName = data.releaseDocument && data.releaseDocument.length > 0 ? data.releaseDocument[0]?.name : undefined;
     const clearanceDocumentName = data.clearanceDocument && data.clearanceDocument.length > 0 ? data.clearanceDocument[0]?.name : undefined;
 
     addShipment({ 
       trailerId,
-      contentDescription: data.contentDescription,
+      stsJob: data.stsJob,
       quantity: data.quantity,
       exporter: data.exporter,
+      importer: data.importer,
       locationName: data.locationName,
       releaseDocumentName,
       clearanceDocumentName,
@@ -73,7 +73,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
     });
     toast({
       title: "Success!",
-      description: `Shipment "${data.contentDescription}" added to trailer ${trailerId}.`,
+      description: `Shipment with STS Job "${data.stsJob}" added to trailer ${trailerId}.`,
     });
     reset();
     setIsOpen(false);
@@ -90,20 +90,31 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
           <div>
-            <Label htmlFor="contentDescription">Content Description</Label>
-            <Textarea id="contentDescription" {...register('contentDescription')} placeholder="e.g., Pallet of Widgets" />
-            {errors.contentDescription && <p className="text-sm text-destructive mt-1">{errors.contentDescription.message}</p>}
+            <Label htmlFor="stsJob">STS Job Number</Label>
+            <Input id="stsJob" type="number" {...register('stsJob')} placeholder="e.g., 12345" />
+            {errors.stsJob && <p className="text-sm text-destructive mt-1">{errors.stsJob.message}</p>}
           </div>
+          
+          <div>
+            <Label htmlFor="quantity">Quantity</Label>
+            <Input id="quantity" type="number" {...register('quantity')} placeholder="e.g., 100" />
+            {errors.quantity && <p className="text-sm text-destructive mt-1">{errors.quantity.message}</p>}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="quantity">Quantity</Label>
-              <Input id="quantity" type="number" {...register('quantity')} placeholder="e.g., 100" />
-              {errors.quantity && <p className="text-sm text-destructive mt-1">{errors.quantity.message}</p>}
-            </div>
-            <div>
-              <Label htmlFor="exporter">Exporter</Label>
+              <Label htmlFor="exporter" className="flex items-center">
+                <UserCircle className="mr-2 h-4 w-4 text-muted-foreground" /> Exporter
+              </Label>
               <Input id="exporter" {...register('exporter')} placeholder="e.g., Acme Exporters Inc." />
               {errors.exporter && <p className="text-sm text-destructive mt-1">{errors.exporter.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="importer" className="flex items-center">
+                <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer
+              </Label>
+              <Input id="importer" {...register('importer')} placeholder="e.g., Global Importers LLC" />
+              {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
             </div>
           </div>
 

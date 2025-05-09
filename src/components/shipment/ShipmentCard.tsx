@@ -4,10 +4,10 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp } from 'lucide-react';
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, UserCircle, Users, Hash } from 'lucide-react'; // Added Hash, UserCircle, Users
 import AssignLocationDialog from './AssignLocationDialog';
 import EditShipmentDialog from './EditShipmentDialog';
-import AttachDocumentDialog from './AttachDocumentDialog'; // Import the new dialog
+import AttachDocumentDialog from './AttachDocumentDialog'; 
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import {
   DropdownMenu,
@@ -21,9 +21,8 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ShipmentCardProps {
   shipment: Shipment;
-  onDelete: () => void; // Keep onDelete as it's a direct action
-  onUpdateLocation: (newLocation: string) => void; // Keep onUpdateLocation as it uses its own dialog
-  // onToggleReleased and onToggleCleared are removed as the card will handle this logic directly
+  onDelete: () => void; 
+  onUpdateLocation: (newLocation: string) => void; 
 }
 
 export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: ShipmentCardProps) {
@@ -35,23 +34,25 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
   const [isAttachDocumentOpen, setIsAttachDocumentOpen] = useState(false);
   const [attachDocumentType, setAttachDocumentType] = useState<'release' | 'clearance' | null>(null);
 
+  const shipmentIdentifier = `STS Job: ${shipment.stsJob}`;
+
   const handleMarkAsPermitted = () => {
-    if (!shipment.released) { // If currently not released, user wants to mark as released (attach doc)
+    if (!shipment.released) { 
       setAttachDocumentType('release');
       setIsAttachDocumentOpen(true);
-    } else { // If currently released, user wants to mark as not permitted (no doc needed)
+    } else { 
       updateShipment(shipment.id, { released: false });
-      toast({ title: "Shipment Updated", description: `${shipment.contentDescription} marked as not permitted to be released.` });
+      toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not permitted to be released.` });
     }
   };
 
   const handleMarkAsCleared = () => {
-    if (!shipment.cleared) { // If currently not cleared, user wants to mark as cleared (attach doc)
+    if (!shipment.cleared) { 
       setAttachDocumentType('clearance');
       setIsAttachDocumentOpen(true);
-    } else { // If currently cleared, user wants to mark as not cleared (no doc needed)
+    } else { 
       updateShipment(shipment.id, { cleared: false });
-      toast({ title: "Shipment Updated", description: `${shipment.contentDescription} marked as not cleared.` });
+      toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not cleared.` });
     }
   };
 
@@ -65,7 +66,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
     } else if (docType === 'clearance') {
       updateShipment(attachedShipmentId, { clearanceDocumentName: documentName, cleared: true });
     }
-    setIsAttachDocumentOpen(false); // Close dialog after successful attachment
+    setIsAttachDocumentOpen(false); 
   };
   
   const handleDelete = (e: React.MouseEvent) => {
@@ -80,7 +81,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
           <div className="flex items-start justify-between">
             <CardTitle className="text-lg flex items-center">
               <Package className="mr-2 h-5 w-5 text-primary" />
-              {shipment.contentDescription}
+              STS Job: {shipment.stsJob}
             </CardTitle>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -119,7 +120,18 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
         </CardHeader>
         <CardContent className="space-y-1.5 text-sm flex-grow">
           <p><span className="font-medium text-muted-foreground">Quantity:</span> {shipment.quantity}</p>
-          <p><span className="font-medium text-muted-foreground">Exporter:</span> {shipment.exporter}</p>
+          
+          <div className="flex items-center">
+            <UserCircle className="mr-1.5 h-4 w-4 text-muted-foreground" />
+            <span className="font-medium text-muted-foreground">Exporter:</span>
+            <span className="ml-1.5">{shipment.exporter}</span>
+          </div>
+          
+          <div className="flex items-center">
+            <Users className="mr-1.5 h-4 w-4 text-muted-foreground" />
+            <span className="font-medium text-muted-foreground">Importer:</span>
+            <span className="ml-1.5">{shipment.importer}</span>
+          </div>
           
           {shipment.weight !== undefined && shipment.weight !== null && (
             <div className="flex items-center">
@@ -183,7 +195,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
         setIsOpen={setIsAssignLocationOpen}
         currentLocation={shipment.locationName}
         onSubmit={onUpdateLocation}
-        shipmentContent={shipment.contentDescription}
+        shipmentIdentifier={shipmentIdentifier}
       />
 
       {isEditShipmentOpen && (
@@ -199,7 +211,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
           isOpen={isAttachDocumentOpen}
           setIsOpen={setIsAttachDocumentOpen}
           shipmentId={shipment.id}
-          shipmentContentDescription={shipment.contentDescription}
+          shipmentIdentifier={shipmentIdentifier}
           documentType={attachDocumentType}
           onDocumentAttached={handleDocumentAttached}
         />

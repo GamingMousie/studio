@@ -37,7 +37,7 @@ interface AttachDocumentDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   shipmentId: string;
-  shipmentContentDescription: string;
+  shipmentIdentifier: string; // Changed from shipmentContentDescription
   documentType: 'release' | 'clearance';
   onDocumentAttached: (shipmentId: string, documentType: 'release' | 'clearance', documentName: string) => void;
 }
@@ -46,7 +46,7 @@ export default function AttachDocumentDialog({
   isOpen,
   setIsOpen,
   shipmentId,
-  shipmentContentDescription,
+  shipmentIdentifier, // Changed from shipmentContentDescription
   documentType,
   onDocumentAttached,
 }: AttachDocumentDialogProps) {
@@ -60,14 +60,14 @@ export default function AttachDocumentDialog({
     onDocumentAttached(shipmentId, documentType, documentFile.name);
     toast({
       title: "Document Attached!",
-      description: `${documentFile.name} has been associated as the ${documentType} document for shipment "${shipmentContentDescription}".`,
+      description: `${documentFile.name} has been associated as the ${documentType} document for shipment "${shipmentIdentifier}".`,
     });
     reset();
     setIsOpen(false);
   };
 
   const dialogTitle = documentType === 'release' ? 'Attach Release Document' : 'Attach Clearance Document';
-  const dialogDescription = `Upload the ${documentType} document for shipment: ${shipmentContentDescription}.`;
+  const dialogDescription = `Upload the ${documentType} document for shipment: ${shipmentIdentifier}.`;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) reset(); }}>

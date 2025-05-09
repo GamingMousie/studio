@@ -28,7 +28,7 @@ interface AssignLocationDialogProps {
   setIsOpen: (isOpen: boolean) => void;
   currentLocation: string;
   onSubmit: (newLocation: string) => void;
-  shipmentContent: string;
+  shipmentIdentifier: string; // Changed from shipmentContent
 }
 
 export default function AssignLocationDialog({
@@ -36,7 +36,7 @@ export default function AssignLocationDialog({
   setIsOpen,
   currentLocation,
   onSubmit,
-  shipmentContent,
+  shipmentIdentifier, // Changed from shipmentContent
 }: AssignLocationDialogProps) {
   const { toast } = useToast();
   const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<LocationFormData>({
@@ -55,7 +55,6 @@ export default function AssignLocationDialog({
     if (isOpen) {
       setValue('locationName', currentLocation === "Pending Assignment" ? "" : currentLocation);
     } else {
-      // Reset scanning state when dialog is closed
       setIsScanning(false);
       setHasCameraPermission(null);
     }
@@ -90,12 +89,10 @@ export default function AssignLocationDialog({
             title: 'Camera Access Denied',
             description: 'Please enable camera permissions in your browser settings to use this feature.',
           });
-          // Keep isScanning true to show the error message, user can cancel.
         }
       };
       getCameraPermission();
     } else {
-      // Cleanup: Stop video stream if active
       if (activeStream) {
         activeStream.getTracks().forEach(track => track.stop());
         setActiveStream(null);
@@ -103,15 +100,11 @@ export default function AssignLocationDialog({
           videoRef.current.srcObject = null;
         }
       }
-      // Optionally reset camera permission status for next attempt
-      // setHasCameraPermission(null); 
     }
 
-    // Cleanup function for when the component unmounts or isScanning dependency changes
     return () => {
       if (activeStream) {
         activeStream.getTracks().forEach(track => track.stop());
-        // No need to set activeStream to null here as it's managed by state and effect re-runs
       }
     };
   }, [isScanning, toast]); // removed activeStream from deps
@@ -123,14 +116,14 @@ export default function AssignLocationDialog({
       title: "Barcode Scanned (Simulated)",
       description: `Location set to ${scannedValue}. You can now save.`,
     });
-    setIsScanning(false); // Stop scanning and return to form
+    setIsScanning(false); 
   };
 
   const handleFormSubmit: SubmitHandler<LocationFormData> = (data) => {
     onSubmit(data.locationName);
     toast({
       title: "Location Updated!",
-      description: `Location for "${shipmentContent}" set to ${data.locationName}.`,
+      description: `Location for "${shipmentIdentifier}" set to ${data.locationName}.`,
     });
     closeDialogCleanup();
   };
@@ -148,7 +141,7 @@ export default function AssignLocationDialog({
           <DialogTitle>{isScanning ? 'Scan Location Barcode' : 'Assign Warehouse Location'}</DialogTitle>
           {!isScanning && (
             <DialogDescription>
-              Update the location for shipment: <span className="font-semibold">{shipmentContent}</span>.
+              Update the location for shipment: <span className="font-semibold">{shipmentIdentifier}</span>.
               Current location: <span className="font-semibold">{currentLocation}</span>.
             </DialogDescription>
           )}

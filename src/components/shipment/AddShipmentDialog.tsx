@@ -22,7 +22,7 @@ import { FileText, Weight, Box } from 'lucide-react';
 const shipmentSchema = z.object({
   contentDescription: z.string().min(1, 'Content description is required').max(100, 'Description too long'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
-  destination: z.string().min(1, 'Destination is required').max(50, 'Destination too long'),
+  exporter: z.string().min(1, 'Exporter is required').max(50, 'Exporter name too long'),
   locationName: z.string().optional(),
   releaseDocument: z.any().optional(), // Changed from z.instanceof(FileList)
   clearanceDocument: z.any().optional(), // Changed from z.instanceof(FileList)
@@ -62,7 +62,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       trailerId,
       contentDescription: data.contentDescription,
       quantity: data.quantity,
-      destination: data.destination,
+      exporter: data.exporter,
       locationName: data.locationName,
       releaseDocumentName,
       clearanceDocumentName,
@@ -101,9 +101,9 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
               {errors.quantity && <p className="text-sm text-destructive mt-1">{errors.quantity.message}</p>}
             </div>
             <div>
-              <Label htmlFor="destination">Destination</Label>
-              <Input id="destination" {...register('destination')} placeholder="e.g., Main Warehouse" />
-              {errors.destination && <p className="text-sm text-destructive mt-1">{errors.destination.message}</p>}
+              <Label htmlFor="exporter">Exporter</Label>
+              <Input id="exporter" {...register('exporter')} placeholder="e.g., Acme Exporters Inc." />
+              {errors.exporter && <p className="text-sm text-destructive mt-1">{errors.exporter.message}</p>}
             </div>
           </div>
 

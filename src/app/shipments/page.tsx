@@ -30,7 +30,7 @@ export default function AllShipmentsPage() {
       const matchesSearch = 
         shipment.id.toLowerCase().includes(searchLower) ||
         shipment.contentDescription.toLowerCase().includes(searchLower) ||
-        shipment.destination.toLowerCase().includes(searchLower) ||
+        shipment.exporter.toLowerCase().includes(searchLower) || // Changed from destination
         (shipment.locationName && shipment.locationName.toLowerCase().includes(searchLower));
       
       const matchesTrailer = trailerFilter === 'all' || shipment.trailerId === trailerFilter;
@@ -51,7 +51,7 @@ export default function AllShipmentsPage() {
               </div>
               <Skeleton className="h-4 w-1/2" /> {/* ID */}
               <Skeleton className="h-4 w-1/3 mt-1" /> {/* Quantity */}
-              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Destination */}
+              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Exporter */}
               <div className="grid grid-cols-2 gap-2 mt-1">
                 <Skeleton className="h-4 w-3/4" /> {/* Weight */}
                 <Skeleton className="h-4 w-3/4" /> {/* Pallet Space */}
@@ -80,7 +80,7 @@ export default function AllShipmentsPage() {
                 <Skeleton className="h-4 w-2/5" />
                 <div className="flex items-center gap-4 text-sm">
                   <Skeleton className="h-4 w-20" />
-                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-28" /> {/* Exporter */}
                   <Skeleton className="h-5 w-24" />
                 </div>
                 <div className="flex items-center gap-4 text-sm mt-1">
@@ -121,7 +121,7 @@ export default function AllShipmentsPage() {
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input 
-              placeholder="Search shipments..."
+              placeholder="Search shipments by ID, Content, Exporter, Location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"

@@ -82,7 +82,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
         </CardHeader>
         <CardContent className="space-y-1.5 text-sm flex-grow">
           <p><span className="font-medium text-muted-foreground">Quantity:</span> {shipment.quantity}</p>
-          <p><span className="font-medium text-muted-foreground">Destination:</span> {shipment.destination}</p>
+          <p><span className="font-medium text-muted-foreground">Exporter:</span> {shipment.exporter}</p>
           
           {shipment.weight !== undefined && shipment.weight !== null && (
             <div className="flex items-center">

@@ -18,9 +18,9 @@ export default function SingleShipmentPage() {
   const params = useParams();
   const shipmentId = params.shipmentId as string;
 
-  const { getShipmentById, getTrailerById } = useWarehouse(); // Assuming getShipmentById exists or will be added
+  const { getShipmentById, getTrailerById } = useWarehouse(); 
 
-  const [shipment, setShipment] = useState<Shipment | null | undefined>(undefined); // undefined for loading, null for not found
+  const [shipment, setShipment] = useState<Shipment | null | undefined>(undefined); 
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -44,7 +44,7 @@ export default function SingleShipmentPage() {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
     try {
-      return format(parseISO(dateString), 'PPpp'); // e.g., Sep 20, 2023, 10:00 AM
+      return format(parseISO(dateString), 'PPpp'); 
     } catch (error) {
       return "Invalid Date";
     }
@@ -90,7 +90,6 @@ export default function SingleShipmentPage() {
     );
   }
   
-  // Ensure shipment is not null before proceeding
   if (!shipment) return null;
 
 
@@ -115,7 +114,7 @@ export default function SingleShipmentPage() {
                 Shipment Details
               </CardTitle>
               <CardDescription className="mt-1">
-                STS Job: <span className="font-semibold text-foreground">{shipment.stsJob}</span> | ID: <span className="font-semibold text-foreground">{shipment.id.substring(0,8)}...</span>
+                STS Job: <span className="font-semibold text-foreground">{shipment.stsJob}</span> | Shipment ID: <span className="font-semibold text-foreground">{shipment.id.substring(0,8)}...</span>
               </CardDescription>
             </div>
              {trailer && (
@@ -128,12 +127,24 @@ export default function SingleShipmentPage() {
             )}
           </div>
         </CardHeader>
-        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-sm card-content-print">
+        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm card-content-print"> {/* Increased gap-y */}
           
           <div className="space-y-1">
             <h3 className="font-semibold text-muted-foreground flex items-center"><Hash className="mr-2 h-4 w-4" />STS Job Number</h3>
-            <p className="text-base font-medium">{shipment.stsJob}</p>
+            <p className="text-xl font-bold text-foreground">{shipment.stsJob}</p>
           </div>
+
+          {trailer && (
+            <div className="space-y-1">
+              <h3 className="font-semibold text-muted-foreground flex items-center"><Truck className="mr-2 h-4 w-4" />Associated Trailer ID</h3>
+              <p className="text-xl font-bold text-foreground">
+                <Link href={`/trailers/${trailer.id}`} className="hover:underline">
+                  {trailer.id}
+                </Link>
+                 {trailer.name && <span className="text-base font-medium text-muted-foreground ml-2">({trailer.name})</span>}
+              </p>
+            </div>
+          )}
           
           <div className="space-y-1">
             <h3 className="font-semibold text-muted-foreground flex items-center"><Package className="mr-2 h-4 w-4" />Quantity</h3>

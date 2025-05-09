@@ -3,10 +3,10 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useWarehouse } from '@/contexts/WarehouseContext';
-import type { Trailer } from '@/types';
+import type { Trailer, Shipment } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, ArrowRight, CalendarDays } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays, Package } from 'lucide-react';
 import Link from 'next/link';
 import {
   addWeeks,
@@ -23,8 +23,13 @@ import { Skeleton } from '@/components/ui/skeleton';
 // Helper function to generate a unique key for a date (YYYY-MM-DD)
 const getDateKey = (date: Date): string => format(date, 'yyyy-MM-dd');
 
+// Define an interface for the enriched trailer data including total pieces
+interface EnrichedTrailer extends Trailer {
+  totalPieces: number;
+}
+
 export default function WeeklyCalendarPage() {
-  const { trailers } = useWarehouse();
+  const { trailers, getShipmentsByTrailerId } = useWarehouse(); // Added getShipmentsByTrailerId
   const [isClient, setIsClient] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date()); // Date to determine the current week
 
@@ -42,8 +47,8 @@ export default function WeeklyCalendarPage() {
   }, [currentWeekStart, currentWeekEnd]);
 
   const trailersByArrivalDate = useMemo(() => {
-    const byDay: { [dateKey: string]: Trailer[] } = {};
-    if (!isClient) return byDay; // Ensure trailers are loaded on client
+    const byDay: { [dateKey: string]: EnrichedTrailer[] } = {};
+    if (!isClient || !getShipmentsByTrailerId) return byDay; // Ensure trailers and context functions are loaded on client
 
     trailers.forEach(trailer => {
       if (trailer.arrivalDate) {
@@ -53,14 +58,16 @@ export default function WeeklyCalendarPage() {
           if (!byDay[key]) {
             byDay[key] = [];
           }
-          byDay[key].push(trailer);
+          const shipmentsForTrailer = getShipmentsByTrailerId(trailer.id);
+          const totalPieces = shipmentsForTrailer.reduce((acc, shipment) => acc + shipment.quantity, 0);
+          byDay[key].push({ ...trailer, totalPieces });
         } catch (error) {
-          console.error("Error parsing trailer arrival date:", trailer.arrivalDate, error);
+          console.error("Error processing trailer for calendar:", trailer.id, trailer.arrivalDate, error);
         }
       }
     });
     return byDay;
-  }, [trailers, isClient]);
+  }, [trailers, isClient, getShipmentsByTrailerId]); // Added getShipmentsByTrailerId dependency
 
   const handlePreviousWeek = () => {
     setCurrentDate(prev => subWeeks(prev, 1));
@@ -108,22 +115,26 @@ export default function WeeklyCalendarPage() {
                   <div>{format(day, 'EEE')}</div>
                   <div className={`text-lg sm:text-xl ${isToday(day) ? 'text-primary' : ''}`}>{format(day, 'd')}</div>
                 </div>
-                <div className="p-1.5 sm:p-2 flex-grow space-y-1 overflow-y-auto max-h-[200px] sm:max-h-[250px]">
+                <div className="p-1.5 sm:p-2 flex-grow space-y-1.5 overflow-y-auto max-h-[200px] sm:max-h-[250px]">
                   {isClient && trailersByArrivalDate[getDateKey(day)]?.map(trailer => (
                     <Link href={`/trailers/${trailer.id}`} key={trailer.id} legacyBehavior>
                       <a className="block p-1.5 bg-background hover:bg-secondary rounded-md text-xs sm:text-sm shadow-sm transition-all border border-border hover:border-primary/50">
-                        <p className="font-semibold text-primary truncate" title={trailer.id}>{trailer.id}</p>
-                        {trailer.name && <p className="text-muted-foreground truncate" title={trailer.name}>{trailer.name}</p>}
+                        <p className="font-semibold text-primary truncate" title={`ID: ${trailer.id}`}>ID: {trailer.id}</p>
+                        {trailer.name && <p className="text-muted-foreground truncate" title={`Name: ${trailer.name}`}>Name: {trailer.name}</p>}
+                        <div className="flex items-center text-muted-foreground mt-0.5">
+                           <Package className="h-3.5 w-3.5 mr-1 flex-shrink-0" /> 
+                           <span>Pieces: {trailer.totalPieces}</span>
+                        </div>
                       </a>
                     </Link>
                   ))}
-                  {isClient && !trailersByArrivalDate[getDateKey(day)] && (
+                  {isClient && (!trailersByArrivalDate[getDateKey(day)] || trailersByArrivalDate[getDateKey(day)]?.length === 0) && (
                     <div className="text-xs text-muted-foreground text-center pt-4 italic">No arrivals</div>
                   )}
                   {!isClient && (
                      <div className="space-y-1 p-1.5">
-                       <Skeleton className="h-10 w-full" />
-                       <Skeleton className="h-10 w-full" />
+                       <Skeleton className="h-12 w-full" />
+                       <Skeleton className="h-12 w-full" />
                      </div>
                   )}
                 </div>
@@ -135,3 +146,4 @@ export default function WeeklyCalendarPage() {
     </div>
   );
 }
+

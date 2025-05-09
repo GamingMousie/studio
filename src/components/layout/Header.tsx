@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { ShipShapeLogo } from '@/components/icons/ShipShapeLogo';
+import { Button } from '@/components/ui/button';
+import { Package } from 'lucide-react';
 
 const Header = () => {
   return (
@@ -9,9 +11,14 @@ const Header = () => {
           <ShipShapeLogo className="h-8 w-8" />
           <span>ShipShape</span>
         </Link>
-        <nav>
-          {/* Add navigation links here if needed in the future */}
-          {/* Example: <Link href="/locations" className="text-foreground hover:text-primary transition-colors">Locations</Link> */}
+        <nav className="flex items-center gap-4">
+          <Button variant="ghost" asChild>
+            <Link href="/shipments" className="text-foreground hover:text-primary transition-colors">
+              <Package className="mr-2 h-5 w-5" />
+              All Shipments
+            </Link>
+          </Button>
+          {/* Add more navigation links here if needed in the future */}
         </nav>
       </div>
     </header>
@@ -19,3 +26,4 @@ const Header = () => {
 };
 
 export default Header;
+

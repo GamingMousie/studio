@@ -38,7 +38,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
   const shipments = getShipmentsByTrailerId(trailer.id);
   const shipmentCount = shipments.length;
 
-  const cardContent = (
+  const GridViewContent = () => (
     <>
       <div className="flex items-center justify-between">
         <CardTitle className="text-xl group-hover:text-primary transition-colors">{trailer.name}</CardTitle>
@@ -79,6 +79,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
       </div>
     </>
   );
+
 
   const cardActions = (
     <div className="flex items-center justify-between w-full">
@@ -155,14 +156,16 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
     );
   }
 
+  // Grid View
   return (
     <Card className="group transition-all hover:shadow-lg flex flex-col h-full">
-      <Link href={`/trailers/${trailer.id}`} className="block flex-grow">
+      {/* Make the CardHeader and CardContent part of the link for consistent click behavior */}
+      <Link href={`/trailers/${trailer.id}`} className="block flex-grow flex flex-col">
         <CardHeader className="pb-2">
            <Badge className={`${statusColors[trailer.status]} text-white text-xs px-1.5 py-0.5 self-start`}>{trailer.status}</Badge>
         </CardHeader>
-        <CardContent>
-          {cardContent}
+        <CardContent className="flex-grow">
+          <GridViewContent />
         </CardContent>
       </Link>
       <CardFooter className="pt-4">

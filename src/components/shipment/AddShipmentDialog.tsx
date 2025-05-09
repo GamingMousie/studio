@@ -15,12 +15,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { FileText } from 'lucide-react';
 
 const shipmentSchema = z.object({
   contentDescription: z.string().min(1, 'Content description is required').max(100, 'Description too long'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   destination: z.string().min(1, 'Destination is required').max(50, 'Destination too long'),
   locationName: z.string().optional(),
+  releaseDocument: z.instanceof(FileList).optional(),
+  clearanceDocument: z.instanceof(FileList).optional(),
 });
 
 type ShipmentFormData = z.infer<typeof shipmentSchema>;
@@ -39,7 +42,18 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
   });
 
   const onSubmit: SubmitHandler<ShipmentFormData> = (data) => {
-    addShipment({ ...data, trailerId });
+    const releaseDocumentName = data.releaseDocument?.[0]?.name;
+    const clearanceDocumentName = data.clearanceDocument?.[0]?.name;
+
+    addShipment({ 
+      trailerId,
+      contentDescription: data.contentDescription,
+      quantity: data.quantity,
+      destination: data.destination,
+      locationName: data.locationName,
+      releaseDocumentName,
+      clearanceDocumentName,
+    });
     toast({
       title: "Success!",
       description: `Shipment "${data.contentDescription}" added to trailer ${trailerId}.`,
@@ -80,6 +94,23 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             <Input id="locationName" {...register('locationName')} placeholder="e.g., Bay C2" />
             {errors.locationName && <p className="text-sm text-destructive mt-1">{errors.locationName.message}</p>}
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="releaseDocument" className="flex items-center">
+              <FileText className="mr-2 h-4 w-4 text-muted-foreground" /> Release Document (Optional)
+            </Label>
+            <Input id="releaseDocument" type="file" {...register('releaseDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+            {errors.releaseDocument && <p className="text-sm text-destructive mt-1">{errors.releaseDocument.message}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="clearanceDocument" className="flex items-center">
+              <FileText className="mr-2 h-4 w-4 text-muted-foreground" /> Clearance Document (Optional)
+            </Label>
+            <Input id="clearanceDocument" type="file" {...register('clearanceDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+            {errors.clearanceDocument && <p className="text-sm text-destructive mt-1">{errors.clearanceDocument.message}</p>}
+          </div>
+
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => { setIsOpen(false); reset(); }}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>

@@ -14,4 +14,7 @@ export interface Shipment {
   quantity: number;
   destination: string;
   locationName: string; // Warehouse location name, e.g., "Bay A1", "Shelf 3-C"
+  releaseDocumentName?: string; // Optional: Name of the release document
+  clearanceDocumentName?: string; // Optional: Name of the clearance document
 }
+

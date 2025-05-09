@@ -3,7 +3,7 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical } from 'lucide-react';
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText } from 'lucide-react';
 import AssignLocationDialog from './AssignLocationDialog';
 import {
   DropdownMenu,
@@ -64,6 +64,20 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
               {shipment.locationName}
             </Badge>
           </div>
+          {shipment.releaseDocumentName && (
+            <div className="flex items-center pt-1">
+              <FileText className="mr-1.5 h-4 w-4 text-muted-foreground" />
+              <span className="font-medium text-muted-foreground">Release Doc:</span>
+              <span className="ml-1.5 text-foreground truncate" title={shipment.releaseDocumentName}>{shipment.releaseDocumentName}</span>
+            </div>
+          )}
+          {shipment.clearanceDocumentName && (
+             <div className="flex items-center">
+              <FileText className="mr-1.5 h-4 w-4 text-muted-foreground" />
+              <span className="font-medium text-muted-foreground">Clearance Doc:</span>
+              <span className="ml-1.5 text-foreground truncate" title={shipment.clearanceDocumentName}>{shipment.clearanceDocumentName}</span>
+            </div>
+          )}
         </CardContent>
         <CardFooter className="pt-3">
           <Button variant="outline" size="sm" className="w-full" onClick={() => setIsAssignLocationOpen(true)}>

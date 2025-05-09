@@ -29,13 +29,21 @@ const WarehouseContext = createContext<WarehouseContextType | undefined>(undefin
 const initialTrailers: Trailer[] = [
   { id: 'T-001', name: 'Alpha Transporter', status: 'Docked', company: 'Logistics Inc.', arrivalDate: new Date('2024-07-20T10:00:00Z').toISOString(), storageExpiryDate: new Date('2024-08-20T10:00:00Z').toISOString() },
   { id: 'T-002', name: 'Beta Hauler', status: 'In-Transit', company: 'QuickShip Co.', arrivalDate: new Date('2024-07-22T14:30:00Z').toISOString() },
-  { id: 'T-003', name: 'Gamma Carrier', status: 'Empty' }, // Example without company or dates
+  { id: 'T-003', name: 'Gamma Carrier', status: 'Empty', company: 'Cargo Movers' },
+  { id: 'T-004', name: 'Delta Freighter', status: 'Loading', company: 'Logistics Inc.' },
 ];
 
 const initialShipments: Shipment[] = [
   { id: uuidv4(), trailerId: 'T-001', stsJob: 12345, quantity: 50, exporter: 'City Retail Hub', importer: 'National Importers Ltd.', locationName: 'Bay A1', releaseDocumentName: 'release_electronics_123.pdf', clearanceDocumentName: 'clearance_electronics_123.pdf', released: true, cleared: true, weight: 1200, palletSpace: 4 },
   { id: uuidv4(), trailerId: 'T-001', stsJob: 67890, quantity: 200, exporter: 'Regional Outlet', importer: 'Global Goods Inc.', locationName: 'Shelf B7', released: false, cleared: false, weight: 800, palletSpace: 6 },
   { id: uuidv4(), trailerId: 'T-002', stsJob: 11223, quantity: 10, exporter: 'Factory Zone', importer: 'Cross-Border Traders', locationName: 'Dock 3', releaseDocumentName: 'industrial_release.docx', released: true, cleared: false, weight: 2500, palletSpace: 2 },
+  { id: uuidv4(), trailerId: 'T-003', stsJob: 22334, quantity: 75, exporter: 'Agri Exports', importer: 'FoodStuffs Co.', locationName: 'Cool Storage 1', released: true, cleared: true, weight: 1500, palletSpace: 10 },
+  { id: uuidv4(), trailerId: 'T-003', stsJob: 33445, quantity: 120, exporter: 'Textile Mill', importer: 'Fashion Forward', locationName: 'Section C, Row 2', released: false, cleared: true, weight: 600, palletSpace: 8 },
+  { id: uuidv4(), trailerId: 'T-004', stsJob: 44556, quantity: 30, exporter: 'Heavy Machinery Ltd.', importer: 'BuildIt Supplies', locationName: 'Yard 5', released: true, cleared: false, weight: 5000, palletSpace: 5 },
+  { id: uuidv4(), trailerId: 'T-001', stsJob: 55667, quantity: 90, exporter: 'Pharma Solutions', importer: 'HealthCorp', locationName: 'Bay A2', released: true, cleared: true, weight: 300, palletSpace: 3 },
+  { id: uuidv4(), trailerId: 'T-002', stsJob: 66778, quantity: 150, exporter: 'Auto Parts Global', importer: 'Mechanics United', locationName: 'Pending Assignment', released: false, cleared: false, weight: 1800, palletSpace: 12 },
+  { id: uuidv4(), trailerId: 'T-004', stsJob: 77889, quantity: 25, exporter: 'Fine Wines LLC', importer: 'Luxury Imports', locationName: 'Climate Control Zone', released: true, cleared: true, weight: 400, palletSpace: 2 },
+  { id: uuidv4(), trailerId: 'T-003', stsJob: 88990, quantity: 500, exporter: 'Bulk Goods Co.', importer: 'Warehouse Direct', locationName: 'Section D, Row 10', released: false, cleared: false, weight: 2200, palletSpace: 15 },
 ];
 
 
@@ -165,3 +173,4 @@ export const useWarehouse = (): WarehouseContextType => {
   }
   return context;
 };
+

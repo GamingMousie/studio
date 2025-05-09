@@ -43,9 +43,33 @@ export default function SingleShipmentPage() {
 
   const handleViewDocument = (documentName?: string) => {
     if (documentName) {
-      // In a real app, this would open/download the document.
-      // For now, we can just log it or show an alert.
-      alert(`Viewing document: ${documentName}\n(Functionality to open/download document not yet implemented)`);
+      // Simulate opening the document in a new tab
+      // In a real app, this would be a URL to the document or a download trigger
+      const newWindow = window.open("", "_blank");
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>Viewing Document: ${documentName}</title>
+              <style>
+                body { font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f0f0f0; }
+                .container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+                h1 { color: #333; }
+                p { color: #666; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1>Viewing Document: ${documentName}</h1>
+                <p>(This is a placeholder. In a real application, the document would be displayed here.)</p>
+              </div>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      } else {
+        alert(`Could not open new window to view document: ${documentName}. Please check your popup blocker settings.`);
+      }
     }
   };
 

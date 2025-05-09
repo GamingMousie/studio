@@ -38,18 +38,18 @@ const initialTrailers: Trailer[] = [
 ];
 
 const initialShipments: Shipment[] = [
-  { id: uuidv4(), trailerId: 'T-001', stsJob: 12345, quantity: 50, importer: 'National Importers Ltd.', locationName: 'Bay A1', releaseDocumentName: 'release_electronics_123.pdf', clearanceDocumentName: 'clearance_electronics_123.pdf', released: true, cleared: true, weight: 1200, palletSpace: 4 },
-  { id: uuidv4(), trailerId: 'T-001', stsJob: 67890, quantity: 200, importer: 'Global Goods Inc.', locationName: 'Shelf B7', released: false, cleared: false, weight: 800, palletSpace: 6 },
-  { id: uuidv4(), trailerId: 'T-002', stsJob: 11223, quantity: 10, importer: 'Cross-Border Traders', locationName: 'Dock 3', releaseDocumentName: 'industrial_release.docx', released: true, cleared: false, weight: 2500, palletSpace: 2 },
-  { id: uuidv4(), trailerId: 'T-003', stsJob: 22334, quantity: 75, importer: 'FoodStuffs Co.', locationName: 'Cool Storage 1', released: true, cleared: true, weight: 1500, palletSpace: 10 },
-  { id: uuidv4(), trailerId: 'T-003', stsJob: 33445, quantity: 120, importer: 'Fashion Forward', locationName: 'Section C, Row 2', released: false, cleared: true, weight: 600, palletSpace: 8 },
-  { id: uuidv4(), trailerId: 'T-004', stsJob: 44556, quantity: 30, importer: 'BuildIt Supplies', locationName: 'Yard 5', released: true, cleared: false, weight: 5000, palletSpace: 5 },
-  { id: uuidv4(), trailerId: 'T-001', stsJob: 55667, quantity: 90, importer: 'HealthCorp', locationName: 'Bay A2', released: true, cleared: true, weight: 300, palletSpace: 3 },
-  { id: uuidv4(), trailerId: 'T-002', stsJob: 66778, quantity: 150, importer: 'Mechanics United', locationName: 'Pending Assignment', released: false, cleared: false, weight: 1800, palletSpace: 12 },
-  { id: uuidv4(), trailerId: 'T-004', stsJob: 77889, quantity: 25, importer: 'Luxury Imports', locationName: 'Climate Control Zone', released: true, cleared: true, weight: 400, palletSpace: 2 },
-  { id: uuidv4(), trailerId: 'T-003', stsJob: 88990, quantity: 500, importer: 'Warehouse Direct', locationName: 'Section D, Row 10', released: false, cleared: false, weight: 2200, palletSpace: 15 },
-  { id: uuidv4(), trailerId: 'T-005', stsJob: 99001, quantity: 60, importer: 'Gourmet Foods', locationName: 'Refrigerated Bay 1', released: true, cleared: true, weight: 700, palletSpace: 5 },
-  { id: uuidv4(), trailerId: 'T-006', stsJob: 10101, quantity: 200, importer: 'Constructors Choice', locationName: 'Pending Assignment', released: false, cleared: false, weight: 3000, palletSpace: 20 },
+  { id: uuidv4(), trailerId: 'T-001', stsJob: 12345, quantity: 50, importer: 'National Importers Ltd.', locationName: 'Location 1', releaseDocumentName: 'release_electronics_123.pdf', clearanceDocumentName: 'clearance_electronics_123.pdf', released: true, cleared: true, weight: 1200, palletSpace: 4 },
+  { id: uuidv4(), trailerId: 'T-001', stsJob: 67890, quantity: 200, importer: 'Global Goods Inc.', locationName: 'Location 2', released: false, cleared: false, weight: 800, palletSpace: 6 },
+  { id: uuidv4(), trailerId: 'T-002', stsJob: 11223, quantity: 10, importer: 'Cross-Border Traders', locationName: 'Location 3', releaseDocumentName: 'industrial_release.docx', released: true, cleared: false, weight: 2500, palletSpace: 2 },
+  { id: uuidv4(), trailerId: 'T-003', stsJob: 22334, quantity: 75, importer: 'FoodStuffs Co.', locationName: 'Location 4', released: true, cleared: true, weight: 1500, palletSpace: 10 },
+  { id: uuidv4(), trailerId: 'T-003', stsJob: 33445, quantity: 120, importer: 'Fashion Forward', locationName: 'Location 5', released: false, cleared: true, weight: 600, palletSpace: 8 },
+  { id: uuidv4(), trailerId: 'T-004', stsJob: 44556, quantity: 30, importer: 'BuildIt Supplies', locationName: 'Location 6', released: true, cleared: false, weight: 5000, palletSpace: 5 },
+  { id: uuidv4(), trailerId: 'T-001', stsJob: 55667, quantity: 90, importer: 'HealthCorp', locationName: 'Location 7', released: true, cleared: true, weight: 300, palletSpace: 3 },
+  { id: uuidv4(), trailerId: 'T-002', stsJob: 66778, quantity: 150, importer: 'Mechanics United', locationName: 'Location 8', released: false, cleared: false, weight: 1800, palletSpace: 12 },
+  { id: uuidv4(), trailerId: 'T-004', stsJob: 77889, quantity: 25, importer: 'Luxury Imports', locationName: 'Location 9', released: true, cleared: true, weight: 400, palletSpace: 2 },
+  { id: uuidv4(), trailerId: 'T-003', stsJob: 88990, quantity: 500, importer: 'Warehouse Direct', locationName: 'Location 10', released: false, cleared: false, weight: 2200, palletSpace: 15 },
+  { id: uuidv4(), trailerId: 'T-005', stsJob: 99001, quantity: 60, importer: 'Gourmet Foods', locationName: 'Location 1', released: true, cleared: true, weight: 700, palletSpace: 5 },
+  { id: uuidv4(), trailerId: 'T-006', stsJob: 10101, quantity: 200, importer: 'Constructors Choice', locationName: 'Location 2', released: false, cleared: false, weight: 3000, palletSpace: 20 },
 ];
 
 
@@ -183,3 +183,4 @@ export const useWarehouse = (): WarehouseContextType => {
   }
   return context;
 };
+

@@ -18,4 +18,6 @@ export interface Shipment {
   clearanceDocumentName?: string; // Optional: Name of the clearance document
   released: boolean; // Indicates if the shipment has permission to be released
   cleared: boolean; // Indicates if the shipment is cleared
+  weight?: number; // Optional: Weight of the shipment in kg
+  palletSpace?: number; // Optional: Pallet spaces occupied by the shipment
 }

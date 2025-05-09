@@ -31,7 +31,7 @@ export default function AllShipmentsPage() {
         shipment.id.toLowerCase().includes(searchLower) ||
         shipment.contentDescription.toLowerCase().includes(searchLower) ||
         shipment.destination.toLowerCase().includes(searchLower) ||
-        shipment.locationName.toLowerCase().includes(searchLower);
+        (shipment.locationName && shipment.locationName.toLowerCase().includes(searchLower));
       
       const matchesTrailer = trailerFilter === 'all' || shipment.trailerId === trailerFilter;
       
@@ -52,6 +52,10 @@ export default function AllShipmentsPage() {
               <Skeleton className="h-4 w-1/2" /> {/* ID */}
               <Skeleton className="h-4 w-1/3 mt-1" /> {/* Quantity */}
               <Skeleton className="h-4 w-2/5 mt-1" /> {/* Destination */}
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Skeleton className="h-4 w-3/4" /> {/* Weight */}
+                <Skeleton className="h-4 w-3/4" /> {/* Pallet Space */}
+              </div>
               <div className="flex items-center mt-1">
                 <Skeleton className="h-4 w-4 mr-1" />
                 <Skeleton className="h-4 w-1/4" />
@@ -78,6 +82,10 @@ export default function AllShipmentsPage() {
                   <Skeleton className="h-4 w-20" />
                   <Skeleton className="h-4 w-28" />
                   <Skeleton className="h-5 w-24" />
+                </div>
+                <div className="flex items-center gap-4 text-sm mt-1">
+                  <Skeleton className="h-4 w-24" /> {/* Weight */}
+                  <Skeleton className="h-4 w-24" /> {/* Pallet Space */}
                 </div>
                  <div className="flex items-center mt-1 space-x-2">
                     <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-24" />
@@ -168,4 +176,3 @@ export default function AllShipmentsPage() {
     </div>
   );
 }
-

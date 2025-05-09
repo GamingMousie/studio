@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText } from 'lucide-react';
+import { FileText, Weight, Box } from 'lucide-react';
 
 const shipmentSchema = z.object({
   contentDescription: z.string().min(1, 'Content description is required').max(100, 'Description too long'),
@@ -28,6 +28,8 @@ const shipmentSchema = z.object({
   clearanceDocument: z.any().optional(), // Changed from z.instanceof(FileList)
   released: z.boolean().optional(),
   cleared: z.boolean().optional(),
+  weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
+  palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(),
 });
 
 type ShipmentFormData = z.infer<typeof shipmentSchema>;
@@ -46,6 +48,8 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
     defaultValues: {
       released: false,
       cleared: false,
+      weight: null,
+      palletSpace: null,
     }
   });
 
@@ -64,6 +68,8 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       clearanceDocumentName,
       released: data.released,
       cleared: data.cleared,
+      weight: data.weight ?? undefined,
+      palletSpace: data.palletSpace ?? undefined,
     });
     toast({
       title: "Success!",
@@ -75,14 +81,14 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) reset(); }}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle>Add New Shipment</DialogTitle>
           <DialogDescription>
             Enter details for the new shipment to be added to trailer ID: {trailerId}.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
           <div>
             <Label htmlFor="contentDescription">Content Description</Label>
             <Textarea id="contentDescription" {...register('contentDescription')} placeholder="e.g., Pallet of Widgets" />
@@ -100,6 +106,24 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
               {errors.destination && <p className="text-sm text-destructive mt-1">{errors.destination.message}</p>}
             </div>
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="weight" className="flex items-center">
+                <Weight className="mr-2 h-4 w-4 text-muted-foreground" /> Weight (kg) (Optional)
+              </Label>
+              <Input id="weight" type="number" step="0.1" {...register('weight')} placeholder="e.g., 1250.5" />
+              {errors.weight && <p className="text-sm text-destructive mt-1">{errors.weight.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="palletSpace" className="flex items-center">
+                <Box className="mr-2 h-4 w-4 text-muted-foreground" /> Pallet Spaces (Optional)
+              </Label>
+              <Input id="palletSpace" type="number" {...register('palletSpace')} placeholder="e.g., 4" />
+              {errors.palletSpace && <p className="text-sm text-destructive mt-1">{errors.palletSpace.message}</p>}
+            </div>
+          </div>
+
            <div>
             <Label htmlFor="locationName">Initial Location (Optional)</Label>
             <Input id="locationName" {...register('locationName')} placeholder="e.g., Bay C2" />
@@ -125,7 +149,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="flex items-center space-x-2">
               <Checkbox id="released" {...register('released')} />
-              <Label htmlFor="released" className="font-normal">Mark as Permitted to be Released</Label>
+              <Label htmlFor="released" className="font-normal">Permitted to be Released</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="cleared" {...register('cleared')} />
@@ -134,7 +158,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
           </div>
 
 
-          <DialogFooter>
+          <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={() => { setIsOpen(false); reset(); }}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Adding...' : 'Add Shipment'}

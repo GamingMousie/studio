@@ -89,3 +89,35 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .printable-area {
+    margin: 0 !important;
+    padding: 1em !important; /* Adjust padding for print layout */
+    border: none !important;
+    box-shadow: none !important;
+    width: 100% !important; /* Ensure it takes full width of print page */
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+   .printable-area .no-print-in-area {
+      display: none !important;
+  }
+  body {
+    background-color: #fff !important; 
+    -webkit-print-color-adjust: exact; /* Ensures background colors and images are printed in Chrome/Safari */
+    print-color-adjust: exact; /* Standard property */
+  }
+  /* Ensure card content is visible correctly */
+   .printable-area .card-content-print {
+    padding-top: 1.5rem !important; /* Replicate CardContent pt-6 */
+  }
+  /* Hide scrollbars during print if any part of printable area might scroll */
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}

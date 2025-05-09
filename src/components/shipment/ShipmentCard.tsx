@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import Link from 'next/link'; // Import Link
 import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, C
 import AssignLocationDialog from './AssignLocationDialog';
 import EditShipmentDialog from './EditShipmentDialog';
 import AttachDocumentDialog from './AttachDocumentDialog'; 
-import ConfirmationDialog from '@/components/shared/ConfirmationDialog'; // Import ConfirmationDialog
+import ConfirmationDialog from '@/components/shared/ConfirmationDialog';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import {
   DropdownMenu,
@@ -34,7 +35,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
   const [isEditShipmentOpen, setIsEditShipmentOpen] = useState(false);
   const [isAttachDocumentOpen, setIsAttachDocumentOpen] = useState(false);
   const [attachDocumentType, setAttachDocumentType] = useState<'release' | 'clearance' | null>(null);
-  const [isShipmentDeleteDialogOpen, setIsShipmentDeleteDialogOpen] = useState(false); // State for delete confirmation
+  const [isShipmentDeleteDialogOpen, setIsShipmentDeleteDialogOpen] = useState(false); 
 
   const shipmentIdentifier = `STS Job: ${shipment.stsJob}`;
 
@@ -43,8 +44,8 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
       setAttachDocumentType('release');
       setIsAttachDocumentOpen(true);
     } else { 
-      updateShipment(shipment.id, { released: false });
-      toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not permitted to be released.` });
+      updateShipment(shipment.id, { released: false, releaseDocumentName: undefined }); // Clear document name if un-permitting
+      toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not permitted. Release document removed.` });
     }
   };
 
@@ -53,8 +54,8 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
       setAttachDocumentType('clearance');
       setIsAttachDocumentOpen(true);
     } else { 
-      updateShipment(shipment.id, { cleared: false });
-      toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not cleared.` });
+      updateShipment(shipment.id, { cleared: false, clearanceDocumentName: undefined }); // Clear document name if un-clearing
+      toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not cleared. Clearance document removed.` });
     }
   };
 
@@ -77,9 +78,11 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
       <Card className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow duration-200">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-lg flex items-center">
-              <Package className="mr-2 h-5 w-5 text-primary" />
-              STS Job: {shipment.stsJob}
+            <CardTitle className="text-lg">
+              <Link href={`/shipments/${shipment.id}`} className="hover:underline text-primary flex items-center group">
+                <Package className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
+                STS Job: {shipment.stsJob}
+              </Link>
             </CardTitle>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -89,6 +92,11 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                   <Link href={`/shipments/${shipment.id}`} className="flex items-center w-full">
+                     <Package className="mr-2 h-4 w-4" /> View Details
+                   </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setIsEditShipmentOpen(true)}>
                   <Pencil className="mr-2 h-4 w-4" />
@@ -100,11 +108,11 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleMarkAsPermitted}>
                   {shipment.released ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
-                  {shipment.released ? 'Mark as Not Permitted' : 'Mark as Permitted (Attach Doc)'}
+                  {shipment.released ? 'Mark as Not Permitted' : 'Permit (Attach Doc)'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleMarkAsCleared}>
                    {shipment.cleared ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
-                  {shipment.cleared ? 'Mark as Not Cleared' : 'Mark as Cleared (Attach Doc)'}
+                  {shipment.cleared ? 'Mark as Not Cleared' : 'Clear (Attach Doc)'}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setIsShipmentDeleteDialogOpen(true)} className="text-destructive focus:text-destructive focus:bg-destructive/10">

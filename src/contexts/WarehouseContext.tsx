@@ -1,3 +1,4 @@
+
 // @ts-nocheck
 'use client';
 
@@ -19,6 +20,7 @@ interface WarehouseContextType {
   updateShipmentLocation: (shipmentId: string, locationName: string) => void;
   deleteShipment: (shipmentId: string) => void;
   getTrailerById: (trailerId: string) => Trailer | undefined;
+  getShipmentById: (shipmentId: string) => Shipment | undefined; // Added this
   updateShipmentReleasedStatus: (shipmentId: string, released: boolean) => void;
   updateShipmentClearedStatus: (shipmentId: string, cleared: boolean) => void;
   updateShipment: (shipmentId: string, data: ShipmentUpdateData) => void;
@@ -146,6 +148,10 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
     return trailers.find(t => t.id === trailerId);
   }, [trailers]);
 
+  const getShipmentById = useCallback((shipmentId: string) => { // Added this function
+    return shipments.find(s => s.id === shipmentId);
+  }, [shipments]);
+
   return (
     <WarehouseContext.Provider
       value={{
@@ -161,6 +167,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
         updateShipment,
         deleteShipment,
         getTrailerById,
+        getShipmentById, // Exported here
         updateShipmentReleasedStatus,
         updateShipmentClearedStatus,
       }}

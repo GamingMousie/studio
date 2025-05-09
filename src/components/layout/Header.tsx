@@ -6,7 +6,7 @@ import { Package, CalendarDays, Truck } from 'lucide-react'; // Added Truck
 
 const Header = () => {
   return (
-    <header className="bg-card border-b border-border shadow-sm">
+    <header className="bg-card border-b border-border shadow-sm no-print">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
           <ShipShapeLogo className="h-8 w-8" />

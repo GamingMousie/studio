@@ -3,7 +3,7 @@ import type { Trailer, TrailerStatus } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Package, Edit, Trash2, MoreVertical, ChevronRight } from 'lucide-react';
+import { Truck, Package, Edit, Trash2, MoreVertical, ChevronRight, Briefcase } from 'lucide-react';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import {
   DropdownMenu,
@@ -45,6 +45,12 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
         <Truck className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors" />
       </div>
       <CardDescription>ID: {trailer.id}</CardDescription>
+      {trailer.company && (
+        <div className="mt-1 flex items-center text-xs text-muted-foreground">
+          <Briefcase className="mr-1.5 h-3.5 w-3.5" /> 
+          <span>{trailer.company}</span>
+        </div>
+      )}
       
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between text-sm">
@@ -111,6 +117,12 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
             <Link href={`/trailers/${trailer.id}`} className="block">
               <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">{trailer.name}</h3>
               <p className="text-sm text-muted-foreground">ID: {trailer.id}</p>
+              {trailer.company && (
+                <div className="mt-1 flex items-center text-xs text-muted-foreground">
+                  <Briefcase className="mr-1.5 h-3 w-3" />
+                  <span>{trailer.company}</span>
+                </div>
+              )}
             </Link>
             <div className="mt-2 flex items-center gap-4 text-sm">
               <div className="flex items-center">

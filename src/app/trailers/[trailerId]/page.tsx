@@ -8,7 +8,7 @@ import ShipmentCard from '@/components/shipment/ShipmentCard';
 import AddShipmentDialog from '@/components/shipment/AddShipmentDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, Package, Truck } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Package, Truck, Briefcase } from 'lucide-react';
 import Link from 'next/link';
 
 export default function TrailerShipmentsPage() {
@@ -58,11 +58,19 @@ export default function TrailerShipmentsPage() {
 
       <Card className="shadow-lg">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <Truck className="h-10 w-10 text-primary" />
+          <div className="flex items-start gap-4">
+            <Truck className="h-12 w-12 text-primary mt-1" />
             <div>
               <CardTitle className="text-3xl">{trailer.name}</CardTitle>
-              <CardDescription>ID: {trailer.id} | Status: <span className="font-semibold">{trailer.status}</span></CardDescription>
+              <CardDescription>
+                ID: {trailer.id} | Status: <span className="font-semibold">{trailer.status}</span>
+              </CardDescription>
+              {trailer.company && (
+                <CardDescription className="mt-1 flex items-center">
+                  <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Company: <span className="font-semibold ml-1">{trailer.company}</span>
+                </CardDescription>
+              )}
             </div>
           </div>
         </CardHeader>

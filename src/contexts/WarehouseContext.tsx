@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid'; // Using uuid for unique shipment IDs
 
 interface WarehouseContextType {
   trailers: Trailer[];
-  addTrailer: (trailer: Omit<Trailer, 'status'> & { status?: TrailerStatus }) => void;
+  addTrailer: (trailer: Omit<Trailer, 'status'> & { status?: TrailerStatus; company?: string }) => void;
   updateTrailerStatus: (trailerId: string, status: TrailerStatus) => void;
   deleteTrailer: (trailerId: string) => void;
   shipments: Shipment[];
@@ -22,13 +22,15 @@ interface WarehouseContextType {
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
 
 const initialTrailers: Trailer[] = [
-  { id: 'T-001', name: 'Alpha Transporter', status: 'Docked' },
-  { id: 'T-002', name: 'Beta Hauler', status: 'In-Transit' },
+  { id: 'T-001', name: 'Alpha Transporter', status: 'Docked', company: 'Logistics Inc.' },
+  { id: 'T-002', name: 'Beta Hauler', status: 'In-Transit', company: 'QuickShip Co.' },
+  { id: 'T-003', name: 'Gamma Carrier', status: 'Empty' }, // Example without company
 ];
 
 const initialShipments: Shipment[] = [
   { id: uuidv4(), trailerId: 'T-001', contentDescription: 'Electronics Batch #123', quantity: 50, destination: 'City Retail Hub', locationName: 'Bay A1' },
   { id: uuidv4(), trailerId: 'T-001', contentDescription: 'Apparel Stock Lot', quantity: 200, destination: 'Regional Outlet', locationName: 'Shelf B7' },
+  { id: uuidv4(), trailerId: 'T-002', contentDescription: 'Industrial Parts', quantity: 10, destination: 'Factory Zone', locationName: 'Dock 3' },
 ];
 
 
@@ -36,8 +38,12 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   const [trailers, setTrailers] = useLocalStorageState<Trailer[]>('trailers', initialTrailers);
   const [shipments, setShipments] = useLocalStorageState<Shipment[]>('shipments', initialShipments);
 
-  const addTrailer = useCallback((trailerData: Omit<Trailer, 'status'> & { status?: TrailerStatus }) => {
-    const newTrailer: Trailer = { ...trailerData, status: trailerData.status || 'Empty' };
+  const addTrailer = useCallback((trailerData: Omit<Trailer, 'status'> & { status?: TrailerStatus; company?: string }) => {
+    const newTrailer: Trailer = { 
+      ...trailerData, 
+      status: trailerData.status || 'Empty',
+      company: trailerData.company || undefined // Ensure company is handled, defaults to undefined if not provided
+    };
     setTrailers((prev) => [...prev, newTrailer]);
   }, [setTrailers]);
 

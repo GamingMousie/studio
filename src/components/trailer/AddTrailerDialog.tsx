@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 const trailerSchema = z.object({
   id: z.string().min(1, 'Trailer ID is required').max(20, 'Trailer ID too long'),
   name: z.string().min(1, 'Trailer Name is required').max(50, 'Trailer Name too long'),
+  company: z.string().max(50, 'Company name too long').optional(),
   status: z.enum(['Docked', 'In-Transit', 'Empty', 'Loading', 'Unloading']).default('Empty'),
 });
 
@@ -40,6 +41,7 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
     resolver: zodResolver(trailerSchema),
     defaultValues: {
       status: 'Empty',
+      company: '',
     }
   });
   
@@ -69,7 +71,7 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) reset(); }}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add New Trailer</DialogTitle>
@@ -87,6 +89,11 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
             <Label htmlFor="name">Trailer Name</Label>
             <Input id="name" {...register('name')} placeholder="e.g., Main Hauler" />
             {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
+          </div>
+          <div>
+            <Label htmlFor="company">Company (Optional)</Label>
+            <Input id="company" {...register('company')} placeholder="e.g., Logistics Inc." />
+            {errors.company && <p className="text-sm text-destructive mt-1">{errors.company.message}</p>}
           </div>
            <div>
             <Label htmlFor="status">Initial Status</Label>
@@ -106,7 +113,7 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
             {errors.status && <p className="text-sm text-destructive mt-1">{errors.status.message}</p>}
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+            <Button type="button" variant="outline" onClick={() => { setIsOpen(false); reset(); }}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Adding...' : 'Add Trailer'}
             </Button>

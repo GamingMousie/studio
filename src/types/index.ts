@@ -4,6 +4,7 @@ export interface Trailer {
   id: string; // User-defined unique ID
   name: string; // Optional descriptive name
   status: TrailerStatus;
+  company?: string; // Optional: Company associated with the trailer
 }
 
 export interface Shipment {

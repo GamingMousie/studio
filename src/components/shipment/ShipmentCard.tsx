@@ -3,8 +3,9 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box } from 'lucide-react';
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil } from 'lucide-react';
 import AssignLocationDialog from './AssignLocationDialog';
+import EditShipmentDialog from './EditShipmentDialog'; // Import the new dialog
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,9 +25,10 @@ interface ShipmentCardProps {
 
 export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onToggleReleased, onToggleCleared }: ShipmentCardProps) {
   const [isAssignLocationOpen, setIsAssignLocationOpen] = useState(false);
+  const [isEditShipmentOpen, setIsEditShipmentOpen] = useState(false); // State for edit dialog
 
   const handleToggleReleased = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click or other parent events
+    e.stopPropagation(); 
     onToggleReleased();
   };
 
@@ -58,13 +60,17 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setIsEditShipmentOpen(true)}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit Shipment Details
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsAssignLocationOpen(true)}>
                   <Edit3 className="mr-2 h-4 w-4" />
                   Assign/Edit Location
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleToggleReleased}>
                   {shipment.released ? <CircleOff className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />}
-                  {shipment.released ? 'Mark as Not Permitted to be Released' : 'Mark as Permitted to be Released'}
+                  {shipment.released ? 'Mark as Not Permitted' : 'Mark as Permitted to be Released'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleToggleCleared}>
                   {shipment.cleared ? <CircleOff className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />}
@@ -136,10 +142,11 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
         </CardContent>
         <CardFooter className="pt-3">
           <Button variant="outline" size="sm" className="w-full" onClick={() => setIsAssignLocationOpen(true)}>
-            <Edit3 className="mr-2 h-4 w-4" /> Assign Location
+            <Edit3 className="mr-2 h-4 w-4" /> Assign/Update Location
           </Button>
         </CardFooter>
       </Card>
+
       <AssignLocationDialog
         isOpen={isAssignLocationOpen}
         setIsOpen={setIsAssignLocationOpen}
@@ -147,6 +154,19 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
         onSubmit={onUpdateLocation}
         shipmentContent={shipment.contentDescription}
       />
+
+      {/* Conditionally render EditShipmentDialog */}
+      {shipmentToEdit && (
+        <EditShipmentDialog
+          isOpen={isEditShipmentOpen}
+          setIsOpen={setIsEditShipmentOpen}
+          shipmentToEdit={shipment}
+        />
+      )}
     </>
   );
 }
+
+// Helper prop to ensure shipment is always available when dialog is open (though ShipmentCard already ensures shipment exists)
+// For this pattern, we pass the specific shipment directly
+const shipmentToEdit = shipment; 

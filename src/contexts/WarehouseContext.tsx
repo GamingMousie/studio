@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useCallback } from 'react';
-import type { Trailer, Shipment, TrailerStatus } from '@/types';
+import type { Trailer, Shipment, TrailerStatus, ShipmentUpdateData } from '@/types';
 import useLocalStorageState from '@/hooks/useLocalStorageState';
 import { v4 as uuidv4 } from 'uuid'; // Using uuid for unique shipment IDs
 
@@ -20,6 +20,7 @@ interface WarehouseContextType {
   getTrailerById: (trailerId: string) => Trailer | undefined;
   updateShipmentReleasedStatus: (shipmentId: string, released: boolean) => void;
   updateShipmentClearedStatus: (shipmentId: string, cleared: boolean) => void;
+  updateShipment: (shipmentId: string, data: ShipmentUpdateData) => void;
 }
 
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
@@ -89,13 +90,26 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
 
   const updateShipmentReleasedStatus = useCallback((shipmentId: string, released: boolean) => {
     setShipments((prev) =>
-      prev.map((s) => (s.id === shipmentId ? { ...s, released } : s)) // Fixed: changed 't' to 's'
+      prev.map((s) => (s.id === shipmentId ? { ...s, released } : s)) 
     );
   }, [setShipments]);
 
   const updateShipmentClearedStatus = useCallback((shipmentId: string, cleared: boolean) => {
     setShipments((prev) =>
-      prev.map((s) => (s.id === shipmentId ? { ...s, cleared } : s)) // Fixed: changed 't' to 's'
+      prev.map((s) => (s.id === shipmentId ? { ...s, cleared } : s)) 
+    );
+  }, [setShipments]);
+
+  const updateShipment = useCallback((shipmentId: string, data: ShipmentUpdateData) => {
+    setShipments(prev =>
+      prev.map(s =>
+        s.id === shipmentId
+          ? {
+              ...s, // keep existing fields like trailerId, id
+              ...data, // apply all updated data
+            }
+          : s
+      )
     );
   }, [setShipments]);
 
@@ -118,6 +132,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
         getShipmentsByTrailerId,
         addShipment,
         updateShipmentLocation,
+        updateShipment,
         deleteShipment,
         getTrailerById,
         updateShipmentReleasedStatus,

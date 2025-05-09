@@ -21,3 +21,33 @@ export interface Shipment {
   weight?: number; // Optional: Weight of the shipment in kg
   palletSpace?: number; // Optional: Pallet spaces occupied by the shipment
 }
+
+// Used for the form data when creating or updating a shipment
+export interface ShipmentFormData {
+  contentDescription: string;
+  quantity: number;
+  exporter: string;
+  locationName?: string;
+  // FileList for new files, string for existing file names (when editing and not changing)
+  // However, for context update, we'll pass resolved file names.
+  releaseDocument?: FileList | File | null; 
+  clearanceDocument?: FileList | File | null;
+  released?: boolean;
+  cleared?: boolean;
+  weight?: number | null;
+  palletSpace?: number | null;
+}
+
+// Specifically for updating an existing shipment via context
+export interface ShipmentUpdateData {
+  contentDescription: string;
+  quantity: number;
+  exporter: string;
+  locationName: string; // Keep it non-optional for updates; use current if not changed
+  releaseDocumentName?: string;
+  clearanceDocumentName?: string;
+  released: boolean;
+  cleared: boolean;
+  weight?: number;
+  palletSpace?: number;
+}

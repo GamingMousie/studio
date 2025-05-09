@@ -49,7 +49,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onToggleReleased}>
                   {shipment.released ? <CircleOff className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />}
-                  {shipment.released ? 'Mark as Not Released' : 'Mark as Released'}
+                  {shipment.released ? 'Mark as Not Permitted to be Released' : 'Mark as Permitted to be Released'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onToggleCleared}>
                   {shipment.cleared ? <CircleOff className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />}
@@ -78,7 +78,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
 
           <div className="flex items-center pt-1">
             {shipment.released ? <CheckCircle2 className="mr-1.5 h-4 w-4 text-green-600" /> : <CircleOff className="mr-1.5 h-4 w-4 text-muted-foreground" />}
-            <span className="font-medium text-muted-foreground">Released:</span>
+            <span className="font-medium text-muted-foreground">Permitted to be Released:</span>
             <span className="ml-1.5 font-semibold">{shipment.released ? 'Yes' : 'No'}</span>
           </div>
           <div className="flex items-center">
@@ -118,4 +118,3 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
     </>
   );
 }
-

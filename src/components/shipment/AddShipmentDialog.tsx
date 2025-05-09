@@ -125,7 +125,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="flex items-center space-x-2">
               <Checkbox id="released" {...register('released')} />
-              <Label htmlFor="released" className="font-normal">Mark as Released</Label>
+              <Label htmlFor="released" className="font-normal">Mark as Permitted to be Released</Label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="cleared" {...register('cleared')} />
@@ -145,4 +145,3 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
     </Dialog>
   );
 }
-

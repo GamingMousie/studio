@@ -70,3 +70,5 @@ export interface TrailerFormData {
   arrivalDate?: Date | null; 
   storageExpiryDate?: Date | null; 
 }
+
+```

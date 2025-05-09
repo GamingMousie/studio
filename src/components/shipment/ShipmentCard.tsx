@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash } from 'lucide-react'; 
-import AssignLocationDialog from './AssignLocationDialog';
+import ManageLocationsDialog from './ManageLocationsDialog'; // Changed from AssignLocationDialog
 import EditShipmentDialog from './EditShipmentDialog';
 import AttachDocumentDialog from './AttachDocumentDialog'; 
 import ConfirmationDialog from '@/components/shared/ConfirmationDialog';
@@ -24,15 +24,13 @@ import { useToast } from '@/hooks/use-toast';
 interface ShipmentCardProps {
   shipment: Shipment;
   onDelete: () => void; 
-  // onUpdateLocation is now effectively onAddLocation
-  onUpdateLocation: (newLocation: string) => void; 
 }
 
-export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: ShipmentCardProps) {
-  const { updateShipment, addShipmentLocation } = useWarehouse(); // addShipmentLocation from context
+export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) {
+  const { updateShipment } = useWarehouse();
   const { toast } = useToast();
 
-  const [isAssignLocationOpen, setIsAssignLocationOpen] = useState(false);
+  const [isManageLocationsOpen, setIsManageLocationsOpen] = useState(false); // Renamed state
   const [isEditShipmentOpen, setIsEditShipmentOpen] = useState(false);
   const [isAttachDocumentOpen, setIsAttachDocumentOpen] = useState(false);
   const [attachDocumentType, setAttachDocumentType] = useState<'release' | 'clearance' | null>(null);
@@ -72,11 +70,6 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
     }
     setIsAttachDocumentOpen(false); 
   };
-
-  const handleAddLocation = (newLocation: string) => {
-    addShipmentLocation(shipment.id, newLocation);
-    // Toast is handled by AssignLocationDialog now with more context
-  };
   
 
   return (
@@ -108,9 +101,9 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit Shipment Details
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsAssignLocationOpen(true)}>
-                  <Edit3 className="mr-2 h-4 w-4" />
-                  Add Location
+                 <DropdownMenuItem onClick={() => setIsManageLocationsOpen(true)}>
+                  <MapPin className="mr-2 h-4 w-4" />
+                  Manage Locations
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleMarkAsPermitted}>
                   {shipment.released ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
@@ -198,19 +191,19 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
           )}
         </CardContent>
         <CardFooter className="pt-3">
-          <Button variant="outline" size="sm" className="w-full" onClick={() => setIsAssignLocationOpen(true)}>
-            <MapPin className="mr-2 h-4 w-4" /> Add Location
+          <Button variant="outline" size="sm" className="w-full" onClick={() => setIsManageLocationsOpen(true)}>
+            <MapPin className="mr-2 h-4 w-4" /> Manage Locations
           </Button>
         </CardFooter>
       </Card>
 
-      <AssignLocationDialog
-        isOpen={isAssignLocationOpen}
-        setIsOpen={setIsAssignLocationOpen}
-        currentLocationsDisplay={(shipment.locationNames || []).join(', ')}
-        onSubmit={handleAddLocation} // This will now add to the list via context
-        shipmentIdentifier={shipmentIdentifier}
-      />
+      {isManageLocationsOpen && (
+        <ManageLocationsDialog
+          isOpen={isManageLocationsOpen}
+          setIsOpen={setIsManageLocationsOpen}
+          shipmentToManage={shipment}
+        />
+      )}
 
       {isEditShipmentOpen && (
         <EditShipmentDialog
@@ -245,3 +238,5 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
     </>
   );
 }
+
+```

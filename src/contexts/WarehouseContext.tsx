@@ -17,7 +17,6 @@ interface WarehouseContextType {
   shipments: Shipment[];
   getShipmentsByTrailerId: (trailerId: string) => Shipment[];
   addShipment: (shipment: Omit<Shipment, 'id' | 'locationNames' | 'released' | 'cleared' | 'importer' | 'stsJob'> & { stsJob: number; importer: string; initialLocationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?: boolean, cleared?: boolean, weight?: number, palletSpace?: number }) => void;
-  addShipmentLocation: (shipmentId: string, newLocationName: string) => void; // Renamed from updateShipmentLocation
   deleteShipment: (shipmentId: string) => void;
   getTrailerById: (trailerId: string) => Trailer | undefined;
   getShipmentById: (shipmentId: string) => Shipment | undefined;
@@ -108,26 +107,6 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
     setShipments((prev) => [...prev, newShipment]);
   }, [setShipments]);
 
-  const addShipmentLocation = useCallback((shipmentId: string, newLocationName: string) => {
-    setShipments((prev) =>
-      prev.map((s) => {
-        if (s.id === shipmentId) {
-          const newLocationNames = Array.isArray(s.locationNames) ? [...s.locationNames] : [];
-          // Remove "Pending Assignment" if it exists and we're adding a real location
-          const pendingIndex = newLocationNames.indexOf('Pending Assignment');
-          if (pendingIndex !== -1) {
-            newLocationNames.splice(pendingIndex, 1);
-          }
-          if (newLocationName && !newLocationNames.includes(newLocationName)) {
-            newLocationNames.push(newLocationName);
-          }
-          return { ...s, locationNames: newLocationNames.length > 0 ? newLocationNames : ['Pending Assignment'] };
-        }
-        return s;
-      })
-    );
-  }, [setShipments]);
-
   const updateShipmentReleasedStatus = useCallback((shipmentId: string, released: boolean) => {
     setShipments((prev) =>
       prev.map((s) => (s.id === shipmentId ? { ...s, released } : s)) 
@@ -147,6 +126,12 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
           ? {
               ...s, 
               ...data, 
+              // Ensure locationNames is always an array, default to ['Pending Assignment'] if empty or only contains it
+              locationNames: (data.locationNames && data.locationNames.length > 0 && !(data.locationNames.length === 1 && data.locationNames[0] === 'Pending Assignment')) 
+                                ? data.locationNames 
+                                : (s.locationNames && s.locationNames.length > 0 && !(s.locationNames.length === 1 && s.locationNames[0] === 'Pending Assignment') 
+                                    ? s.locationNames 
+                                    : ['Pending Assignment']),
             }
           : s
       )
@@ -176,7 +161,6 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
         shipments,
         getShipmentsByTrailerId,
         addShipment,
-        addShipmentLocation, // Updated
         updateShipment,
         deleteShipment,
         getTrailerById,

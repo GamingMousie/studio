@@ -14,7 +14,7 @@ import type { Shipment } from '@/types';
 import { Badge } from '@/components/ui/badge';
 
 export default function AllShipmentsPage() {
-  const { shipments, trailers, deleteShipment, addShipmentLocation } = useWarehouse(); // Use addShipmentLocation
+  const { shipments, trailers, deleteShipment } = useWarehouse(); 
   const [isClient, setIsClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [trailerFilter, setTrailerFilter] = useState<string | 'all'>('all');
@@ -31,7 +31,7 @@ export default function AllShipmentsPage() {
         shipment.id.toLowerCase().includes(searchLower) ||
         shipment.stsJob.toString().toLowerCase().includes(searchLower) || 
         shipment.importer.toLowerCase().includes(searchLower) || 
-        (shipment.locationNames && shipment.locationNames.some(loc => loc.toLowerCase().includes(searchLower))); // Search in locationNames array
+        (shipment.locationNames && shipment.locationNames.some(loc => loc.toLowerCase().includes(searchLower))); 
       
       const matchesTrailer = trailerFilter === 'all' || shipment.trailerId === trailerFilter;
       
@@ -69,7 +69,7 @@ export default function AllShipmentsPage() {
               </div>
             </CardContent>
             <div className="p-4 pt-0 border-t mt-auto">
-              <Skeleton className="h-9 w-full" /> {/* Assign Location Button */}
+              <Skeleton className="h-9 w-full" /> {/* Manage Locations Button */}
             </div>
           </Card>
         ) : (
@@ -166,7 +166,6 @@ export default function AllShipmentsPage() {
               key={shipment.id} 
               shipment={shipment} 
               onDelete={() => deleteShipment(shipment.id)}
-              onUpdateLocation={(newLocation) => addShipmentLocation(shipment.id, newLocation)} // Use addShipmentLocation
             />
           ))}
         </div>
@@ -174,3 +173,5 @@ export default function AllShipmentsPage() {
     </div>
   );
 }
+
+```

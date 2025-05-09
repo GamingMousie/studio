@@ -22,7 +22,6 @@ export default function TrailerShipmentsPage() {
     getTrailerById,
     getShipmentsByTrailerId,
     deleteShipment,
-    addShipmentLocation, // Changed from updateShipmentLocation
   } = useWarehouse();
 
   const [trailer, setTrailer] = useState<Trailer | null>(null);
@@ -153,7 +152,6 @@ export default function TrailerShipmentsPage() {
                   key={shipment.id}
                   shipment={shipment}
                   onDelete={() => deleteShipment(shipment.id)}
-                  onUpdateLocation={(newLocation) => addShipmentLocation(shipment.id, newLocation)} // Use addShipmentLocation
                 />
               ))}
             </div>
@@ -169,3 +167,5 @@ export default function TrailerShipmentsPage() {
     </div>
   );
 }
+
+```

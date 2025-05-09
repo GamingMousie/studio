@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Trailer, TrailerStatus } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,8 +16,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import EditTrailerDialog from './EditTrailerDialog'; 
-import ConfirmationDialog from '@/components/shared/ConfirmationDialog'; // Import ConfirmationDialog
+import ConfirmationDialog from '@/components/shared/ConfirmationDialog';
 import { format, parseISO } from 'date-fns';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 interface TrailerCardProps {
@@ -40,11 +40,25 @@ const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloa
 
 export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChange }: TrailerCardProps) {
   const { getShipmentsByTrailerId } = useWarehouse();
-  const shipments = getShipmentsByTrailerId(trailer.id);
-  const shipmentCount = shipments.length;
-  const totalPieces = shipments.reduce((acc, shipment) => acc + shipment.quantity, 0);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  const [shipments, setShipments] = useState(() => getShipmentsByTrailerId(trailer.id));
+  const [shipmentCount, setShipmentCount] = useState(shipments.length);
+  const [totalPieces, setTotalPieces] = useState(() => shipments.reduce((acc, shipment) => acc + shipment.quantity, 0));
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); 
+
+  useEffect(() => {
+    setIsMounted(true);
+    // Recalculate shipments and counts on mount and when trailer or context data might change
+    // This ensures client-side data is used after initial mount
+    const currentShipments = getShipmentsByTrailerId(trailer.id);
+    setShipments(currentShipments);
+    setShipmentCount(currentShipments.length);
+    setTotalPieces(currentShipments.reduce((acc, s) => acc + s.quantity, 0));
+  }, [trailer.id, getShipmentsByTrailerId]);
+
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -75,21 +89,28 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
         <Truck className="h-7 w-7 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
       </div>
 
-      {trailer.arrivalDate && (
+      {isMounted && trailer.arrivalDate && (
         <div className="flex items-center text-sm text-foreground mt-0.5 mb-2 font-semibold">
           <CalendarDays className="mr-1.5 h-4 w-4 text-primary" />
           <span>Arrived: {formatDate(trailer.arrivalDate)}</span>
         </div>
       )}
+      {!isMounted && trailer.arrivalDate && <Skeleton className="h-4 w-3/4 mt-1 mb-2" /> }
 
-      {trailer.name && <CardDescription className="text-xs text-muted-foreground mb-0.5">Name: {trailer.name}</CardDescription>}
-      {trailer.company && (
+
+      {isMounted && trailer.name && <CardDescription className="text-xs text-muted-foreground mb-0.5">Name: {trailer.name}</CardDescription>}
+      {!isMounted && trailer.name && <Skeleton className="h-3 w-1/2 mb-0.5" />}
+
+      {isMounted && trailer.company && (
         <div className="flex items-center text-xs text-muted-foreground">
           <Briefcase className="mr-1.5 h-3.5 w-3.5" />
           <span>{trailer.company}</span>
         </div>
       )}
-      <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />
+      {!isMounted && trailer.company && <Skeleton className="h-3 w-2/3" />}
+      
+      {isMounted && <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />}
+      {!isMounted && trailer.storageExpiryDate && <Skeleton className="h-3 w-1/2 mt-1" />}
       
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between text-sm">
@@ -110,17 +131,21 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Shipments:</span>
-          <div className="flex items-center">
-            <Package className="h-4 w-4 mr-1 text-muted-foreground" />
-            <span>{shipmentCount}</span>
-          </div>
+          {isMounted ? (
+            <div className="flex items-center">
+              <Package className="h-4 w-4 mr-1 text-muted-foreground" />
+              <span>{shipmentCount}</span>
+            </div>
+          ) : <Skeleton className="h-4 w-10" />}
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Total Pieces:</span>
-          <div className="flex items-center">
-            <Boxes className="h-4 w-4 mr-1 text-muted-foreground" />
-            <span>{totalPieces}</span>
-          </div>
+          {isMounted ? (
+            <div className="flex items-center">
+              <Boxes className="h-4 w-4 mr-1 text-muted-foreground" />
+              <span>{totalPieces}</span>
+            </div>
+          ): <Skeleton className="h-4 w-10" />}
         </div>
       </div>
     </>
@@ -166,20 +191,27 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
                 <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
                   ID: {trailer.id}
                 </h3>
-                {trailer.arrivalDate && (
+                {isMounted && trailer.arrivalDate && (
                   <div className="flex items-center text-sm text-foreground mt-0.5 font-semibold">
                     <CalendarDays className="mr-1.5 h-4 w-4 text-primary" />
                     <span>Arrived: {formatDate(trailer.arrivalDate)}</span>
                   </div>
                 )}
-                {trailer.name && <p className="text-xs text-muted-foreground mt-0.5">Name: {trailer.name}</p>}
-                {trailer.company && (
+                {!isMounted && trailer.arrivalDate && <Skeleton className="h-4 w-3/4 mt-0.5 mb-1" />}
+
+                {isMounted && trailer.name && <p className="text-xs text-muted-foreground mt-0.5">Name: {trailer.name}</p>}
+                {!isMounted && trailer.name && <Skeleton className="h-3 w-1/2 mt-0.5" />}
+
+                {isMounted && trailer.company && (
                   <div className="mt-1 flex items-center text-xs text-muted-foreground">
                     <Briefcase className="mr-1.5 h-3 w-3" />
                     <span>{trailer.company}</span>
                   </div>
                 )}
-                <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />
+                {!isMounted && trailer.company && <Skeleton className="h-3 w-2/3 mt-1" />}
+                
+                {isMounted && <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />}
+                {!isMounted && trailer.storageExpiryDate && <Skeleton className="h-3 w-1/2 mt-1" />}
               </Link>
               <div className="mt-2 flex items-center gap-4 text-sm">
                 <div className="flex items-center">
@@ -187,11 +219,11 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
                 </div>
                 <div className="flex items-center text-muted-foreground">
                   <Package className="h-4 w-4 mr-1" />
-                  <span>{shipmentCount} Shipments</span>
+                  {isMounted ? <span>{shipmentCount} Shipments</span> : <Skeleton className="h-4 w-20" /> }
                 </div>
                 <div className="flex items-center text-muted-foreground">
                   <Boxes className="h-4 w-4 mr-1" />
-                  <span>{totalPieces} Pieces</span>
+                  {isMounted ? <span>{totalPieces} Pieces</span> : <Skeleton className="h-4 w-16" />}
                 </div>
               </div>
             </div>
@@ -226,7 +258,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
             setIsOpen={setIsDeleteDialogOpen}
             onConfirm={onDelete}
             title="Delete Trailer?"
-            description={`Are you sure you want to delete trailer ID: ${trailer.id} (${trailer.name || 'No Name'})? This will also delete all its ${shipmentCount} associated shipments. This action cannot be undone.`}
+            description={`Are you sure you want to delete trailer ID: ${trailer.id} (${trailer.name || 'No Name'})? This will also delete all its ${isMounted ? shipmentCount : '...'} associated shipments. This action cannot be undone.`}
             confirmText="Delete"
             confirmButtonVariant="destructive"
           />
@@ -264,7 +296,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           setIsOpen={setIsDeleteDialogOpen}
           onConfirm={onDelete}
           title="Delete Trailer?"
-          description={`Are you sure you want to delete trailer ID: ${trailer.id} (${trailer.name || 'No Name'})? This will also delete all its ${shipmentCount} associated shipments. This action cannot be undone.`}
+          description={`Are you sure you want to delete trailer ID: ${trailer.id} (${trailer.name || 'No Name'})? This will also delete all its ${isMounted ? shipmentCount : '...'} associated shipments. This action cannot be undone.`}
           confirmText="Delete"
           confirmButtonVariant="destructive"
         />
@@ -272,4 +304,3 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
     </>
   );
 }
-

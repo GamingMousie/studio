@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -156,7 +157,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
       />
 
       {/* Conditionally render EditShipmentDialog */}
-      {shipmentToEdit && (
+      {isEditShipmentOpen && (
         <EditShipmentDialog
           isOpen={isEditShipmentOpen}
           setIsOpen={setIsEditShipmentOpen}
@@ -166,7 +167,3 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
     </>
   );
 }
-
-// Helper prop to ensure shipment is always available when dialog is open (though ShipmentCard already ensures shipment exists)
-// For this pattern, we pass the specific shipment directly
-const shipmentToEdit = shipment; 

@@ -207,7 +207,7 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: S
       <AssignLocationDialog
         isOpen={isAssignLocationOpen}
         setIsOpen={setIsAssignLocationOpen}
-        currentLocationsDisplay={shipment.locationNames.join(', ')}
+        currentLocationsDisplay={(shipment.locationNames || []).join(', ')}
         onSubmit={handleAddLocation} // This will now add to the list via context
         shipmentIdentifier={shipmentIdentifier}
       />

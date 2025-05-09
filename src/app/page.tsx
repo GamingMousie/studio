@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -60,6 +61,10 @@ export default function HomePage() {
                   <Skeleton className="h-4 w-1/3" />
                   <Skeleton className="h-4 w-10" />
                 </div>
+                <div className="flex items-center justify-between text-sm">
+                  <Skeleton className="h-4 w-1/3" /> {/* Label for pieces */}
+                  <Skeleton className="h-4 w-10" /> {/* Value for pieces */}
+                </div>
               </div>
             </CardContent>
             <CardFooter className="pt-4">
@@ -81,6 +86,7 @@ export default function HomePage() {
                 <div className="mt-2 flex items-center gap-4 text-sm">
                   <Skeleton className="h-5 w-20" /> {/* Status Badge */}
                   <Skeleton className="h-4 w-28" /> {/* Shipment Count */}
+                  <Skeleton className="h-4 w-24" /> {/* Pieces Count */}
                 </div>
               </div>
               <div className="flex items-center gap-2">

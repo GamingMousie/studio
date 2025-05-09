@@ -5,7 +5,7 @@ import type { Trailer, TrailerStatus } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Package, Edit, Trash2, MoreVertical, ChevronRight, Briefcase, CalendarDays } from 'lucide-react';
+import { Truck, Package, Edit, Trash2, MoreVertical, ChevronRight, Briefcase, CalendarDays, Boxes } from 'lucide-react';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import {
   DropdownMenu,
@@ -42,6 +42,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
   const { getShipmentsByTrailerId } = useWarehouse();
   const shipments = getShipmentsByTrailerId(trailer.id);
   const shipmentCount = shipments.length;
+  const totalPieces = shipments.reduce((acc, shipment) => acc + shipment.quantity, 0);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); 
 
@@ -114,6 +115,13 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
             <span>{shipmentCount}</span>
           </div>
         </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Total Pieces:</span>
+          <div className="flex items-center">
+            <Boxes className="h-4 w-4 mr-1 text-muted-foreground" />
+            <span>{totalPieces}</span>
+          </div>
+        </div>
       </div>
     </>
   );
@@ -180,6 +188,10 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
                 <div className="flex items-center text-muted-foreground">
                   <Package className="h-4 w-4 mr-1" />
                   <span>{shipmentCount} Shipments</span>
+                </div>
+                <div className="flex items-center text-muted-foreground">
+                  <Boxes className="h-4 w-4 mr-1" />
+                  <span>{totalPieces} Pieces</span>
                 </div>
               </div>
             </div>

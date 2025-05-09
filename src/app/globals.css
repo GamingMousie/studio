@@ -87,6 +87,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-geist-sans); /* Use Geist Sans as the default body font */
   }
 }
 

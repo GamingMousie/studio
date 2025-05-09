@@ -1,18 +1,20 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+// Correctly import Geist fonts from the 'geist' package
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/layout/Header';
 import { WarehouseProvider } from '@/contexts/WarehouseContext';
 
-const geistSans = Geist({
+// Instantiate Geist fonts correctly
+const geistSans = GeistSans({
   variable: '--font-geist-sans',
-  subsets: ['latin'],
+  // subsets are not typically specified this way for Geist/font, it handles Latin characters by default
 });
 
-const geistMono = Geist_Mono({
+const geistMono = GeistMono({
   variable: '--font-geist-mono',
-  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
@@ -26,8 +28,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    // Apply font variable classes to the <html> tag
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      {/* 'antialiased' class remains on the body, font-family will be applied via CSS variables in globals.css */}
+      <body className="antialiased">
         <WarehouseProvider>
           <Header />
           <main className="container mx-auto px-4 py-8">

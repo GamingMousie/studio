@@ -12,7 +12,7 @@ export interface Shipment {
   trailerId: string;
   contentDescription: string;
   quantity: number;
-  exporter: string; // Changed from destination
+  exporter: string; 
   locationName: string; // Warehouse location name, e.g., "Bay A1", "Shelf 3-C"
   releaseDocumentName?: string; // Optional: Name of the release document
   clearanceDocumentName?: string; // Optional: Name of the clearance document
@@ -53,3 +53,9 @@ export interface ShipmentUpdateData {
   palletSpace?: number;
 }
 
+// Specifically for updating an existing trailer via context
+export interface TrailerUpdateData {
+  name?: string;
+  company?: string;
+  status?: TrailerStatus;
+}

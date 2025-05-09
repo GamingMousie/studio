@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useCallback } from 'react';
-import type { Trailer, Shipment, TrailerStatus, ShipmentUpdateData } from '@/types';
+import type { Trailer, Shipment, TrailerStatus, ShipmentUpdateData, TrailerUpdateData } from '@/types';
 import useLocalStorageState from '@/hooks/useLocalStorageState';
 import { v4 as uuidv4 } from 'uuid'; // Using uuid for unique shipment IDs
 
@@ -11,6 +11,7 @@ interface WarehouseContextType {
   trailers: Trailer[];
   addTrailer: (trailer: Omit<Trailer, 'status'> & { status?: TrailerStatus; company?: string }) => void;
   updateTrailerStatus: (trailerId: string, status: TrailerStatus) => void;
+  updateTrailer: (trailerId: string, data: TrailerUpdateData) => void;
   deleteTrailer: (trailerId: string) => void;
   shipments: Shipment[];
   getShipmentsByTrailerId: (trailerId: string) => Shipment[];
@@ -54,6 +55,14 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   const updateTrailerStatus = useCallback((trailerId: string, status: TrailerStatus) => {
     setTrailers((prev) =>
       prev.map((t) => (t.id === trailerId ? { ...t, status } : t))
+    );
+  }, [setTrailers]);
+
+  const updateTrailer = useCallback((trailerId: string, data: TrailerUpdateData) => {
+    setTrailers(prev => 
+      prev.map(t => 
+        t.id === trailerId ? { ...t, ...data } : t
+      )
     );
   }, [setTrailers]);
 
@@ -127,6 +136,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
         trailers,
         addTrailer,
         updateTrailerStatus,
+        updateTrailer,
         deleteTrailer,
         shipments,
         getShipmentsByTrailerId,

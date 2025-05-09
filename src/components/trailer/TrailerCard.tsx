@@ -1,3 +1,5 @@
+
+import { useState } from 'react';
 import Link from 'next/link';
 import type { Trailer, TrailerStatus } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import EditTrailerDialog from './EditTrailerDialog'; // Import the new dialog
 
 
 interface TrailerCardProps {
@@ -37,6 +40,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
   const { getShipmentsByTrailerId } = useWarehouse();
   const shipments = getShipmentsByTrailerId(trailer.id);
   const shipmentCount = shipments.length;
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const GridViewContent = () => (
     <>
@@ -97,7 +101,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => {/* Implement Edit */ alert('Edit functionality to be implemented')}}>
+          <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
             <Edit className="mr-2 h-4 w-4" />
             Edit Trailer
           </DropdownMenuItem>
@@ -112,65 +116,83 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
 
   if (viewMode === 'list') {
     return (
-      <Card className="group transition-all hover:shadow-lg w-full">
-        <div className="p-4 flex items-center justify-between">
-          <div className="flex-grow">
-            <Link href={`/trailers/${trailer.id}`} className="block">
-              <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">{trailer.name}</h3>
-              <p className="text-sm text-muted-foreground">ID: {trailer.id}</p>
-              {trailer.company && (
-                <div className="mt-1 flex items-center text-xs text-muted-foreground">
-                  <Briefcase className="mr-1.5 h-3 w-3" />
-                  <span>{trailer.company}</span>
+      <>
+        <Card className="group transition-all hover:shadow-lg w-full">
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex-grow">
+              <Link href={`/trailers/${trailer.id}`} className="block">
+                <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">{trailer.name}</h3>
+                <p className="text-sm text-muted-foreground">ID: {trailer.id}</p>
+                {trailer.company && (
+                  <div className="mt-1 flex items-center text-xs text-muted-foreground">
+                    <Briefcase className="mr-1.5 h-3 w-3" />
+                    <span>{trailer.company}</span>
+                  </div>
+                )}
+              </Link>
+              <div className="mt-2 flex items-center gap-4 text-sm">
+                <div className="flex items-center">
+                  <Badge className={`${statusColors[trailer.status]} text-white text-xs px-1.5 py-0.5`}>{trailer.status}</Badge>
                 </div>
-              )}
-            </Link>
-            <div className="mt-2 flex items-center gap-4 text-sm">
-              <div className="flex items-center">
-                <Badge className={`${statusColors[trailer.status]} text-white text-xs px-1.5 py-0.5`}>{trailer.status}</Badge>
-              </div>
-              <div className="flex items-center text-muted-foreground">
-                <Package className="h-4 w-4 mr-1" />
-                <span>{shipmentCount} Shipments</span>
+                <div className="flex items-center text-muted-foreground">
+                  <Package className="h-4 w-4 mr-1" />
+                  <span>{shipmentCount} Shipments</span>
+                </div>
               </div>
             </div>
+            <div className="flex items-center gap-2">
+              <Select value={trailer.status} onValueChange={(newStatus) => onStatusChange(newStatus as TrailerStatus)}>
+                <SelectTrigger className="h-9 text-xs w-[130px] hidden sm:flex">
+                  <SelectValue placeholder="Change status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allStatuses.map(status => (
+                    <SelectItem key={status} value={status} className="text-xs">
+                      <Badge className={`${statusColors[status]} text-white mr-2 w-3 h-3 p-0 inline-block rounded-full`} />
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {cardActions}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Select value={trailer.status} onValueChange={(newStatus) => onStatusChange(newStatus as TrailerStatus)}>
-              <SelectTrigger className="h-9 text-xs w-[130px] hidden sm:flex">
-                <SelectValue placeholder="Change status" />
-              </SelectTrigger>
-              <SelectContent>
-                {allStatuses.map(status => (
-                  <SelectItem key={status} value={status} className="text-xs">
-                    <Badge className={`${statusColors[status]} text-white mr-2 w-3 h-3 p-0 inline-block rounded-full`} />
-                    {status}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {cardActions}
-          </div>
-        </div>
-      </Card>
+        </Card>
+        {isEditDialogOpen && (
+          <EditTrailerDialog 
+            isOpen={isEditDialogOpen} 
+            setIsOpen={setIsEditDialogOpen} 
+            trailerToEdit={trailer} 
+          />
+        )}
+      </>
     );
   }
 
   // Grid View
   return (
-    <Card className="group transition-all hover:shadow-lg flex flex-col h-full">
-      {/* Make the CardHeader and CardContent part of the link for consistent click behavior */}
-      <Link href={`/trailers/${trailer.id}`} className="block flex-grow flex flex-col">
-        <CardHeader className="pb-2">
-           <Badge className={`${statusColors[trailer.status]} text-white text-xs px-1.5 py-0.5 self-start`}>{trailer.status}</Badge>
-        </CardHeader>
-        <CardContent className="flex-grow">
-          <GridViewContent />
-        </CardContent>
-      </Link>
-      <CardFooter className="pt-4">
-        {cardActions}
-      </CardFooter>
-    </Card>
+    <>
+      <Card className="group transition-all hover:shadow-lg flex flex-col h-full">
+        {/* Make the CardHeader and CardContent part of the link for consistent click behavior */}
+        <Link href={`/trailers/${trailer.id}`} className="block flex-grow flex flex-col">
+          <CardHeader className="pb-2">
+            <Badge className={`${statusColors[trailer.status]} text-white text-xs px-1.5 py-0.5 self-start`}>{trailer.status}</Badge>
+          </CardHeader>
+          <CardContent className="flex-grow">
+            <GridViewContent />
+          </CardContent>
+        </Link>
+        <CardFooter className="pt-4">
+          {cardActions}
+        </CardFooter>
+      </Card>
+      {isEditDialogOpen && (
+        <EditTrailerDialog 
+          isOpen={isEditDialogOpen} 
+          setIsOpen={setIsEditDialogOpen} 
+          trailerToEdit={trailer} 
+        />
+      )}
+    </>
   );
 }

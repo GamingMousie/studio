@@ -1,6 +1,7 @@
 
 import type { Metadata } from 'next';
 // Import Geist fonts using named import syntax
+// These imports provide font objects directly, not loader functions.
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import './globals.css';
@@ -8,14 +9,9 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/layout/Header';
 import { WarehouseProvider } from '@/contexts/WarehouseContext';
 
-// Instantiate Geist fonts correctly
-const geistSans = GeistSans({
-  variable: '--font-geist-sans',
-});
-
-const geistMono = GeistMono({
-  variable: '--font-geist-mono',
-});
+// The imported GeistSans and GeistMono are already font objects.
+// Their .variable property provides the class name to apply the font and CSS variables.
+// No need to call them as functions like GeistSans(...)
 
 export const metadata: Metadata = {
   title: 'ShipShape - Warehouse Management',
@@ -28,9 +24,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // Apply font variable classes to the <html> tag
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      {/* 'antialiased' class remains on the body, font-family will be applied via CSS variables in globals.css */}
+    // Apply font variable classes directly to the <html> tag.
+    // GeistSans.variable and GeistMono.variable are class names that set up
+    // CSS custom properties (e.g., --font-geist-sans, --font-geist-mono).
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      {/* 
+        The 'antialiased' class remains on the body.
+        The font-family is applied via CSS variables in globals.css, for example:
+        body { font-family: var(--font-geist-sans); }
+      */}
       <body className="antialiased">
         <WarehouseProvider>
           <Header />
@@ -43,4 +45,3 @@ export default function RootLayout({
     </html>
   );
 }
-

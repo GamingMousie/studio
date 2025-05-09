@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash } from 'lucide-react';
+import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
 export default function SingleShipmentPage() {
@@ -38,6 +38,14 @@ export default function SingleShipmentPage() {
   const handlePrint = () => {
     if (canPrint) {
       window.print();
+    }
+  };
+
+  const handleViewDocument = (documentName?: string) => {
+    if (documentName) {
+      // In a real app, this would open/download the document.
+      // For now, we can just log it or show an alert.
+      alert(`Viewing document: ${documentName}\n(Functionality to open/download document not yet implemented)`);
     }
   };
 
@@ -188,7 +196,7 @@ export default function SingleShipmentPage() {
             </div>
           </div>
 
-          <div className="space-y-1 col-span-1 md:col-span-2 border-t pt-4 mt-2">
+          <div className="space-y-3 col-span-1 md:col-span-2 border-t pt-4 mt-2">
             <h3 className="font-semibold text-muted-foreground mb-2">Status & Documents</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                  <div>
@@ -202,6 +210,15 @@ export default function SingleShipmentPage() {
                     {shipment.releaseDocumentName && (
                       <div className="flex items-center text-xs text-muted-foreground ml-7">
                         <FileText className="mr-1 h-3.5 w-3.5" /> Doc: {shipment.releaseDocumentName}
+                        <Button
+                            variant="link"
+                            size="sm"
+                            className="ml-2 h-auto p-0 text-xs no-print-in-area"
+                            onClick={() => handleViewDocument(shipment.releaseDocumentName)}
+                            aria-label={`View release document ${shipment.releaseDocumentName}`}
+                          >
+                            <Eye className="mr-1 h-3 w-3" /> View
+                          </Button>
                       </div>
                     )}
                  </div>
@@ -216,6 +233,15 @@ export default function SingleShipmentPage() {
                     {shipment.clearanceDocumentName && (
                       <div className="flex items-center text-xs text-muted-foreground ml-7">
                         <FileText className="mr-1 h-3.5 w-3.5" /> Doc: {shipment.clearanceDocumentName}
+                        <Button
+                            variant="link"
+                            size="sm"
+                            className="ml-2 h-auto p-0 text-xs no-print-in-area"
+                            onClick={() => handleViewDocument(shipment.clearanceDocumentName)}
+                            aria-label={`View clearance document ${shipment.clearanceDocumentName}`}
+                          >
+                            <Eye className="mr-1 h-3 w-3" /> View
+                          </Button>
                       </div>
                     )}
                  </div>
@@ -255,3 +281,4 @@ export default function SingleShipmentPage() {
     </div>
   );
 }
+

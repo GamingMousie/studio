@@ -1,5 +1,6 @@
+
 import type { Metadata } from 'next';
-// Correctly import Geist fonts from the 'geist' package
+// Import Geist fonts using named import syntax
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import './globals.css';
@@ -10,7 +11,6 @@ import { WarehouseProvider } from '@/contexts/WarehouseContext';
 // Instantiate Geist fonts correctly
 const geistSans = GeistSans({
   variable: '--font-geist-sans',
-  // subsets are not typically specified this way for Geist/font, it handles Latin characters by default
 });
 
 const geistMono = GeistMono({
@@ -43,3 +43,4 @@ export default function RootLayout({
     </html>
   );
 }
+

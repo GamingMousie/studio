@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Trailer, TrailerStatus } from '@/types';
@@ -42,19 +43,15 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
   const { getShipmentsByTrailerId } = useWarehouse();
   const [isMounted, setIsMounted] = useState(false);
   
-  const [shipments, setShipments] = useState(() => getShipmentsByTrailerId(trailer.id));
-  const [shipmentCount, setShipmentCount] = useState(shipments.length);
-  const [totalPieces, setTotalPieces] = useState(() => shipments.reduce((acc, shipment) => acc + shipment.quantity, 0));
+  const [shipmentCount, setShipmentCount] = useState<number>(0);
+  const [totalPieces, setTotalPieces] = useState<number>(0);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); 
 
   useEffect(() => {
     setIsMounted(true);
-    // Recalculate shipments and counts on mount and when trailer or context data might change
-    // This ensures client-side data is used after initial mount
     const currentShipments = getShipmentsByTrailerId(trailer.id);
-    setShipments(currentShipments);
     setShipmentCount(currentShipments.length);
     setTotalPieces(currentShipments.reduce((acc, s) => acc + s.quantity, 0));
   }, [trailer.id, getShipmentsByTrailerId]);
@@ -71,7 +68,8 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
   };
 
   const DateDisplay = ({ label, dateString, icon: Icon }: { label: string, dateString?: string, icon: React.ElementType }) => {
-    if (!dateString) return null;
+    // This component is only called when dateString is guaranteed to exist and isMounted is true.
+    // The conditional rendering is handled by the caller.
     return (
       <div className="flex items-center text-xs text-muted-foreground mt-1">
         <Icon className="mr-1.5 h-3.5 w-3.5" />
@@ -89,28 +87,43 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
         <Truck className="h-7 w-7 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
       </div>
 
-      {isMounted && trailer.arrivalDate && (
-        <div className="flex items-center text-sm text-foreground mt-0.5 mb-2 font-semibold">
-          <CalendarDays className="mr-1.5 h-4 w-4 text-primary" />
-          <span>Arrived: {formatDate(trailer.arrivalDate)}</span>
-        </div>
-      )}
-      {!isMounted && trailer.arrivalDate && <Skeleton className="h-4 w-3/4 mt-1 mb-2" /> }
+      {trailer.arrivalDate ? (
+        isMounted ? (
+          <div className="flex items-center text-sm text-foreground mt-0.5 mb-2 font-semibold">
+            <CalendarDays className="mr-1.5 h-4 w-4 text-primary" />
+            <span>Arrived: {formatDate(trailer.arrivalDate)}</span>
+          </div>
+        ) : (
+          <Skeleton className="h-4 w-3/4 mt-1 mb-2" />
+        )
+      ) : null}
 
-
-      {isMounted && trailer.name && <CardDescription className="text-xs text-muted-foreground mb-0.5">Name: {trailer.name}</CardDescription>}
-      {!isMounted && trailer.name && <Skeleton className="h-3 w-1/2 mb-0.5" />}
-
-      {isMounted && trailer.company && (
-        <div className="flex items-center text-xs text-muted-foreground">
-          <Briefcase className="mr-1.5 h-3.5 w-3.5" />
-          <span>{trailer.company}</span>
-        </div>
-      )}
-      {!isMounted && trailer.company && <Skeleton className="h-3 w-2/3" />}
+      {trailer.name ? (
+        isMounted ? (
+          <CardDescription className="text-xs text-muted-foreground mb-0.5">Name: {trailer.name}</CardDescription>
+        ) : (
+          <Skeleton className="h-3 w-1/2 mb-0.5" />
+        )
+      ) : null}
       
-      {isMounted && <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />}
-      {!isMounted && trailer.storageExpiryDate && <Skeleton className="h-3 w-1/2 mt-1" />}
+      {trailer.company ? (
+        isMounted ? (
+          <div className="flex items-center text-xs text-muted-foreground">
+            <Briefcase className="mr-1.5 h-3.5 w-3.5" />
+            <span>{trailer.company}</span>
+          </div>
+        ) : (
+          <Skeleton className="h-3 w-2/3" />
+        )
+      ) : null}
+      
+      {trailer.storageExpiryDate ? (
+        isMounted ? (
+          <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />
+        ) : (
+          <Skeleton className="h-3 w-1/2 mt-1" />
+        )
+      ) : null}
       
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between text-sm">
@@ -191,27 +204,43 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
                 <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
                   ID: {trailer.id}
                 </h3>
-                {isMounted && trailer.arrivalDate && (
-                  <div className="flex items-center text-sm text-foreground mt-0.5 font-semibold">
-                    <CalendarDays className="mr-1.5 h-4 w-4 text-primary" />
-                    <span>Arrived: {formatDate(trailer.arrivalDate)}</span>
-                  </div>
-                )}
-                {!isMounted && trailer.arrivalDate && <Skeleton className="h-4 w-3/4 mt-0.5 mb-1" />}
+                {trailer.arrivalDate ? (
+                  isMounted ? (
+                    <div className="flex items-center text-sm text-foreground mt-0.5 font-semibold">
+                      <CalendarDays className="mr-1.5 h-4 w-4 text-primary" />
+                      <span>Arrived: {formatDate(trailer.arrivalDate)}</span>
+                    </div>
+                  ) : (
+                    <Skeleton className="h-4 w-3/4 mt-0.5 mb-1" />
+                  )
+                ) : null}
 
-                {isMounted && trailer.name && <p className="text-xs text-muted-foreground mt-0.5">Name: {trailer.name}</p>}
-                {!isMounted && trailer.name && <Skeleton className="h-3 w-1/2 mt-0.5" />}
+                {trailer.name ? (
+                  isMounted ? (
+                     <p className="text-xs text-muted-foreground mt-0.5">Name: {trailer.name}</p>
+                  ) : (
+                     <Skeleton className="h-3 w-1/2 mt-0.5" />
+                  )
+                ) : null}
 
-                {isMounted && trailer.company && (
-                  <div className="mt-1 flex items-center text-xs text-muted-foreground">
-                    <Briefcase className="mr-1.5 h-3 w-3" />
-                    <span>{trailer.company}</span>
-                  </div>
-                )}
-                {!isMounted && trailer.company && <Skeleton className="h-3 w-2/3 mt-1" />}
+                {trailer.company ? (
+                  isMounted ? (
+                    <div className="mt-1 flex items-center text-xs text-muted-foreground">
+                      <Briefcase className="mr-1.5 h-3 w-3" />
+                      <span>{trailer.company}</span>
+                    </div>
+                  ) : (
+                     <Skeleton className="h-3 w-2/3 mt-1" />
+                  )
+                ) : null}
                 
-                {isMounted && <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />}
-                {!isMounted && trailer.storageExpiryDate && <Skeleton className="h-3 w-1/2 mt-1" />}
+                {trailer.storageExpiryDate ? (
+                  isMounted ? (
+                    <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />
+                  ) : (
+                     <Skeleton className="h-3 w-1/2 mt-1" />
+                  )
+                ) : null}
               </Link>
               <div className="mt-2 flex items-center gap-4 text-sm">
                 <div className="flex items-center">

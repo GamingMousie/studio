@@ -43,7 +43,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
   const shipments = getShipmentsByTrailerId(trailer.id);
   const shipmentCount = shipments.length;
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for delete confirmation
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); 
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -67,18 +67,27 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
 
   const GridViewContent = () => (
     <>
-      <div className="flex items-center justify-between">
-        <CardTitle className="text-xl group-hover:text-primary transition-colors">{trailer.name}</CardTitle>
-        <Truck className="h-8 w-8 text-muted-foreground group-hover:text-primary transition-colors" />
+      <div className="flex items-start justify-between">
+        <CardTitle className="text-xl group-hover:text-primary transition-colors mb-1">
+          ID: {trailer.id}
+        </CardTitle>
+        <Truck className="h-7 w-7 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
       </div>
-      <CardDescription>ID: {trailer.id}</CardDescription>
+
+      {trailer.arrivalDate && (
+        <div className="flex items-center text-sm text-foreground mt-0.5 mb-2 font-semibold">
+          <CalendarDays className="mr-1.5 h-4 w-4 text-primary" />
+          <span>Arrived: {formatDate(trailer.arrivalDate)}</span>
+        </div>
+      )}
+
+      {trailer.name && <CardDescription className="text-xs text-muted-foreground mb-0.5">Name: {trailer.name}</CardDescription>}
       {trailer.company && (
-        <div className="mt-1 flex items-center text-xs text-muted-foreground">
-          <Briefcase className="mr-1.5 h-3.5 w-3.5" /> 
+        <div className="flex items-center text-xs text-muted-foreground">
+          <Briefcase className="mr-1.5 h-3.5 w-3.5" />
           <span>{trailer.company}</span>
         </div>
       )}
-      <DateDisplay label="Arrived" dateString={trailer.arrivalDate} icon={CalendarDays} />
       <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />
       
       <div className="mt-4 space-y-2">
@@ -146,15 +155,22 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           <div className="p-4 flex items-center justify-between">
             <div className="flex-grow">
               <Link href={`/trailers/${trailer.id}`} className="block">
-                <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">{trailer.name}</h3>
-                <p className="text-sm text-muted-foreground">ID: {trailer.id}</p>
+                <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
+                  ID: {trailer.id}
+                </h3>
+                {trailer.arrivalDate && (
+                  <div className="flex items-center text-sm text-foreground mt-0.5 font-semibold">
+                    <CalendarDays className="mr-1.5 h-4 w-4 text-primary" />
+                    <span>Arrived: {formatDate(trailer.arrivalDate)}</span>
+                  </div>
+                )}
+                {trailer.name && <p className="text-xs text-muted-foreground mt-0.5">Name: {trailer.name}</p>}
                 {trailer.company && (
                   <div className="mt-1 flex items-center text-xs text-muted-foreground">
                     <Briefcase className="mr-1.5 h-3 w-3" />
                     <span>{trailer.company}</span>
                   </div>
                 )}
-                <DateDisplay label="Arrived" dateString={trailer.arrivalDate} icon={CalendarDays} />
                 <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />
               </Link>
               <div className="mt-2 flex items-center gap-4 text-sm">
@@ -198,7 +214,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
             setIsOpen={setIsDeleteDialogOpen}
             onConfirm={onDelete}
             title="Delete Trailer?"
-            description={`Are you sure you want to delete trailer "${trailer.name}" (ID: ${trailer.id})? This will also delete all its ${shipmentCount} associated shipments. This action cannot be undone.`}
+            description={`Are you sure you want to delete trailer ID: ${trailer.id} (${trailer.name || 'No Name'})? This will also delete all its ${shipmentCount} associated shipments. This action cannot be undone.`}
             confirmText="Delete"
             confirmButtonVariant="destructive"
           />
@@ -236,7 +252,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           setIsOpen={setIsDeleteDialogOpen}
           onConfirm={onDelete}
           title="Delete Trailer?"
-          description={`Are you sure you want to delete trailer "${trailer.name}" (ID: ${trailer.id})? This will also delete all its ${shipmentCount} associated shipments. This action cannot be undone.`}
+          description={`Are you sure you want to delete trailer ID: ${trailer.id} (${trailer.name || 'No Name'})? This will also delete all its ${shipmentCount} associated shipments. This action cannot be undone.`}
           confirmText="Delete"
           confirmButtonVariant="destructive"
         />
@@ -244,3 +260,4 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
     </>
   );
 }
+

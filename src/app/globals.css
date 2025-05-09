@@ -90,6 +90,10 @@
   }
 }
 
+.print-only-block {
+  display: none;
+}
+
 @media print {
   .no-print {
     display: none !important;
@@ -119,5 +123,9 @@
   /* Hide scrollbars during print if any part of printable area might scroll */
   ::-webkit-scrollbar {
     display: none;
+  }
+
+  .print-only-block {
+    display: block !important;
   }
 }

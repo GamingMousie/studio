@@ -221,6 +221,30 @@ export default function SingleShipmentPage() {
               <p>Associated with Trailer <Link href={`/trailers/${trailer.id}`} className="text-primary hover:underline font-semibold">{trailer.name} (ID: {trailer.id})</Link>, arrived on {formatDate(trailer.arrivalDate)}.</p>
           </CardFooter>
         )}
+        
+        {/* Signature Block - Print Only */}
+        <div className="print-only-block px-6 pb-6 pt-8 mt-8 border-t border-border">
+          <h3 className="text-lg font-semibold mb-8 text-center text-foreground">Driver's Acknowledgment of Receipt</h3>
+          <div className="grid grid-cols-2 gap-x-12 gap-y-12">
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-muted-foreground">Signature</label>
+              <div className="h-12 border-b border-foreground"></div>
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-muted-foreground">Printed Name</label>
+              <div className="h-12 border-b border-foreground"></div>
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-muted-foreground">Date</label>
+              <div className="h-12 border-b border-foreground"></div>
+            </div>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-muted-foreground">Time</label>
+              <div className="h-12 border-b border-foreground"></div>
+            </div>
+          </div>
+        </div>
+
       </Card>
     </div>
   );

@@ -4,9 +4,11 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil } from 'lucide-react';
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp } from 'lucide-react';
 import AssignLocationDialog from './AssignLocationDialog';
-import EditShipmentDialog from './EditShipmentDialog'; // Import the new dialog
+import EditShipmentDialog from './EditShipmentDialog';
+import AttachDocumentDialog from './AttachDocumentDialog'; // Import the new dialog
+import { useWarehouse } from '@/contexts/WarehouseContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,27 +17,55 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useToast } from '@/hooks/use-toast';
 
 interface ShipmentCardProps {
   shipment: Shipment;
-  onDelete: () => void;
-  onUpdateLocation: (newLocation: string) => void;
-  onToggleReleased: () => void;
-  onToggleCleared: () => void;
+  onDelete: () => void; // Keep onDelete as it's a direct action
+  onUpdateLocation: (newLocation: string) => void; // Keep onUpdateLocation as it uses its own dialog
+  // onToggleReleased and onToggleCleared are removed as the card will handle this logic directly
 }
 
-export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onToggleReleased, onToggleCleared }: ShipmentCardProps) {
-  const [isAssignLocationOpen, setIsAssignLocationOpen] = useState(false);
-  const [isEditShipmentOpen, setIsEditShipmentOpen] = useState(false); // State for edit dialog
+export default function ShipmentCard({ shipment, onDelete, onUpdateLocation }: ShipmentCardProps) {
+  const { updateShipment } = useWarehouse();
+  const { toast } = useToast();
 
-  const handleToggleReleased = (e: React.MouseEvent) => {
-    e.stopPropagation(); 
-    onToggleReleased();
+  const [isAssignLocationOpen, setIsAssignLocationOpen] = useState(false);
+  const [isEditShipmentOpen, setIsEditShipmentOpen] = useState(false);
+  const [isAttachDocumentOpen, setIsAttachDocumentOpen] = useState(false);
+  const [attachDocumentType, setAttachDocumentType] = useState<'release' | 'clearance' | null>(null);
+
+  const handleMarkAsPermitted = () => {
+    if (!shipment.released) { // If currently not released, user wants to mark as released (attach doc)
+      setAttachDocumentType('release');
+      setIsAttachDocumentOpen(true);
+    } else { // If currently released, user wants to mark as not permitted (no doc needed)
+      updateShipment(shipment.id, { released: false });
+      toast({ title: "Shipment Updated", description: `${shipment.contentDescription} marked as not permitted to be released.` });
+    }
   };
 
-  const handleToggleCleared = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onToggleCleared();
+  const handleMarkAsCleared = () => {
+    if (!shipment.cleared) { // If currently not cleared, user wants to mark as cleared (attach doc)
+      setAttachDocumentType('clearance');
+      setIsAttachDocumentOpen(true);
+    } else { // If currently cleared, user wants to mark as not cleared (no doc needed)
+      updateShipment(shipment.id, { cleared: false });
+      toast({ title: "Shipment Updated", description: `${shipment.contentDescription} marked as not cleared.` });
+    }
+  };
+
+  const handleDocumentAttached = (
+    attachedShipmentId: string, 
+    docType: 'release' | 'clearance', 
+    documentName: string
+  ) => {
+    if (docType === 'release') {
+      updateShipment(attachedShipmentId, { releaseDocumentName: documentName, released: true });
+    } else if (docType === 'clearance') {
+      updateShipment(attachedShipmentId, { clearanceDocumentName: documentName, cleared: true });
+    }
+    setIsAttachDocumentOpen(false); // Close dialog after successful attachment
   };
   
   const handleDelete = (e: React.MouseEvent) => {
@@ -69,13 +99,13 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
                   <Edit3 className="mr-2 h-4 w-4" />
                   Assign/Edit Location
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleToggleReleased}>
-                  {shipment.released ? <CircleOff className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />}
-                  {shipment.released ? 'Mark as Not Permitted' : 'Mark as Permitted to be Released'}
+                <DropdownMenuItem onClick={handleMarkAsPermitted}>
+                  {shipment.released ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
+                  {shipment.released ? 'Mark as Not Permitted' : 'Mark as Permitted (Attach Doc)'}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleToggleCleared}>
-                  {shipment.cleared ? <CircleOff className="mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />}
-                  {shipment.cleared ? 'Mark as Not Cleared' : 'Mark as Cleared'}
+                <DropdownMenuItem onClick={handleMarkAsCleared}>
+                   {shipment.cleared ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
+                  {shipment.cleared ? 'Mark as Not Cleared' : 'Mark as Cleared (Attach Doc)'}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive focus:bg-destructive/10">
@@ -156,12 +186,22 @@ export default function ShipmentCard({ shipment, onDelete, onUpdateLocation, onT
         shipmentContent={shipment.contentDescription}
       />
 
-      {/* Conditionally render EditShipmentDialog */}
       {isEditShipmentOpen && (
         <EditShipmentDialog
           isOpen={isEditShipmentOpen}
           setIsOpen={setIsEditShipmentOpen}
           shipmentToEdit={shipment}
+        />
+      )}
+
+      {isAttachDocumentOpen && attachDocumentType && (
+        <AttachDocumentDialog
+          isOpen={isAttachDocumentOpen}
+          setIsOpen={setIsAttachDocumentOpen}
+          shipmentId={shipment.id}
+          shipmentContentDescription={shipment.contentDescription}
+          documentType={attachDocumentType}
+          onDocumentAttached={handleDocumentAttached}
         />
       )}
     </>

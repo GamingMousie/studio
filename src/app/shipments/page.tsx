@@ -14,7 +14,7 @@ import type { Shipment } from '@/types';
 import { Badge } from '@/components/ui/badge';
 
 export default function AllShipmentsPage() {
-  const { shipments, trailers, deleteShipment, updateShipmentLocation, updateShipmentReleasedStatus, updateShipmentClearedStatus } = useWarehouse();
+  const { shipments, trailers, deleteShipment, updateShipmentLocation } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [trailerFilter, setTrailerFilter] = useState<string | 'all'>('all');
@@ -30,7 +30,7 @@ export default function AllShipmentsPage() {
       const matchesSearch = 
         shipment.id.toLowerCase().includes(searchLower) ||
         shipment.contentDescription.toLowerCase().includes(searchLower) ||
-        shipment.exporter.toLowerCase().includes(searchLower) || // Changed from destination
+        shipment.exporter.toLowerCase().includes(searchLower) || 
         (shipment.locationName && shipment.locationName.toLowerCase().includes(searchLower));
       
       const matchesTrailer = trailerFilter === 'all' || shipment.trailerId === trailerFilter;
@@ -167,8 +167,7 @@ export default function AllShipmentsPage() {
               shipment={shipment} 
               onDelete={() => deleteShipment(shipment.id)}
               onUpdateLocation={(newLocation) => updateShipmentLocation(shipment.id, newLocation)}
-              onToggleReleased={() => updateShipmentReleasedStatus(shipment.id, !shipment.released)}
-              onToggleCleared={() => updateShipmentClearedStatus(shipment.id, !shipment.cleared)}
+              // onToggleReleased and onToggleCleared are handled internally by ShipmentCard now
             />
           ))}
         </div>

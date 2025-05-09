@@ -22,8 +22,6 @@ export default function TrailerShipmentsPage() {
     getShipmentsByTrailerId,
     deleteShipment,
     updateShipmentLocation,
-    updateShipmentReleasedStatus,
-    updateShipmentClearedStatus,
   } = useWarehouse();
 
   const [trailer, setTrailer] = useState<Trailer | null>(null);
@@ -39,20 +37,18 @@ export default function TrailerShipmentsPage() {
         setIsTrailerFound(true);
       } else {
         setIsTrailerFound(false);
-        // Optionally, you could redirect here or show a more prominent "not found" message earlier.
-        // For now, the main render logic will handle showing "not found".
         console.error("Trailer not found during effect execution");
       }
     }
-  }, [trailerId, getTrailerById]); // Removed router from deps as it's stable, add it back if navigation logic depends on it changing.
+  }, [trailerId, getTrailerById]); 
 
   const shipmentsForCurrentTrailer = useMemo(() => {
-    if (!trailerId || !isTrailerFound) return []; // Ensure trailer is found before getting shipments
+    if (!trailerId || !isTrailerFound) return []; 
     return getShipmentsByTrailerId(trailerId);
   }, [trailerId, isTrailerFound, getShipmentsByTrailerId]);
 
 
-  if (isTrailerFound === null) { // Initial loading state for trailer check
+  if (isTrailerFound === null) { 
     return (
       <div className="flex justify-center items-center h-[calc(100vh-200px)]">
         <p className="text-xl text-muted-foreground">Loading trailer details...</p>
@@ -60,7 +56,7 @@ export default function TrailerShipmentsPage() {
     );
   }
 
-  if (isTrailerFound === false) { // Trailer explicitly not found
+  if (isTrailerFound === false) { 
      return (
         <div className="flex flex-col justify-center items-center h-[calc(100vh-200px)] space-y-4">
           <p className="text-2xl font-semibold text-destructive">Trailer Not Found</p>
@@ -74,7 +70,7 @@ export default function TrailerShipmentsPage() {
      );
   }
   
-  if (!trailer) { // Should be covered by isTrailerFound logic, but as a fallback
+  if (!trailer) { 
      return (
       <div className="flex justify-center items-center h-[calc(100vh-200px)]">
         <p className="text-xl text-muted-foreground">Loading trailer data...</p>
@@ -135,8 +131,7 @@ export default function TrailerShipmentsPage() {
                   shipment={shipment}
                   onDelete={() => deleteShipment(shipment.id)}
                   onUpdateLocation={(newLocation) => updateShipmentLocation(shipment.id, newLocation)}
-                  onToggleReleased={() => updateShipmentReleasedStatus(shipment.id, !shipment.released)}
-                  onToggleCleared={() => updateShipmentClearedStatus(shipment.id, !shipment.cleared)}
+                  // onToggleReleased and onToggleCleared are handled internally by ShipmentCard now
                 />
               ))}
             </div>

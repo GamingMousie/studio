@@ -39,15 +39,17 @@ export interface ShipmentFormData {
 }
 
 // Specifically for updating an existing shipment via context
+// Made all fields optional to support partial updates (e.g. just status and document name)
 export interface ShipmentUpdateData {
-  contentDescription: string;
-  quantity: number;
-  exporter: string;
-  locationName: string; // Keep it non-optional for updates; use current if not changed
+  contentDescription?: string;
+  quantity?: number;
+  exporter?: string;
+  locationName?: string;
   releaseDocumentName?: string;
   clearanceDocumentName?: string;
-  released: boolean;
-  cleared: boolean;
+  released?: boolean;
+  cleared?: boolean;
   weight?: number;
   palletSpace?: number;
 }
+

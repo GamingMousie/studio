@@ -18,15 +18,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Edit, Users, MapPin } from 'lucide-react'; 
+import { FileText, Weight, Box, Edit, Users, MapPin, Send } from 'lucide-react';
 
 const editShipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'),
+  exporter: z.string().min(1, 'Exporter is required').max(50, 'Exporter name too long'),
   locationNamesInput: z.string().optional(), // For comma-separated input
-  releaseDocument: z.any().optional(), 
-  clearanceDocument: z.any().optional(), 
+  releaseDocument: z.any().optional(),
+  clearanceDocument: z.any().optional(),
   released: z.boolean().optional(),
   cleared: z.boolean().optional(),
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
@@ -44,20 +45,21 @@ interface EditShipmentDialogProps {
 export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }: EditShipmentDialogProps) {
   const { updateShipment } = useWarehouse();
   const { toast } = useToast();
-  
+
   const { register, handleSubmit, reset, control, formState: { errors, isSubmitting }, watch, setValue } = useForm<EditShipmentFormDataType>({
     resolver: zodResolver(editShipmentSchema),
     defaultValues: {
       stsJob: shipmentToEdit.stsJob,
       quantity: shipmentToEdit.quantity,
       importer: shipmentToEdit.importer,
+      exporter: shipmentToEdit.exporter,
       locationNamesInput: (shipmentToEdit.locationNames || []).join(', '),
       released: shipmentToEdit.released,
       cleared: shipmentToEdit.cleared,
       weight: shipmentToEdit.weight ?? null,
       palletSpace: shipmentToEdit.palletSpace ?? null,
-      releaseDocument: null, 
-      clearanceDocument: null, 
+      releaseDocument: null,
+      clearanceDocument: null,
     }
   });
 
@@ -67,6 +69,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
         stsJob: shipmentToEdit.stsJob,
         quantity: shipmentToEdit.quantity,
         importer: shipmentToEdit.importer,
+        exporter: shipmentToEdit.exporter,
         locationNamesInput: (shipmentToEdit.locationNames || []).join(', '),
         released: shipmentToEdit.released,
         cleared: shipmentToEdit.cleared,
@@ -89,6 +92,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
       stsJob: data.stsJob,
       quantity: data.quantity,
       importer: data.importer,
+      exporter: data.exporter,
       locationNames: locationNamesArray.length > 0 ? locationNamesArray : ['Pending Assignment'],
       releaseDocumentName: newReleaseDocumentFile ? newReleaseDocumentFile.name : shipmentToEdit.releaseDocumentName,
       clearanceDocumentName: newClearanceDocumentFile ? newClearanceDocumentFile.name : shipmentToEdit.clearanceDocumentName,
@@ -113,6 +117,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
           stsJob: shipmentToEdit.stsJob,
           quantity: shipmentToEdit.quantity,
           importer: shipmentToEdit.importer,
+          exporter: shipmentToEdit.exporter,
           locationNamesInput: (shipmentToEdit.locationNames || []).join(', '),
           released: shipmentToEdit.released,
           cleared: shipmentToEdit.cleared,
@@ -139,19 +144,27 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
             <Input id="stsJob" type="number" {...register('stsJob')} />
             {errors.stsJob && <p className="text-sm text-destructive mt-1">{errors.stsJob.message}</p>}
           </div>
-          
+
           <div>
             <Label htmlFor="quantity">Quantity</Label>
             <Input id="quantity" type="number" {...register('quantity')} />
             {errors.quantity && <p className="text-sm text-destructive mt-1">{errors.quantity.message}</p>}
           </div>
-          
+
           <div>
             <Label htmlFor="importer" className="flex items-center">
               <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer
             </Label>
             <Input id="importer" {...register('importer')} />
             {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="exporter" className="flex items-center">
+              <Send className="mr-2 h-4 w-4 text-muted-foreground" /> Exporter
+            </Label>
+            <Input id="exporter" {...register('exporter')} />
+            {errors.exporter && <p className="text-sm text-destructive mt-1">{errors.exporter.message}</p>}
           </div>
 
 
@@ -201,7 +214,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
             <Input id="clearanceDocument" type="file" {...register('clearanceDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
             {errors.clearanceDocument && <p className="text-sm text-destructive mt-1">{(errors.clearanceDocument as any)?.message}</p>}
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="flex items-center space-x-2">
               <Checkbox id="released" {...register('released')} defaultChecked={shipmentToEdit.released} onCheckedChange={(checked) => setValue('released', !!checked)} />

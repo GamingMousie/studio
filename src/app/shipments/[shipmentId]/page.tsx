@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye } from 'lucide-react';
+import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
 export default function SingleShipmentPage() {
@@ -18,9 +18,9 @@ export default function SingleShipmentPage() {
   const params = useParams();
   const shipmentId = params.shipmentId as string;
 
-  const { getShipmentById, getTrailerById } = useWarehouse(); 
+  const { getShipmentById, getTrailerById } = useWarehouse();
 
-  const [shipment, setShipment] = useState<Shipment | null | undefined>(undefined); 
+  const [shipment, setShipment] = useState<Shipment | null | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function SingleShipmentPage() {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
     try {
-      return format(parseISO(dateString), 'PPpp'); 
+      return format(parseISO(dateString), 'PPpp');
     } catch (error) {
       return "Invalid Date";
     }
@@ -96,7 +96,7 @@ export default function SingleShipmentPage() {
             <Skeleton className="h-4 w-1/2" />
           </CardHeader>
           <CardContent className="space-y-3">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(7)].map((_, i) => ( // Increased to 7 for exporter
               <div key={i} className="flex items-center space-x-2">
                 <Skeleton className="h-5 w-5 rounded-full" />
                 <Skeleton className="h-4 w-1/4" />
@@ -121,7 +121,7 @@ export default function SingleShipmentPage() {
       </div>
     );
   }
-  
+
   if (!shipment) return null;
 
   const locations = shipment.locationNames;
@@ -163,7 +163,7 @@ export default function SingleShipmentPage() {
           </div>
         </CardHeader>
         <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm card-content-print">
-          
+
           {trailer && (
             <div className="space-y-1 md:col-span-1">
               <h3 className="font-semibold text-muted-foreground flex items-center"><Truck className="mr-2 h-4 w-4" />Associated Trailer ID</h3>
@@ -180,7 +180,7 @@ export default function SingleShipmentPage() {
             <h3 className="font-semibold text-muted-foreground flex items-center"><Hash className="mr-2 h-4 w-4" />STS Job Number</h3>
             <p className="text-2xl font-bold text-foreground">{shipment.stsJob}</p>
           </div>
-          
+
           <div className="space-y-1">
             <h3 className="font-semibold text-muted-foreground flex items-center"><Package className="mr-2 h-4 w-4" />Quantity</h3>
             <p className="text-base font-medium">{shipment.quantity} pieces</p>
@@ -197,14 +197,19 @@ export default function SingleShipmentPage() {
             <h3 className="font-semibold text-muted-foreground flex items-center"><Users className="mr-2 h-4 w-4" />Importer</h3>
             <p>{shipment.importer}</p>
           </div>
-          
+
+          <div className="space-y-1">
+            <h3 className="font-semibold text-muted-foreground flex items-center"><Send className="mr-2 h-4 w-4" />Exporter</h3>
+            <p>{shipment.exporter}</p>
+          </div>
+
           {shipment.weight !== undefined && shipment.weight !== null && (
              <div className="space-y-1">
               <h3 className="font-semibold text-muted-foreground flex items-center"><Weight className="mr-2 h-4 w-4" />Weight</h3>
               <p>{shipment.weight} kg</p>
             </div>
           )}
-          
+
           <div className="space-y-1 col-span-1 md:col-span-2">
             <h3 className="font-semibold text-muted-foreground flex items-center"><MapPin className="mr-2 h-4 w-4" />Warehouse Locations</h3>
             <div className="flex flex-wrap gap-2 mt-1">
@@ -277,7 +282,7 @@ export default function SingleShipmentPage() {
               <p>Associated with Trailer <Link href={`/trailers/${trailer.id}`} className="text-primary hover:underline font-semibold">{trailer.name} (ID: {trailer.id})</Link>, arrived on {formatDate(trailer.arrivalDate)}.</p>
           </CardFooter>
         )}
-        
+
         {/* Signature Block - Print Only */}
         <div className="print-only-block px-6 pb-6 pt-8 mt-8 border-t border-border">
           <h3 className="text-lg font-semibold mb-8 text-center text-foreground">Driver's Acknowledgment of Receipt</h3>
@@ -305,4 +310,3 @@ export default function SingleShipmentPage() {
     </div>
   );
 }
-

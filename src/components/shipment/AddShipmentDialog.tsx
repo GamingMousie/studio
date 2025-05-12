@@ -16,15 +16,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Users, MapPin } from 'lucide-react'; 
+import { FileText, Weight, Box, Users, MapPin, Send } from 'lucide-react';
 
 const shipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'),
+  exporter: z.string().min(1, 'Exporter is required').max(50, 'Exporter name too long'),
   locationNameInput: z.string().optional(), // Changed from locationName to locationNameInput
-  releaseDocument: z.any().optional(), 
-  clearanceDocument: z.any().optional(), 
+  releaseDocument: z.any().optional(),
+  clearanceDocument: z.any().optional(),
   released: z.boolean().optional(),
   cleared: z.boolean().optional(),
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
@@ -57,11 +58,12 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
     const releaseDocumentName = data.releaseDocument && data.releaseDocument.length > 0 ? data.releaseDocument[0]?.name : undefined;
     const clearanceDocumentName = data.clearanceDocument && data.clearanceDocument.length > 0 ? data.clearanceDocument[0]?.name : undefined;
 
-    addShipment({ 
+    addShipment({
       trailerId,
       stsJob: data.stsJob,
       quantity: data.quantity,
       importer: data.importer,
+      exporter: data.exporter,
       initialLocationName: data.locationNameInput || undefined, // Pass as initialLocationName
       releaseDocumentName,
       clearanceDocumentName,
@@ -93,7 +95,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             <Input id="stsJob" type="number" {...register('stsJob')} placeholder="e.g., 12345" />
             {errors.stsJob && <p className="text-sm text-destructive mt-1">{errors.stsJob.message}</p>}
           </div>
-          
+
           <div>
             <Label htmlFor="quantity">Quantity</Label>
             <Input id="quantity" type="number" {...register('quantity')} placeholder="e.g., 100" />
@@ -106,6 +108,14 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             </Label>
             <Input id="importer" {...register('importer')} placeholder="e.g., Global Importers LLC" />
             {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="exporter" className="flex items-center">
+              <Send className="mr-2 h-4 w-4 text-muted-foreground" /> Exporter
+            </Label>
+            <Input id="exporter" {...register('exporter')} placeholder="e.g., Local Exporters Co." />
+            {errors.exporter && <p className="text-sm text-destructive mt-1">{errors.exporter.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -148,7 +158,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             <Input id="clearanceDocument" type="file" {...register('clearanceDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
             {errors.clearanceDocument && <p className="text-sm text-destructive mt-1">{(errors.clearanceDocument as any)?.message}</p>}
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="flex items-center space-x-2">
               <Checkbox id="released" {...register('released')} />

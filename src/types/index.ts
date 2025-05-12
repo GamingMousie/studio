@@ -14,7 +14,8 @@ export interface Shipment {
   trailerId: string;
   stsJob: number; // STS job number
   quantity: number;
-  importer: string; 
+  importer: string;
+  exporter: string; // Added exporter
   locationNames: string[]; // Changed from locationName: string
   releaseDocumentName?: string; // Optional: Name of the release document
   clearanceDocumentName?: string; // Optional: Name of the clearance document
@@ -28,9 +29,10 @@ export interface Shipment {
 export interface ShipmentFormData {
   stsJob: number;
   quantity: number;
-  importer: string; 
+  importer: string;
+  exporter: string; // Added exporter
   locationNameInput?: string; // For initial single location input, will be processed into locationNames
-  releaseDocument?: FileList | File | null; 
+  releaseDocument?: FileList | File | null;
   clearanceDocument?: FileList | File | null;
   released?: boolean;
   cleared?: boolean;
@@ -42,7 +44,8 @@ export interface ShipmentFormData {
 export interface ShipmentUpdateData {
   stsJob?: number;
   quantity?: number;
-  importer?: string; 
+  importer?: string;
+  exporter?: string; // Added exporter
   locationNames?: string[]; // Changed from locationName: string
   releaseDocumentName?: string;
   clearanceDocumentName?: string;
@@ -66,9 +69,7 @@ export interface TrailerFormData {
   id: string;
   name: string;
   company?: string;
-  status: TrailerStatus; 
-  arrivalDate?: Date | null; 
-  storageExpiryDate?: Date | null; 
+  status: TrailerStatus;
+  arrivalDate?: Date | null;
+  storageExpiryDate?: Date | null;
 }
-
-```

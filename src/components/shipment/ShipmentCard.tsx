@@ -1,14 +1,14 @@
 
 import { useState } from 'react';
-import Link from 'next/link'; 
+import Link from 'next/link';
 import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash } from 'lucide-react'; 
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send } from 'lucide-react';
 import ManageLocationsDialog from './ManageLocationsDialog';
 import EditShipmentDialog from './EditShipmentDialog';
-import AttachDocumentDialog from './AttachDocumentDialog'; 
+import AttachDocumentDialog from './AttachDocumentDialog';
 import ConfirmationDialog from '@/components/shared/ConfirmationDialog';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import {
@@ -23,7 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ShipmentCardProps {
   shipment: Shipment;
-  onDelete: () => void; 
+  onDelete: () => void;
 }
 
 export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) {
@@ -34,33 +34,33 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
   const [isEditShipmentOpen, setIsEditShipmentOpen] = useState(false);
   const [isAttachDocumentOpen, setIsAttachDocumentOpen] = useState(false);
   const [attachDocumentType, setAttachDocumentType] = useState<'release' | 'clearance' | null>(null);
-  const [isShipmentDeleteDialogOpen, setIsShipmentDeleteDialogOpen] = useState(false); 
+  const [isShipmentDeleteDialogOpen, setIsShipmentDeleteDialogOpen] = useState(false);
 
   const shipmentIdentifier = `STS Job: ${shipment.stsJob}`;
 
   const handleMarkAsPermitted = () => {
-    if (!shipment.released) { 
+    if (!shipment.released) {
       setAttachDocumentType('release');
       setIsAttachDocumentOpen(true);
-    } else { 
-      updateShipment(shipment.id, { released: false, releaseDocumentName: undefined }); 
+    } else {
+      updateShipment(shipment.id, { released: false, releaseDocumentName: undefined });
       toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not permitted. Release document removed.` });
     }
   };
 
   const handleMarkAsCleared = () => {
-    if (!shipment.cleared) { 
+    if (!shipment.cleared) {
       setAttachDocumentType('clearance');
       setIsAttachDocumentOpen(true);
-    } else { 
-      updateShipment(shipment.id, { cleared: false, clearanceDocumentName: undefined }); 
+    } else {
+      updateShipment(shipment.id, { cleared: false, clearanceDocumentName: undefined });
       toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not cleared. Clearance document removed.` });
     }
   };
 
   const handleDocumentAttached = (
-    attachedShipmentId: string, 
-    docType: 'release' | 'clearance', 
+    attachedShipmentId: string,
+    docType: 'release' | 'clearance',
     documentName: string
   ) => {
     if (docType === 'release') {
@@ -68,9 +68,9 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
     } else if (docType === 'clearance') {
       updateShipment(attachedShipmentId, { clearanceDocumentName: documentName, cleared: true });
     }
-    setIsAttachDocumentOpen(false); 
+    setIsAttachDocumentOpen(false);
   };
-  
+
   const locations = shipment.locationNames;
   const isPendingAssignment = !locations || locations.length === 0 || (locations.length === 1 && locations[0] === 'Pending Assignment');
 
@@ -128,13 +128,19 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
         </CardHeader>
         <CardContent className="space-y-1.5 text-sm flex-grow">
           <p><span className="font-medium text-muted-foreground">Quantity:</span> {shipment.quantity}</p>
-          
+
           <div className="flex items-center">
             <Users className="mr-1.5 h-4 w-4 text-muted-foreground" />
             <span className="font-medium text-muted-foreground">Importer:</span>
             <span className="ml-1.5">{shipment.importer}</span>
           </div>
-          
+
+          <div className="flex items-center">
+            <Send className="mr-1.5 h-4 w-4 text-muted-foreground" />
+            <span className="font-medium text-muted-foreground">Exporter:</span>
+            <span className="ml-1.5">{shipment.exporter}</span>
+          </div>
+
           {shipment.weight !== undefined && shipment.weight !== null && (
             <div className="flex items-center">
               <Weight className="mr-1.5 h-4 w-4 text-muted-foreground" />

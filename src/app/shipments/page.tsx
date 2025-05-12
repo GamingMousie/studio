@@ -14,11 +14,11 @@ import type { Shipment } from '@/types';
 import { Badge } from '@/components/ui/badge';
 
 export default function AllShipmentsPage() {
-  const { shipments, trailers, deleteShipment } = useWarehouse(); 
+  const { shipments, trailers, deleteShipment } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [trailerFilter, setTrailerFilter] = useState<string | 'all'>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid'); 
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     setIsClient(true);
@@ -27,14 +27,15 @@ export default function AllShipmentsPage() {
   const filteredShipments = useMemo(() => {
     return shipments.filter(shipment => {
       const searchLower = searchTerm.toLowerCase();
-      const matchesSearch = 
+      const matchesSearch =
         shipment.id.toLowerCase().includes(searchLower) ||
-        shipment.stsJob.toString().toLowerCase().includes(searchLower) || 
-        shipment.importer.toLowerCase().includes(searchLower) || 
-        (shipment.locationNames && shipment.locationNames.some(loc => loc.toLowerCase().includes(searchLower))); 
-      
+        shipment.stsJob.toString().toLowerCase().includes(searchLower) ||
+        shipment.importer.toLowerCase().includes(searchLower) ||
+        shipment.exporter.toLowerCase().includes(searchLower) || // Added exporter to search
+        (shipment.locationNames && shipment.locationNames.some(loc => loc.toLowerCase().includes(searchLower)));
+
       const matchesTrailer = trailerFilter === 'all' || shipment.trailerId === trailerFilter;
-      
+
       return matchesSearch && matchesTrailer;
     });
   }, [shipments, searchTerm, trailerFilter]);
@@ -52,6 +53,7 @@ export default function AllShipmentsPage() {
               <Skeleton className="h-4 w-1/2" /> {/* ID */}
               <Skeleton className="h-4 w-1/3 mt-1" /> {/* Quantity */}
               <Skeleton className="h-4 w-2/5 mt-1" /> {/* Importer */}
+              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Exporter */}
               <div className="grid grid-cols-2 gap-2 mt-1">
                 <Skeleton className="h-4 w-3/4" /> {/* Weight */}
                 <Skeleton className="h-4 w-3/4" /> {/* Pallet Space */}
@@ -81,6 +83,7 @@ export default function AllShipmentsPage() {
                 <div className="flex items-center gap-4 text-sm">
                   <Skeleton className="h-4 w-20" /> {/* Quantity */}
                   <Skeleton className="h-4 w-28" /> {/* Importer */}
+                  <Skeleton className="h-4 w-28" /> {/* Exporter */}
                   <Skeleton className="h-5 w-24" /> {/* Location */}
                 </div>
                 <div className="flex items-center gap-4 text-sm mt-1">
@@ -95,7 +98,7 @@ export default function AllShipmentsPage() {
                  </div>
               </div>
               <div className="flex items-center gap-2">
-                <Skeleton className="h-9 w-32" /> 
+                <Skeleton className="h-9 w-32" />
                 <Skeleton className="h-8 w-8" />
               </div>
             </div>
@@ -120,8 +123,8 @@ export default function AllShipmentsPage() {
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input 
-              placeholder="Search by ID, STS Job, Importer, Location..."
+            <Input
+              placeholder="Search by ID, STS Job, Importer, Exporter, Location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -162,9 +165,9 @@ export default function AllShipmentsPage() {
       ) : (
          <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
           {filteredShipments.map((shipment) => (
-            <ShipmentCard 
-              key={shipment.id} 
-              shipment={shipment} 
+            <ShipmentCard
+              key={shipment.id}
+              shipment={shipment}
               onDelete={() => deleteShipment(shipment.id)}
             />
           ))}

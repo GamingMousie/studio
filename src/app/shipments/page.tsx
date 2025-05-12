@@ -124,7 +124,7 @@ export default function AllShipmentsPage() {
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
-              placeholder="Search by ID, STS Job, Importer, Exporter, Location..."
+              placeholder="Search by ID, STS Job, Importer (Consignee), Exporter (Consignor), Location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -176,4 +176,3 @@ export default function AllShipmentsPage() {
     </div>
   );
 }
-

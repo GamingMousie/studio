@@ -152,21 +152,20 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
           </div>
 
           <div>
-            <Label htmlFor="importer" className="flex items-center">
-              <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer
-            </Label>
-            <Input id="importer" {...register('importer')} />
-            {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
-          </div>
-
-          <div>
             <Label htmlFor="exporter" className="flex items-center">
-              <Send className="mr-2 h-4 w-4 text-muted-foreground" /> Exporter
+              <Send className="mr-2 h-4 w-4 text-muted-foreground" /> Exporter (Consignor)
             </Label>
             <Input id="exporter" {...register('exporter')} />
             {errors.exporter && <p className="text-sm text-destructive mt-1">{errors.exporter.message}</p>}
           </div>
-
+          
+          <div>
+            <Label htmlFor="importer" className="flex items-center">
+              <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer (Consignee)
+            </Label>
+            <Input id="importer" {...register('importer')} />
+            {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>

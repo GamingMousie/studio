@@ -103,20 +103,21 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
           </div>
 
           <div>
+            <Label htmlFor="exporter" className="flex items-center">
+              <Send className="mr-2 h-4 w-4 text-muted-foreground" /> Exporter (Consignor)
+            </Label>
+            <Input id="exporter" {...register('exporter')} placeholder="e.g., Local Exporters Co." />
+            {errors.exporter && <p className="text-sm text-destructive mt-1">{errors.exporter.message}</p>}
+          </div>
+
+          <div>
             <Label htmlFor="importer" className="flex items-center">
-              <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer
+              <Users className="mr-2 h-4 w-4 text-muted-foreground" /> Importer (Consignee)
             </Label>
             <Input id="importer" {...register('importer')} placeholder="e.g., Global Importers LLC" />
             {errors.importer && <p className="text-sm text-destructive mt-1">{errors.importer.message}</p>}
           </div>
 
-          <div>
-            <Label htmlFor="exporter" className="flex items-center">
-              <Send className="mr-2 h-4 w-4 text-muted-foreground" /> Exporter
-            </Label>
-            <Input id="exporter" {...register('exporter')} placeholder="e.g., Local Exporters Co." />
-            {errors.exporter && <p className="text-sm text-destructive mt-1">{errors.exporter.message}</p>}
-          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>

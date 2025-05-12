@@ -131,15 +131,16 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
 
           <div className="flex items-center">
             <Send className="mr-1.5 h-4 w-4 text-muted-foreground" />
-            <span className="font-medium text-muted-foreground">Exporter:</span>
+            <span className="font-medium text-muted-foreground">Exporter (Consignor):</span>
             <span className="ml-1.5">{shipment.exporter}</span>
           </div>
 
           <div className="flex items-center">
             <Users className="mr-1.5 h-4 w-4 text-muted-foreground" />
-            <span className="font-medium text-muted-foreground">Importer:</span>
+            <span className="font-medium text-muted-foreground">Importer (Consignee):</span>
             <span className="ml-1.5">{shipment.importer}</span>
           </div>
+
 
           {shipment.weight !== undefined && shipment.weight !== null && (
             <div className="flex items-center">
@@ -247,4 +248,3 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
     </>
   );
 }
-

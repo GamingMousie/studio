@@ -194,14 +194,15 @@ export default function SingleShipmentPage() {
           )}
 
           <div className="space-y-1">
-            <h3 className="font-semibold text-muted-foreground flex items-center"><Send className="mr-2 h-4 w-4" />Exporter</h3>
+            <h3 className="font-semibold text-muted-foreground flex items-center"><Send className="mr-2 h-4 w-4" />Exporter (Consignor)</h3>
             <p>{shipment.exporter}</p>
           </div>
           
           <div className="space-y-1">
-            <h3 className="font-semibold text-muted-foreground flex items-center"><Users className="mr-2 h-4 w-4" />Importer</h3>
+            <h3 className="font-semibold text-muted-foreground flex items-center"><Users className="mr-2 h-4 w-4" />Importer (Consignee)</h3>
             <p>{shipment.importer}</p>
           </div>
+
 
           {shipment.weight !== undefined && shipment.weight !== null && (
              <div className="space-y-1">
@@ -310,4 +311,3 @@ export default function SingleShipmentPage() {
     </div>
   );
 }
-

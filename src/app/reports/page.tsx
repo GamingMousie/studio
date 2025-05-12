@@ -166,7 +166,7 @@ export default function ReportsPage() {
             <CardHeader>
               <CardTitle className="flex items-center text-xl text-primary">
                 <Clock className="mr-2 h-6 w-6" />
-                Weekly/Monthly Released Shipments
+                Monthly Released Shipments
               </CardTitle>
               <CardDescription>
                 View all shipments that were marked as released this week or month.
@@ -329,6 +329,7 @@ export default function ReportsPage() {
     </div>
   );
 }
+
 
 
 

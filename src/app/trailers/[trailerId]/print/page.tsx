@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -9,7 +8,7 @@ import type { Trailer, Shipment } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Truck, FileText } from 'lucide-react';
+import { ArrowLeft, Printer, Truck, FileText, Edit2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,7 +40,19 @@ export default function PrintTrailerTransferPage() {
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [isClient, setIsClient] = useState(false);
   const [generatedDate, setGeneratedDate] = useState<string | null>(null);
+  
+  // State for editable fields
   const [reportingPersonName, setReportingPersonName] = useState('');
+  const [mvArrived, setMvArrived] = useState('');
+  const [mvDate, setMvDate] = useState('');
+  const [customsSealNumberAppliedB, setCustomsSealNumberAppliedB] = useState('');
+  const [localRefNumberB, setLocalRefNumberB] = useState('');
+  const [lorryRegNumberB, setLorryRegNumberB] = useState('');
+  const [shipDateArrivalC, setShipDateArrivalC] = useState('');
+  const [countryOfOriginC, setCountryOfOriginC] = useState('');
+  const [customsSealNoC, setCustomsSealNoC] = useState('');
+  const [companySealNoC, setCompanySealNoC] = useState('');
+
 
   useEffect(() => {
     setIsClient(true);
@@ -110,23 +121,23 @@ export default function PrintTrailerTransferPage() {
 
   if (!trailer) return null;
 
-  const manifestRef = trailer.id; // Mapping 2
-  const unitContainerNumber = trailer.name; // Mapping 1
-  const t1_1 = trailer.customField1; // Mapping 3
-  const t1_2 = trailer.customField2; // Mapping 4
-  const arrivalDateFormatted = formatDateForForm(trailer.arrivalDate); // Mapping 6
-  const totalShipments = shipments.length; // Mapping 8
-  const clearanceAgencyCompany = trailer.company; // Mapping 9
+  const manifestRef = trailer.id; 
+  const unitContainerNumber = trailer.name; 
+  const t1_1 = trailer.customField1; 
+  const t1_2 = trailer.customField2; 
+  const arrivalDateFormatted = formatDateForForm(trailer.arrivalDate); 
+  const totalShipments = shipments.length; 
+  const clearanceAgencyCompany = trailer.company; 
 
 
   return (
     <div className="space-y-6 p-2 md:p-4 print:p-0">
-      <div className="no-print flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="no-print flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
         <Button variant="outline" onClick={() => router.back()} size="sm">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Trailer Details
         </Button>
         <div className="flex flex-col sm:flex-row items-center gap-2">
-            <Label htmlFor="reportingPersonName" className="whitespace-nowrap text-sm">Person Signing:</Label>
+            <Label htmlFor="reportingPersonName" className="whitespace-nowrap text-sm">Person Signing (Part A &amp; C):</Label>
             <Input
                 id="reportingPersonName"
                 value={reportingPersonName}
@@ -139,6 +150,53 @@ export default function PrintTrailerTransferPage() {
           <Printer className="mr-2 h-4 w-4" /> Print Document
         </Button>
       </div>
+
+      {/* Editable fields section - no-print */}
+      <Card className="no-print mb-6 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center"><Edit2 className="mr-2 h-5 w-5 text-primary"/>Additional Details for Print</CardTitle>
+          <CardDescription>Fill these fields before printing the document.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+          <div>
+            <Label htmlFor="mvArrived" className="text-sm font-medium">MV Arrived Per (Part A)</Label>
+            <Input id="mvArrived" value={mvArrived} onChange={(e) => setMvArrived(e.target.value)} placeholder="Enter MV name" className="mt-1"/>
+          </div>
+          <div>
+            <Label htmlFor="mvDate" className="text-sm font-medium">MV Arrival Date (Part A)</Label>
+            <Input id="mvDate" value={mvDate} onChange={(e) => setMvDate(e.target.value)} placeholder="Enter MV arrival date" className="mt-1"/>
+          </div>
+          <div>
+            <Label htmlFor="customsSealNumberAppliedB" className="text-sm font-medium">Customs Seal No. Applied (Part B)</Label>
+            <Input id="customsSealNumberAppliedB" value={customsSealNumberAppliedB} onChange={(e) => setCustomsSealNumberAppliedB(e.target.value)} placeholder="Customs Seal No." className="mt-1"/>
+          </div>
+           <div>
+            <Label htmlFor="localRefNumberB" className="text-sm font-medium">Local Ref Number (Part B)</Label>
+            <Input id="localRefNumberB" value={localRefNumberB} onChange={(e) => setLocalRefNumberB(e.target.value)} placeholder="Local Reference" className="mt-1"/>
+          </div>
+           <div>
+            <Label htmlFor="lorryRegNumberB" className="text-sm font-medium">Lorry Reg. Number (Part B)</Label>
+            <Input id="lorryRegNumberB" value={lorryRegNumberB} onChange={(e) => setLorryRegNumberB(e.target.value)} placeholder="Lorry Registration" className="mt-1"/>
+          </div>
+          <div>
+            <Label htmlFor="shipDateArrivalC" className="text-sm font-medium">Ship/Date of Arrival (Part C)</Label>
+            <Input id="shipDateArrivalC" value={shipDateArrivalC} onChange={(e) => setShipDateArrivalC(e.target.value)} placeholder="Ship/Date" className="mt-1"/>
+          </div>
+          <div>
+            <Label htmlFor="countryOfOriginC" className="text-sm font-medium">Country of Origin (Part C)</Label>
+            <Input id="countryOfOriginC" value={countryOfOriginC} onChange={(e) => setCountryOfOriginC(e.target.value)} placeholder="Country" className="mt-1"/>
+          </div>
+          <div>
+            <Label htmlFor="customsSealNoC" className="text-sm font-medium">Customs Seal No. (Part C)</Label>
+            <Input id="customsSealNoC" value={customsSealNoC} onChange={(e) => setCustomsSealNoC(e.target.value)} placeholder="Customs Seal" className="mt-1"/>
+          </div>
+          <div>
+            <Label htmlFor="companySealNoC" className="text-sm font-medium">Company Seal No. (Part C)</Label>
+            <Input id="companySealNoC" value={companySealNoC} onChange={(e) => setCompanySealNoC(e.target.value)} placeholder="Company Seal" className="mt-1"/>
+          </div>
+        </CardContent>
+      </Card>
+
 
       <Card className="printable-area shadow-lg print:shadow-none print:border-none">
         <CardHeader className="border-b pb-2 print:pb-1 print:border-black">
@@ -171,8 +229,8 @@ export default function PrintTrailerTransferPage() {
             </div>
             <FormLine label="Permission is requested to remove unit/container number:" value={unitContainerNumber} valueBold/>
             <div className="grid grid-cols-3 gap-x-2 items-end">
-                <FormLine label="Which arrived per MV" value={null} />
-                <FormLine label="date" value={null} />
+                <FormLine label="Which arrived per MV" value={mvArrived} />
+                <FormLine label="date" value={mvDate} />
                 <FormLine label="Manifest Ref" value={manifestRef} valueBold />
             </div>
             <FormLine label="to the Authorised Temporary Storage Facility of" value="SPRATT LOGISTICS" valueBold />
@@ -193,12 +251,12 @@ export default function PrintTrailerTransferPage() {
           <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">
             <h3 className="font-bold text-sm print:text-[9pt] mb-1 print:mb-0.5">Part B (Official use only)</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 print:gap-y-0">
-                <FormLine label="Customs seal number applied" value={null}/>
-                <FormLine label="Local Ref Number" value={null}/>
+                <FormLine label="Customs seal number applied" value={customsSealNumberAppliedB}/>
+                <FormLine label="Local Ref Number" value={localRefNumberB}/>
             </div>
             <div className="flex items-start justify-between mt-1 print:mt-0.5">
                 <div className="w-1/2">
-                    <FormLine label="Lorry Reg. Number" value={null}/>
+                    <FormLine label="Lorry Reg. Number" value={lorryRegNumberB}/>
                     <FormLine label="Sealing Official’s signature" value={null} minHeight="min-h-[2em]"/>
                 </div>
                 <div className="border border-foreground print:border-black w-2/5 h-12 print:h-10 flex items-center justify-center text-muted-foreground print:text-gray-500 text-xs print:text-[7pt]">
@@ -211,13 +269,13 @@ export default function PrintTrailerTransferPage() {
            <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">
             <h3 className="font-bold text-sm print:text-[9pt] mb-1 print:mb-0.5">Part C: (Notification on arrival of good at T.S. Facility)</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 print:gap-y-0">
-                <FormLine label="Ship/date of Arrival" value={null}/>
+                <FormLine label="Ship/date of Arrival" value={shipDateArrivalC}/>
                 <FormLine label="T.S. (ACP) Ref:" value={manifestRef} valueBold/>
                 <FormLine label="Container/Trailer Number" value={unitContainerNumber} valueBold/>
                 <FormLine label="Number of T1/Non-EU consignments" value={totalShipments} valueBold/>
-                <FormLine label="Country of Origin" value={null}/>
-                <FormLine label="Customs Seal No." value={null}/>
-                <FormLine label="Company Seal No." value={null}/>
+                <FormLine label="Country of Origin" value={countryOfOriginC}/>
+                <FormLine label="Customs Seal No." value={customsSealNoC}/>
+                <FormLine label="Company Seal No." value={companySealNoC}/>
                 <FormLine label="Clearance Agency" value={clearanceAgencyCompany} valueBold/>
                 <FormLine label="Person Reporting" value={reportingPersonName} valueBold/>
                 <FormLine label="Contact No." value="01 8527 100" valueBold/>

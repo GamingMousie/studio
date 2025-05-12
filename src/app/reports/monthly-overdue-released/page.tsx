@@ -28,7 +28,7 @@ interface OverdueReleasedReportItem {
   customerJobNumber?: string;
   trailerId: string;
   trailerName?: string;
-  trailerCompany?: string; // Added trailer company
+  trailerCompany?: string;
   storageExpiryDate: string; 
   storageExpiryDateFormatted: string;
   releasedAt: string; 
@@ -37,10 +37,10 @@ interface OverdueReleasedReportItem {
 }
 
 export default function MonthlyOverdueReleasedReportPage() {
-  const { shipments, getTrailerById, trailers: allTrailers } = useWarehouse(); // Added allTrailers
+  const { shipments, getTrailerById, trailers: allTrailers } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
   const [displayDate, setDisplayDate] = useState(new Date());
-  const [companyFilter, setCompanyFilter] = useState<string>('all'); // State for company filter
+  const [companyFilter, setCompanyFilter] = useState<string>('all');
 
   useEffect(() => {
     setIsClient(true);
@@ -87,7 +87,7 @@ export default function MonthlyOverdueReleasedReportPage() {
         if (!trailer || !trailer.storageExpiryDate || !shipment.releasedAt) {
           return null; 
         }
-        // Company filter check
+        
         if (companyFilter !== 'all' && trailer.company?.toLowerCase() !== companyFilter.toLowerCase()) {
           return null;
         }
@@ -104,7 +104,7 @@ export default function MonthlyOverdueReleasedReportPage() {
               customerJobNumber: shipment.customerJobNumber,
               trailerId: shipment.trailerId,
               trailerName: trailer.name,
-              trailerCompany: trailer.company, // Store company
+              trailerCompany: trailer.company,
               storageExpiryDate: trailer.storageExpiryDate,
               storageExpiryDateFormatted: formatDateSafe(trailer.storageExpiryDate),
               releasedAt: shipment.releasedAt,
@@ -169,7 +169,7 @@ export default function MonthlyOverdueReleasedReportPage() {
             <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell> {/* Storage Expiry Skeleton */}
             <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
             <TableCell className="text-right"><Skeleton className="h-4 w-[70px] ml-auto" /></TableCell>
           </TableRow>

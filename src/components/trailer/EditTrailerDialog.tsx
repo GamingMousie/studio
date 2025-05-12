@@ -35,7 +35,7 @@ type EditTrailerFormDataInternal = {
   customField2?: string;
 };
 
-const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Empty'];
+const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Devanned'];
 
 const editTrailerSchema = z.object({
   name: z.string().min(1, 'Trailer Name is required').max(50, 'Trailer Name too long'),

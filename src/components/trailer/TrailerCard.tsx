@@ -34,9 +34,9 @@ const statusColors: Record<TrailerStatus, string> = {
   Arrived: 'bg-blue-500',
   Loading: 'bg-green-500',
   Offloading: 'bg-purple-500',
-  Empty: 'bg-gray-500',
+  Devanned: 'bg-gray-500',
 };
-const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Empty'];
+const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Devanned'];
 
 
 export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChange }: TrailerCardProps) {

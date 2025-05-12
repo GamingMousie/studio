@@ -32,7 +32,7 @@ type TrailerFormData = Omit<ExternalTrailerFormData, 'arrivalDate' | 'storageExp
   customField2?: string;
 };
 
-const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Empty'];
+const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Devanned'];
 
 const trailerSchema = z.object({
   id: z.string().min(1, 'Trailer ID is required').max(20, 'Trailer ID too long'),

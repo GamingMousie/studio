@@ -1,4 +1,4 @@
-export type TrailerStatus = 'Scheduled' | 'Arrived' | 'Loading' | 'Offloading' | 'Empty';
+export type TrailerStatus = 'Scheduled' | 'Arrived' | 'Loading' | 'Offloading' | 'Devanned';
 
 export interface Trailer {
   id: string; // User-defined unique ID

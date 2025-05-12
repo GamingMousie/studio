@@ -7,7 +7,7 @@ import type { Shipment, Trailer } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer, ArrowRightCircle, Clock } from 'lucide-react';
+import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer, ArrowRightCircle, Clock, AlertOctagon } from 'lucide-react';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
@@ -143,7 +143,7 @@ export default function ReportsPage() {
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 no-print">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 no-print">
         <Card className="shadow-lg hover:shadow-xl transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center text-xl text-primary">
@@ -155,7 +155,6 @@ export default function ReportsPage() {
             </CardDescription>
           </CardHeader>
           <CardFooter>
-            {/* This card acts as a summary/link, actual report content is below or on its own page */}
             <p className="text-sm text-muted-foreground">
               This report is detailed below on this page.
             </p>
@@ -167,14 +166,33 @@ export default function ReportsPage() {
             <CardHeader>
               <CardTitle className="flex items-center text-xl text-primary">
                 <Clock className="mr-2 h-6 w-6" />
-                Weekly Released Shipments
+                Weekly/Monthly Released Shipments
               </CardTitle>
               <CardDescription>
-                View all shipments that were marked as released this week.
+                View all shipments that were marked as released this week or month.
               </CardDescription>
             </CardHeader>
             <CardFooter>
                 <Button variant="link" className="p-0 h-auto text-primary">
+                View Report <ArrowRightCircle className="ml-2 h-4 w-4" />
+              </Button>
+            </CardFooter>
+          </Card>
+        </Link>
+
+        <Link href="/reports/monthly-overdue-released" passHref>
+          <Card className="shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col justify-between cursor-pointer">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl text-primary">
+                <AlertOctagon className="mr-2 h-6 w-6" />
+                Monthly Overdue Released Shipments
+              </CardTitle>
+              <CardDescription>
+                Shipments released this month after their storage expiry date.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Button variant="link" className="p-0 h-auto text-primary">
                 View Report <ArrowRightCircle className="ml-2 h-4 w-4" />
               </Button>
             </CardFooter>
@@ -291,4 +309,5 @@ export default function ReportsPage() {
     </div>
   );
 }
+
 

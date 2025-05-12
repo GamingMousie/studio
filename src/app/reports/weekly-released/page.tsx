@@ -95,8 +95,8 @@ export default function WeeklyReleasedReportPage() {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>STS Job</TableHead>
           <TableHead>Trailer ID</TableHead>
+          <TableHead>STS Job</TableHead>
           <TableHead>Trailer Name</TableHead>
           <TableHead>Customer Job No.</TableHead>
           <TableHead>Importer</TableHead>
@@ -107,8 +107,8 @@ export default function WeeklyReleasedReportPage() {
       <TableBody>
         {[...Array(5)].map((_, i) => (
           <TableRow key={i}>
-            <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
@@ -166,8 +166,8 @@ export default function WeeklyReleasedReportPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="whitespace-nowrap"><Hash className="inline-block mr-1 h-4 w-4 print:hidden"/>STS Job</TableHead>
                     <TableHead className="whitespace-nowrap"><Truck className="inline-block mr-1 h-4 w-4 print:hidden"/>Trailer ID</TableHead>
+                    <TableHead className="whitespace-nowrap"><Hash className="inline-block mr-1 h-4 w-4 print:hidden"/>STS Job</TableHead>
                     <TableHead className="whitespace-nowrap">Trailer Name</TableHead>
                     <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4 print:hidden"/>Cust. Job No.</TableHead>
                     <TableHead className="whitespace-nowrap"><Users className="inline-block mr-1 h-4 w-4 print:hidden"/>Importer</TableHead>
@@ -178,14 +178,14 @@ export default function WeeklyReleasedReportPage() {
                 <TableBody>
                   {reportData.map((item) => (
                     <TableRow key={item.shipmentId}>
-                      <TableCell className="font-medium">
-                        <Link href={`/shipments/${item.shipmentId}`} className="text-primary hover:underline print:text-foreground print:no-underline">
-                          {item.stsJob}
-                        </Link>
-                      </TableCell>
                        <TableCell>
                         <Link href={`/trailers/${item.trailerId}`} className="text-primary hover:underline print:text-foreground print:no-underline">
                           {item.trailerId}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <Link href={`/shipments/${item.shipmentId}`} className="text-primary hover:underline print:text-foreground print:no-underline">
+                          {item.stsJob}
                         </Link>
                       </TableCell>
                       <TableCell>{item.trailerName || 'N/A'}</TableCell>
@@ -210,3 +210,4 @@ export default function WeeklyReleasedReportPage() {
     </div>
   );
 }
+

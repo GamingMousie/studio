@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import TrailerCard from '@/components/trailer/TrailerCard';
 import AddTrailerDialog from '@/components/trailer/AddTrailerDialog';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, ListFilter, LayoutGrid, Search } from 'lucide-react';
+import { PlusCircle, ListFilter, LayoutGrid, Search, Briefcase } from 'lucide-react'; // Added Briefcase
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { TrailerStatus } from '@/types';
@@ -19,17 +19,32 @@ export default function HomePage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<TrailerStatus | 'all'>('all');
+  const [companyFilter, setCompanyFilter] = useState<string>('all'); // New state for company filter
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  const uniqueCompanies = useMemo(() => {
+    if (!isClient) return [];
+    const companies = new Set<string>();
+    trailers.forEach(trailer => {
+      if (trailer.company) {
+        companies.add(trailer.company);
+      }
+    });
+    return Array.from(companies).sort();
+  }, [trailers, isClient]);
+
   const filteredTrailers = trailers.filter(trailer => {
-    const matchesSearch = trailer.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          trailer.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = trailer.id.toLowerCase().includes(searchLower) ||
+                          trailer.name.toLowerCase().includes(searchLower) ||
+                          (trailer.company && trailer.company.toLowerCase().includes(searchLower));
     const matchesStatus = statusFilter === 'all' || trailer.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesCompany = companyFilter === 'all' || (trailer.company?.toLowerCase() === companyFilter.toLowerCase());
+    return matchesSearch && matchesStatus && matchesCompany;
   });
   
   const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Devanned'];
@@ -117,7 +132,7 @@ export default function HomePage() {
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input 
-              placeholder="Search by ID or Name..."
+              placeholder="Search by ID, Name, or Company..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -132,6 +147,21 @@ export default function HomePage() {
               {allStatuses.map(status => (
                 <SelectItem key={status} value={status}>{status}</SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+          <Select value={companyFilter} onValueChange={(value) => setCompanyFilter(value)}>
+            <SelectTrigger className="w-full md:w-[200px]">
+               <div className="flex items-center">
+                 <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+                 <SelectValue placeholder="Filter by company" />
+               </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {isClient && uniqueCompanies.map(company => (
+                <SelectItem key={company} value={company.toLowerCase()}>{company}</SelectItem>
+              ))}
+              {!isClient && <Skeleton className="h-8 w-full my-1" />}
             </SelectContent>
           </Select>
           <div className="flex gap-2">

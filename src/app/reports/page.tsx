@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import type { Shipment, Trailer } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card'; // Added CardFooter and CardDescription
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ClipboardList, PackageSearch, Info } from 'lucide-react';
@@ -165,3 +165,4 @@ export default function ReportsPage() {
     </div>
   );
 }
+

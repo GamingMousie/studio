@@ -7,14 +7,12 @@ import type { Trailer } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BarChart3, Printer, Info, Briefcase, CalendarCheck } from 'lucide-react';
+import { BarChart3, Printer, Info, Briefcase, CalendarCheck, ArrowLeft, ArrowRight, Undo2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
 import {
@@ -23,6 +21,8 @@ import {
   startOfMonth,
   endOfMonth,
   isWithinInterval,
+  addMonths,
+  subMonths,
 } from 'date-fns';
 import type { ChartConfig } from '@/components/ui/chart';
 
@@ -46,14 +46,14 @@ const generateChartColors = (numColors: number): string[] => {
 export default function MonthlyCompanyTrailersReportPage() {
   const { trailers } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
+  const [displayDate, setDisplayDate] = useState(new Date()); // Date to determine the month to display
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const currentDate = useMemo(() => new Date(), []);
-  const currentMonthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
-  const currentMonthEnd = useMemo(() => endOfMonth(currentDate), [currentDate]);
+  const currentMonthStart = useMemo(() => startOfMonth(displayDate), [displayDate]);
+  const currentMonthEnd = useMemo(() => endOfMonth(displayDate), [displayDate]);
 
   const reportData = useMemo((): CompanyTrailerCount[] => {
     if (!isClient) return [];
@@ -96,13 +96,26 @@ export default function MonthlyCompanyTrailersReportPage() {
   const handlePrintReport = () => {
     window.print();
   };
+  
+  const handlePreviousMonth = () => {
+    setDisplayDate(prev => subMonths(prev, 1));
+  };
 
-  const periodRangeFormatted = `${format(currentMonthStart, 'MMMM yyyy')}`;
+  const handleNextMonth = () => {
+    setDisplayDate(prev => addMonths(prev, 1));
+  };
+
+  const handleThisMonth = () => {
+    setDisplayDate(new Date());
+  };
+
+  const displayedMonthFormatted = format(displayDate, 'MMMM yyyy');
+
   const pageTitle = `Monthly Trailer Arrivals by Company`;
-  const cardTitleText = `Trailer Arrivals per Company - ${periodRangeFormatted}`;
-  const cardDescriptionText = `Summary of trailers that arrived in ${periodRangeFormatted}, grouped by company.`;
+  const cardTitleText = `Trailer Arrivals per Company - ${displayedMonthFormatted}`;
+  const cardDescriptionText = `Summary of trailers that arrived in ${displayedMonthFormatted}, grouped by company.`;
   const printTitleText = 'Monthly Trailer Arrivals by Company Report';
-  const printPeriodText = `For month: ${periodRangeFormatted}`;
+  const printPeriodText = `For month: ${displayedMonthFormatted}`;
 
   const ReportSkeleton = () => (
     <div className="space-y-4">
@@ -133,10 +146,21 @@ export default function MonthlyCompanyTrailersReportPage() {
           <BarChart3 className="mr-3 h-8 w-8 text-primary" />
           {pageTitle}
         </h1>
-        <Button onClick={handlePrintReport} variant="outline">
-          <Printer className="mr-2 h-4 w-4" />
-          Print Report
-        </Button>
+        <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
+           <Button variant="outline" onClick={handlePreviousMonth} aria-label="Previous month">
+            <ArrowLeft className="h-4 w-4 mr-0 sm:mr-2" /> <span className="hidden sm:inline">Prev Month</span>
+          </Button>
+          <Button variant="outline" onClick={handleThisMonth}>
+             <Undo2 className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">This Month</span>
+          </Button>
+          <Button variant="outline" onClick={handleNextMonth} aria-label="Next month">
+             <span className="hidden sm:inline">Next Month</span><ArrowRight className="h-4 w-4 ml-0 sm:ml-2" />
+          </Button>
+          <Button onClick={handlePrintReport} variant="outline">
+            <Printer className="mr-2 h-4 w-4" />
+            Print Report
+          </Button>
+        </div>
       </div>
 
       <Card className="shadow-lg printable-area">
@@ -157,7 +181,7 @@ export default function MonthlyCompanyTrailersReportPage() {
             <div className="min-h-[200px] flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-md p-8">
               <CalendarCheck className="h-16 w-16 text-muted-foreground mb-4" />
               <p className="text-xl text-muted-foreground">
-                No trailer arrivals recorded for any company in {periodRangeFormatted}.
+                No trailer arrivals recorded for any company in {displayedMonthFormatted}.
               </p>
             </div>
           ) : (
@@ -216,10 +240,11 @@ export default function MonthlyCompanyTrailersReportPage() {
         {isClient && reportData.length > 0 && (
           <CardFooter className="text-sm text-muted-foreground border-t pt-4 no-print">
             <Info className="h-4 w-4 mr-2 text-primary" />
-            Displaying trailer arrival counts for {reportData.length} companies in {periodRangeFormatted}.
+            Displaying trailer arrival counts for {reportData.length} companies in {displayedMonthFormatted}.
           </CardFooter>
         )}
       </Card>
     </div>
   );
 }
+

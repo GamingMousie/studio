@@ -7,7 +7,7 @@ import type { Shipment, Trailer } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer, ArrowRightCircle, Clock, AlertOctagon } from 'lucide-react';
+import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer, ArrowRightCircle, Clock, AlertOctagon, BarChart3 } from 'lucide-react';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
@@ -198,6 +198,26 @@ export default function ReportsPage() {
             </CardFooter>
           </Card>
         </Link>
+
+        <Link href="/reports/monthly-company-trailers" passHref>
+          <Card className="shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col justify-between cursor-pointer">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl text-primary">
+                <BarChart3 className="mr-2 h-6 w-6" />
+                Monthly Trailer Arrivals by Company
+              </CardTitle>
+              <CardDescription>
+                Summary of trailer arrivals per company for the current month.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Button variant="link" className="p-0 h-auto text-primary">
+                View Report <ArrowRightCircle className="ml-2 h-4 w-4" />
+              </Button>
+            </CardFooter>
+          </Card>
+        </Link>
+
       </div>
       
       {/* Bond Check Report (Existing Report) */}
@@ -309,5 +329,6 @@ export default function ReportsPage() {
     </div>
   );
 }
+
 
 

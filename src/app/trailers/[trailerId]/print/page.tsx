@@ -19,7 +19,7 @@ const FormLine = ({ label, value, valueBold = false, fullWidthValue = false, min
   const valueDisplay = value !== undefined && value !== null ? String(value) : '';
   return (
     <div className={`flex ${fullWidthValue && label ? 'flex-col items-start' : 'flex-row items-end'} ${minHeight} mb-1 print:mb-0.5`}>
-      {label && <span className="text-xs print:text-[7pt] mr-1 whitespace-nowrap">{label}</span>}
+      {label && <span className="text-xs print:text-[7pt] mr-1 whitespace-nowrap">{label}:</span>}
       <span 
         className={`flex-grow border-b border-foreground ${valueBold ? 'font-semibold' : ''} text-xs print:text-[8pt] pb-px overflow-hidden text-ellipsis whitespace-nowrap`}
       >
@@ -228,7 +228,7 @@ export default function PrintTrailerTransferPage() {
               <span className="flex-grow border-b border-foreground text-xs print:text-[8pt] pb-px mx-1 min-w-[15ch]"></span>
               <span className="text-xs print:text-[7pt] whitespace-nowrap">(import station)</span>
             </div>
-            <FormLine label="Permission is requested to remove unit/container number:" value={unitContainerNumber} valueBold/>
+            <FormLine label="Permission is requested to remove unit/container number" value={unitContainerNumber} valueBold/>
             <div className="grid grid-cols-3 gap-x-2 items-end">
                 <FormLine label="Which arrived per MV" value={mvArrived} />
                 <FormLine label="date" value={mvDate} />
@@ -248,12 +248,31 @@ export default function PrintTrailerTransferPage() {
             </div>
           </div>
           
+          {/* Part B */}
+          <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">
+            <h3 className="font-bold text-sm print:text-[9pt] mb-1 print:mb-0.5">Part B (Official use only)</h3>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 print:gap-y-0">
+                <FormLine label="Customs seal number applied" />
+                <FormLine label="Local Ref Number" />
+            </div>
+            <FormLine label="Date Stamp and Time" fullWidthValue />
+            <FormLine label="Lorry Reg. Number" />
+            <div className="grid grid-cols-2 gap-x-4 mt-2 print:mt-1">
+              <div> {/* Empty div for spacing or if Lorry Reg takes full width conceptually */} </div>
+              <FormLine label="Sealing Official’s signature" fullWidthValue />
+            </div>
+             <div className="border-t border-foreground print:border-black mt-2 pt-1">
+               <FormLine label="Sealing Official’s signature" fullWidthValue />
+             </div>
+
+          </div>
+
           {/* Part C */}
            <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">
             <h3 className="font-bold text-sm print:text-[9pt] mb-1 print:mb-0.5">Part C: (Notification on arrival of good at T.S. Facility)</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 print:gap-y-0">
                 <FormLine label="Ship/date of Arrival" value={shipDateArrivalC}/>
-                <FormLine label="T.S. (ACP) Ref:" value={manifestRef} valueBold/>
+                <FormLine label="T.S. (ACP) Ref" value={manifestRef} valueBold/>
                 <FormLine label="Container/Trailer Number" value={unitContainerNumber} valueBold/>
                 <FormLine label="Number of T1/Non-EU consignments" value={totalShipments} valueBold/>
                 <FormLine label="Country of Origin" value={countryOfOriginC}/>

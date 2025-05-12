@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { ShipShapeLogo } from '@/components/icons/ShipShapeLogo';
 import { Button } from '@/components/ui/button';
-import { Package, CalendarDays, Truck } from 'lucide-react'; // Added Truck
+import { Package, CalendarDays, Truck, LineChart } from 'lucide-react'; // Added Truck and LineChart
 
 const Header = () => {
   return (
@@ -31,6 +31,12 @@ const Header = () => {
               Calendar
             </Link>
           </Button>
+          <Button variant="ghost" asChild className="px-2 sm:px-3">
+            <Link href="/reports" className="text-foreground hover:text-primary transition-colors text-xs sm:text-sm">
+              <LineChart className="mr-1 sm:mr-2 h-4 w-4" />
+              Reports
+            </Link>
+          </Button>
         </nav>
       </div>
     </header>
@@ -38,3 +44,4 @@ const Header = () => {
 };
 
 export default Header;
+

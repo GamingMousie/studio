@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -7,7 +6,7 @@ import type { Shipment, Trailer } from '@/types'; // Assuming Trailer type is al
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertOctagon, PackageSearch, Printer, Info, Truck, CalendarDays, Hash, Briefcase, TrendingUp } from 'lucide-react';
+import { AlertOctagon, PackageSearch, Printer, Info, Truck, CalendarDays, Hash, Briefcase, TrendingUp, ArrowLeft, ArrowRight, Undo2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,6 +16,8 @@ import {
   endOfMonth,
   isWithinInterval,
   differenceInDays,
+  addMonths,
+  subMonths,
 } from 'date-fns';
 
 interface OverdueReleasedReportItem {
@@ -35,15 +36,14 @@ interface OverdueReleasedReportItem {
 export default function MonthlyOverdueReleasedReportPage() {
   const { shipments, getTrailerById } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
+  const [displayDate, setDisplayDate] = useState(new Date()); // Date to determine the month to display
 
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  const currentDate = useMemo(() => new Date(), []);
   
-  const currentMonthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
-  const currentMonthEnd = useMemo(() => endOfMonth(currentDate), [currentDate]);
+  const currentMonthStart = useMemo(() => startOfMonth(displayDate), [displayDate]);
+  const currentMonthEnd = useMemo(() => endOfMonth(displayDate), [displayDate]);
 
   const formatDateSafe = (dateString?: string, dateFormat = 'PP') => {
     if (!dateString) return 'N/A';
@@ -106,12 +106,25 @@ export default function MonthlyOverdueReleasedReportPage() {
     window.print();
   };
 
-  const periodRangeFormatted = `${format(currentMonthStart, 'MMMM yyyy')}`;
+  const handlePreviousMonth = () => {
+    setDisplayDate(prev => subMonths(prev, 1));
+  };
+
+  const handleNextMonth = () => {
+    setDisplayDate(prev => addMonths(prev, 1));
+  };
+
+  const handleThisMonth = () => {
+    setDisplayDate(new Date());
+  };
+
+  const displayedMonthFormatted = format(displayDate, 'MMMM yyyy');
+
   const pageTitle = 'Monthly Overdue Released Shipments';
-  const cardTitleText = `Overdue Shipments Released in ${format(currentDate, 'MMMM')}`;
-  const cardDescriptionText = `Shipments released in ${periodRangeFormatted} after their trailer's storage expiry date.`;
+  const cardTitleText = `Overdue Shipments Released in ${displayedMonthFormatted}`;
+  const cardDescriptionText = `Shipments released in ${displayedMonthFormatted} after their trailer's storage expiry date.`;
   const printTitleText = 'Monthly Overdue Released Shipments Report';
-  const printPeriodText = `For month: ${periodRangeFormatted}`;
+  const printPeriodText = `For month: ${displayedMonthFormatted}`;
 
 
   const ReportSkeleton = () => (
@@ -148,10 +161,21 @@ export default function MonthlyOverdueReleasedReportPage() {
           <AlertOctagon className="mr-3 h-8 w-8 text-primary" />
           {pageTitle}
         </h1>
-        <Button onClick={handlePrintReport} variant="outline">
-          <Printer className="mr-2 h-4 w-4" />
-          Print Report
-        </Button>
+        <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
+          <Button variant="outline" onClick={handlePreviousMonth} aria-label="Previous month">
+            <ArrowLeft className="h-4 w-4 mr-0 sm:mr-2" /> <span className="hidden sm:inline">Prev Month</span>
+          </Button>
+          <Button variant="outline" onClick={handleThisMonth}>
+             <Undo2 className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">This Month</span>
+          </Button>
+          <Button variant="outline" onClick={handleNextMonth} aria-label="Next month">
+             <span className="hidden sm:inline">Next Month</span><ArrowRight className="h-4 w-4 ml-0 sm:ml-2" />
+          </Button>
+          <Button onClick={handlePrintReport} variant="outline">
+            <Printer className="mr-2 h-4 w-4" />
+            Print Report
+          </Button>
+        </div>
       </div>
 
       <Card className="shadow-lg printable-area">
@@ -176,7 +200,7 @@ export default function MonthlyOverdueReleasedReportPage() {
             <div className="min-h-[200px] flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-md p-8">
               <PackageSearch className="h-16 w-16 text-muted-foreground mb-4" />
               <p className="text-xl text-muted-foreground">
-                No overdue shipments found released in {format(currentDate, 'MMMM')}.
+                No overdue shipments found released in {displayedMonthFormatted}.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
                 This means all shipments released this month were done so before their storage expiry date, or no shipments met the criteria.
@@ -224,7 +248,7 @@ export default function MonthlyOverdueReleasedReportPage() {
          {isClient && reportData.length > 0 && (
             <CardFooter className="text-sm text-muted-foreground border-t pt-4 no-print">
                 <Info className="h-4 w-4 mr-2 text-primary" />
-                Displaying {reportData.length} overdue shipment(s) released in {format(currentDate, 'MMMM')}.
+                Displaying {reportData.length} overdue shipment(s) released in {displayedMonthFormatted}.
             </CardFooter>
         )}
       </Card>

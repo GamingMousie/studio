@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -19,33 +18,40 @@ export default function TrailerShipmentsPage() {
   const trailerId = params.trailerId as string;
 
   const {
-    getTrailerById,
     getShipmentsByTrailerId,
     deleteShipment,
+    trailers: trailersFromContext, // Get the full list of trailers from context
   } = useWarehouse();
 
   const [trailer, setTrailer] = useState<Trailer | null>(null);
   const [isAddShipmentDialogOpen, setIsAddShipmentDialogOpen] = useState(false);
-  const [isTrailerFound, setIsTrailerFound] = useState<boolean | null>(null);
+  const [isTrailerFound, setIsTrailerFound] = useState<boolean | null>(null); // null: loading, true: found, false: not found
 
 
   useEffect(() => {
-    if (trailerId) {
-      const currentTrailer = getTrailerById(trailerId);
+    // Ensure trailerId is a non-empty string before proceeding
+    if (typeof trailerId === 'string' && trailerId.trim() !== '') {
+      const currentTrailer = trailersFromContext.find(t => t.id === trailerId);
       if (currentTrailer) {
         setTrailer(currentTrailer);
         setIsTrailerFound(true);
       } else {
+        // If trailersFromContext is populated (guaranteed by initialTrailers or localStorage data)
+        // and the trailer is not found, then it's genuinely not in the current dataset.
         setIsTrailerFound(false);
-        // Removed console.error as the UI handles this state
+        setTrailer(null);
       }
+    } else {
+      // trailerId is invalid or not yet available
+      setIsTrailerFound(false);
+      setTrailer(null);
     }
-  }, [trailerId, getTrailerById]); 
+  }, [trailerId, trailersFromContext]); // Depend on trailerId and the raw trailers array from context
 
   const shipmentsForCurrentTrailer = useMemo(() => {
-    if (!trailerId || !isTrailerFound) return []; 
+    if (!trailerId || !isTrailerFound || !trailer) return [];
     return getShipmentsByTrailerId(trailerId);
-  }, [trailerId, isTrailerFound, getShipmentsByTrailerId]);
+  }, [trailerId, isTrailerFound, trailer, getShipmentsByTrailerId]);
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
@@ -66,9 +72,10 @@ export default function TrailerShipmentsPage() {
     );
   }
 
-  if (isTrailerFound === false) { 
+  if (isTrailerFound === false || !trailer) { 
      return (
         <div className="flex flex-col justify-center items-center h-[calc(100vh-200px)] space-y-4">
+          <Truck className="h-16 w-16 text-muted-foreground" />
           <p className="text-2xl font-semibold text-destructive">Trailer Not Found</p>
           <p className="text-xl text-muted-foreground">Could not find trailer with ID: {trailerId}</p>
           <Button variant="outline" asChild>
@@ -80,15 +87,6 @@ export default function TrailerShipmentsPage() {
      );
   }
   
-  if (!trailer) { 
-     return (
-      <div className="flex justify-center items-center h-[calc(100vh-200px)]">
-        <p className="text-xl text-muted-foreground">Loading trailer data...</p>
-      </div>
-    );
-  }
-
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -189,5 +187,3 @@ export default function TrailerShipmentsPage() {
       />
     </div>
   );
-}
-

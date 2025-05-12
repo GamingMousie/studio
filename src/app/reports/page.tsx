@@ -7,14 +7,16 @@ import type { Shipment, Trailer } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, PackageSearch, Info, Briefcase } from 'lucide-react';
+import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format, parseISO } from 'date-fns';
 
 interface BondCheckReportItem {
   trailerId: string;
   trailerName?: string;
   company?: string;
+  arrivalDate?: string; // Added arrivalDate
   stsJob: number;
   shipmentId: string;
   customerJobNumber?: string;
@@ -29,6 +31,15 @@ export default function ReportsPage() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
+  const formatDateSafe = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    try {
+      return format(parseISO(dateString), 'PP'); // e.g., Jul 20, 2024
+    } catch (error) {
+      return "Invalid Date";
+    }
+  };
 
   const rawBondCheckReportData = useMemo((): BondCheckReportItem[] => {
     if (!isClient) return [];
@@ -51,6 +62,7 @@ export default function ReportsPage() {
           trailerId: shipment.trailerId,
           trailerName: trailer?.name,
           company: trailer?.company,
+          arrivalDate: trailer?.arrivalDate, // Include arrivalDate
           stsJob: shipment.stsJob,
           shipmentId: shipment.id,
           customerJobNumber: shipment.customerJobNumber,
@@ -94,6 +106,7 @@ export default function ReportsPage() {
           <TableHead>Trailer ID</TableHead>
           <TableHead>Trailer Name</TableHead>
           <TableHead>Company</TableHead>
+          <TableHead>Arrival Date</TableHead> {/* New Skeleton Head */}
           <TableHead>STS Job</TableHead>
           <TableHead>Customer Job No.</TableHead>
           <TableHead>Locations</TableHead>
@@ -106,6 +119,7 @@ export default function ReportsPage() {
             <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[90px]" /></TableCell> {/* New Skeleton Cell */}
             <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
@@ -172,6 +186,12 @@ export default function ReportsPage() {
                     <TableHead className="whitespace-nowrap">Trailer ID</TableHead>
                     <TableHead className="whitespace-nowrap">Trailer Name</TableHead>
                     <TableHead className="whitespace-nowrap">Company</TableHead>
+                    <TableHead className="whitespace-nowrap">
+                      <div className="flex items-center">
+                        <CalendarDays className="mr-1.5 h-4 w-4" />
+                        Arrival Date
+                      </div>
+                    </TableHead> {/* New Head */}
                     <TableHead className="whitespace-nowrap">STS Job</TableHead>
                     <TableHead className="whitespace-nowrap">Customer Job No.</TableHead>
                     <TableHead>Locations</TableHead>
@@ -188,6 +208,7 @@ export default function ReportsPage() {
                       </TableCell>
                       <TableCell>{item.trailerName || 'N/A'}</TableCell>
                       <TableCell>{item.company || 'N/A'}</TableCell>
+                      <TableCell>{formatDateSafe(item.arrivalDate)}</TableCell> {/* New Cell */}
                       <TableCell>{item.stsJob}</TableCell>
                       <TableCell>{item.customerJobNumber || 'N/A'}</TableCell>
                       <TableCell>{item.locationsDisplay}</TableCell>

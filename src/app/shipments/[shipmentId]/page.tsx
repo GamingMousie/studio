@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send } from 'lucide-react';
+import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
 export default function SingleShipmentPage() {
@@ -96,7 +96,7 @@ export default function SingleShipmentPage() {
             <Skeleton className="h-4 w-1/2" />
           </CardHeader>
           <CardContent className="space-y-3">
-            {[...Array(7)].map((_, i) => ( // Increased to 7 for exporter
+            {[...Array(8)].map((_, i) => ( // Increased to 8 for customer job number
               <div key={i} className="flex items-center space-x-2">
                 <Skeleton className="h-5 w-5 rounded-full" />
                 <Skeleton className="h-4 w-1/4" />
@@ -150,6 +150,7 @@ export default function SingleShipmentPage() {
               </CardTitle>
               <CardDescription className="mt-1">
                 STS Job: <span className="font-semibold text-foreground">{shipment.stsJob}</span> | Shipment ID: <span className="font-semibold text-foreground">{shipment.id.substring(0,8)}...</span>
+                {shipment.customerJobNumber && ` | Cust. Job: ${shipment.customerJobNumber}`}
               </CardDescription>
             </div>
              {trailer && (
@@ -180,6 +181,14 @@ export default function SingleShipmentPage() {
             <h3 className="font-semibold text-muted-foreground flex items-center"><Hash className="mr-2 h-4 w-4" />STS Job Number</h3>
             <p className="text-2xl font-bold text-foreground">{shipment.stsJob}</p>
           </div>
+          
+          {shipment.customerJobNumber && (
+            <div className="space-y-1 md:col-span-1">
+              <h3 className="font-semibold text-muted-foreground flex items-center"><Briefcase className="mr-2 h-4 w-4" />Customer Job Number</h3>
+              <p className="text-lg font-medium">{shipment.customerJobNumber}</p>
+            </div>
+          )}
+
 
           <div className="space-y-1">
             <h3 className="font-semibold text-muted-foreground flex items-center"><Package className="mr-2 h-4 w-4" />Quantity</h3>

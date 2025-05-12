@@ -5,7 +5,7 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send } from 'lucide-react';
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send, Briefcase } from 'lucide-react';
 import ManageLocationsDialog from './ManageLocationsDialog';
 import EditShipmentDialog from './EditShipmentDialog';
 import AttachDocumentDialog from './AttachDocumentDialog';
@@ -127,6 +127,13 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
           <CardDescription>ID: {shipment.id.substring(0,8)}...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-1.5 text-sm flex-grow">
+          {shipment.customerJobNumber && (
+            <div className="flex items-center">
+              <Briefcase className="mr-1.5 h-4 w-4 text-muted-foreground" />
+              <span className="font-medium text-muted-foreground">Cust. Job No:</span>
+              <span className="ml-1.5">{shipment.customerJobNumber}</span>
+            </div>
+          )}
           <p><span className="font-medium text-muted-foreground">Quantity:</span> {shipment.quantity}</p>
 
           <div className="flex items-center">

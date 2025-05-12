@@ -30,8 +30,9 @@ export default function AllShipmentsPage() {
       const matchesSearch =
         shipment.id.toLowerCase().includes(searchLower) ||
         shipment.stsJob.toString().toLowerCase().includes(searchLower) ||
+        (shipment.customerJobNumber && shipment.customerJobNumber.toLowerCase().includes(searchLower)) ||
         shipment.importer.toLowerCase().includes(searchLower) ||
-        shipment.exporter.toLowerCase().includes(searchLower) || // Added exporter to search
+        shipment.exporter.toLowerCase().includes(searchLower) || 
         (shipment.locationNames && shipment.locationNames.some(loc => loc.toLowerCase().includes(searchLower)));
 
       const matchesTrailer = trailerFilter === 'all' || shipment.trailerId === trailerFilter;
@@ -51,6 +52,7 @@ export default function AllShipmentsPage() {
                 <Skeleton className="h-7 w-7 rounded-md" />
               </div>
               <Skeleton className="h-4 w-1/2" /> {/* ID */}
+              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Customer Job No. */}
               <Skeleton className="h-4 w-1/3 mt-1" /> {/* Quantity */}
               <Skeleton className="h-4 w-2/5 mt-1" /> {/* Exporter */}
               <Skeleton className="h-4 w-2/5 mt-1" /> {/* Importer */}
@@ -80,6 +82,7 @@ export default function AllShipmentsPage() {
               <div className="flex-grow space-y-2">
                 <Skeleton className="h-6 w-3/5" /> {/* STS Job */}
                 <Skeleton className="h-4 w-2/5" /> {/* ID */}
+                <Skeleton className="h-4 w-1/2 mb-1" /> {/* Customer Job No. */}
                 <div className="flex items-center gap-4 text-sm">
                   <Skeleton className="h-4 w-20" /> {/* Quantity */}
                   <Skeleton className="h-4 w-28" /> {/* Exporter */}
@@ -124,7 +127,7 @@ export default function AllShipmentsPage() {
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
-              placeholder="Search by ID, STS Job, Importer (Consignee), Exporter (Consignor), Location..."
+              placeholder="Search by ID, STS Job, Cust. Job, Importer, Exporter, Location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"

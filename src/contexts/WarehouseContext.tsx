@@ -16,7 +16,7 @@ interface WarehouseContextType {
   deleteTrailer: (trailerId: string) => void;
   shipments: Shipment[];
   getShipmentsByTrailerId: (trailerId: string) => Shipment[];
-  addShipment: (shipment: Omit<Shipment, 'id' | 'locationNames' | 'released' | 'cleared' | 'importer' | 'exporter' | 'stsJob'> & { stsJob: number; importer: string; exporter: string; initialLocationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?: boolean, cleared?: boolean, weight?: number, palletSpace?: number }) => void;
+  addShipment: (shipment: Omit<Shipment, 'id' | 'locationNames' | 'released' | 'cleared' | 'importer' | 'exporter' | 'stsJob' | 'customerJobNumber'> & { stsJob: number; customerJobNumber?: string; importer: string; exporter: string; initialLocationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?: boolean, cleared?: boolean, weight?: number, palletSpace?: number }) => void;
   deleteShipment: (shipmentId: string) => void;
   getTrailerById: (trailerId: string) => Trailer | undefined;
   getShipmentById: (shipmentId: string) => Shipment | undefined;
@@ -37,17 +37,17 @@ const initialTrailers: Trailer[] = [
 ];
 
 const initialShipments: Shipment[] = [
-  { id: uuidv4(), trailerId: 'T-001', stsJob: 12345, quantity: 50, importer: 'National Importers Ltd.', exporter: 'Global Exporters Inc.', locationNames: ['Bay A', 'Section 1-A', 'Rack 3, Shelf B', 'Pallet Spot 101', 'Aisle 5, Position 2', 'Zone Blue-7', 'Overflow Area 1', 'QC Hold Area', 'Staging Lane 4', 'Dock Door 12'], releaseDocumentName: 'release_electronics_123.pdf', clearanceDocumentName: 'clearance_electronics_123.pdf', released: true, cleared: true, weight: 1200, palletSpace: 4 },
-  { id: uuidv4(), trailerId: 'T-001', stsJob: 67890, quantity: 200, importer: 'Global Goods Inc.', exporter: 'Domestic Suppliers LLC', locationNames: ['Bay B'], released: false, cleared: false, weight: 800, palletSpace: 6 },
+  { id: uuidv4(), trailerId: 'T-001', stsJob: 12345, customerJobNumber: 'CUST-001', quantity: 50, importer: 'National Importers Ltd.', exporter: 'Global Exporters Inc.', locationNames: ['Bay A', 'Section 1-A', 'Rack 3, Shelf B', 'Pallet Spot 101', 'Aisle 5, Position 2', 'Zone Blue-7', 'Overflow Area 1', 'QC Hold Area', 'Staging Lane 4', 'Dock Door 12'], releaseDocumentName: 'release_electronics_123.pdf', clearanceDocumentName: 'clearance_electronics_123.pdf', released: true, cleared: true, weight: 1200, palletSpace: 4 },
+  { id: uuidv4(), trailerId: 'T-001', stsJob: 67890, customerJobNumber: 'CUST-002', quantity: 200, importer: 'Global Goods Inc.', exporter: 'Domestic Suppliers LLC', locationNames: ['Bay B'], released: false, cleared: false, weight: 800, palletSpace: 6 },
   { id: uuidv4(), trailerId: 'T-002', stsJob: 11223, quantity: 10, importer: 'Cross-Border Traders', exporter: 'International Exports Co.', locationNames: ['Bay C', 'Section 2-A'], releaseDocumentName: 'industrial_release.docx', released: true, cleared: false, weight: 2500, palletSpace: 2 },
-  { id: uuidv4(), trailerId: 'T-003', stsJob: 22334, quantity: 75, importer: 'FoodStuffs Co.', exporter: 'Farm Fresh Exports', locationNames: ['Shelf C-2', 'Cold Storage 1'], released: true, cleared: true, weight: 1500, palletSpace: 10 },
+  { id: uuidv4(), trailerId: 'T-003', stsJob: 22334, customerJobNumber: 'CUST-003', quantity: 75, importer: 'FoodStuffs Co.', exporter: 'Farm Fresh Exports', locationNames: ['Shelf C-2', 'Cold Storage 1'], released: true, cleared: true, weight: 1500, palletSpace: 10 },
   { id: uuidv4(), trailerId: 'T-003', stsJob: 33445, quantity: 120, importer: 'Fashion Forward', exporter: 'Textile Mills Global', locationNames: ['Hanging Rack 5'], released: false, cleared: true, weight: 600, palletSpace: 8 },
-  { id: uuidv4(), trailerId: 'T-004', stsJob: 44556, quantity: 30, importer: 'BuildIt Supplies', exporter: 'Hardware Exports Ltd.', locationNames: ['Bulk Area 3'], released: true, cleared: false, weight: 5000, palletSpace: 5 },
+  { id: uuidv4(), trailerId: 'T-004', stsJob: 44556, customerJobNumber: 'CUST-004', quantity: 30, importer: 'BuildIt Supplies', exporter: 'Hardware Exports Ltd.', locationNames: ['Bulk Area 3'], released: true, cleared: false, weight: 5000, palletSpace: 5 },
   { id: uuidv4(), trailerId: 'T-001', stsJob: 55667, quantity: 90, importer: 'HealthCorp', exporter: 'Pharma Exports Int.', locationNames: ['Pharma Vault 1'], released: true, cleared: true, weight: 300, palletSpace: 3 },
-  { id: uuidv4(), trailerId: 'T-002', stsJob: 66778, quantity: 150, importer: 'Mechanics United', exporter: 'Auto Parts Global', locationNames: ['Parts Aisle M-10'], released: false, cleared: false, weight: 1800, palletSpace: 12 },
+  { id: uuidv4(), trailerId: 'T-002', stsJob: 66778, customerJobNumber: 'CUST-005', quantity: 150, importer: 'Mechanics United', exporter: 'Auto Parts Global', locationNames: ['Parts Aisle M-10'], released: false, cleared: false, weight: 1800, palletSpace: 12 },
   { id: uuidv4(), trailerId: 'T-004', stsJob: 77889, quantity: 25, importer: 'Luxury Imports', exporter: 'Fine Goods Exporters', locationNames: ['High Value Cage 2'], released: true, cleared: true, weight: 400, palletSpace: 2 },
   { id: uuidv4(), trailerId: 'T-003', stsJob: 88990, quantity: 500, importer: 'Warehouse Direct', exporter: 'Bulk Exporters Co.', locationNames: ['Section D', 'Overflow Area 2'], released: false, cleared: false, weight: 2200, palletSpace: 15 },
-  { id: uuidv4(), trailerId: 'T-005', stsJob: 99001, quantity: 60, importer: 'Gourmet Foods', exporter: 'Specialty Exports Ltd.', locationNames: ['Pending Assignment'], released: true, cleared: true, weight: 700, palletSpace: 5 },
+  { id: uuidv4(), trailerId: 'T-005', stsJob: 99001, customerJobNumber: 'CUST-006', quantity: 60, importer: 'Gourmet Foods', exporter: 'Specialty Exports Ltd.', locationNames: ['Pending Assignment'], released: true, cleared: true, weight: 700, palletSpace: 5 },
   { id: uuidv4(), trailerId: 'T-006', stsJob: 10101, quantity: 200, importer: 'Constructors Choice', exporter: 'Building Material Exports', locationNames: ['Pending Assignment'], released: false, cleared: false, weight: 3000, palletSpace: 20 },
 ];
 
@@ -90,11 +90,12 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
     return shipments.filter((s) => s.trailerId === trailerId);
   }, [shipments]);
 
-  const addShipment = useCallback((shipmentData: Omit<Shipment, 'id' | 'locationNames' | 'released' | 'cleared' | 'importer' | 'exporter' | 'stsJob'> & { stsJob: number; importer: string; exporter: string; initialLocationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?:boolean, cleared?: boolean, weight?: number, palletSpace?: number }) => {
+  const addShipment = useCallback((shipmentData: Omit<Shipment, 'id' | 'locationNames' | 'released' | 'cleared' | 'importer' | 'exporter' | 'stsJob' | 'customerJobNumber'> & { stsJob: number; customerJobNumber?: string; importer: string; exporter: string; initialLocationName?: string, releaseDocumentName?: string, clearanceDocumentName?: string, released?:boolean, cleared?: boolean, weight?: number, palletSpace?: number }) => {
     const newShipment: Shipment = {
       ...shipmentData,
       id: uuidv4(),
       stsJob: shipmentData.stsJob,
+      customerJobNumber: shipmentData.customerJobNumber || undefined,
       importer: shipmentData.importer,
       exporter: shipmentData.exporter,
       locationNames: shipmentData.initialLocationName ? [shipmentData.initialLocationName] : ['Pending Assignment'],
@@ -127,6 +128,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
           ? {
               ...s,
               ...data,
+              customerJobNumber: data.customerJobNumber !== undefined ? data.customerJobNumber : s.customerJobNumber,
               locationNames: (data.locationNames && data.locationNames.length > 0 && !(data.locationNames.length === 1 && data.locationNames[0] === 'Pending Assignment'))
                                 ? data.locationNames
                                 : (s.locationNames && s.locationNames.length > 0 && !(s.locationNames.length === 1 && s.locationNames[0] === 'Pending Assignment')

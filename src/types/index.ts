@@ -13,9 +13,10 @@ export interface Shipment {
   id: string; // Auto-generated unique ID
   trailerId: string;
   stsJob: number; // STS job number
+  customerJobNumber?: string; // Optional: Customer's job number
   quantity: number;
-  importer: string;
-  exporter: string; // Added exporter
+  importer: string; // Consignee
+  exporter: string; // Consignor
   locationNames: string[]; // Changed from locationName: string
   releaseDocumentName?: string; // Optional: Name of the release document
   clearanceDocumentName?: string; // Optional: Name of the clearance document
@@ -28,9 +29,10 @@ export interface Shipment {
 // Used for the form data when creating or updating a shipment
 export interface ShipmentFormData {
   stsJob: number;
+  customerJobNumber?: string;
   quantity: number;
-  importer: string;
-  exporter: string; // Added exporter
+  importer: string; // Consignee
+  exporter: string; // Consignor
   locationNameInput?: string; // For initial single location input, will be processed into locationNames
   releaseDocument?: FileList | File | null;
   clearanceDocument?: FileList | File | null;
@@ -43,9 +45,10 @@ export interface ShipmentFormData {
 // Specifically for updating an existing shipment via context
 export interface ShipmentUpdateData {
   stsJob?: number;
+  customerJobNumber?: string;
   quantity?: number;
-  importer?: string;
-  exporter?: string; // Added exporter
+  importer?: string; // Consignee
+  exporter?: string; // Consignor
   locationNames?: string[]; // Changed from locationName: string
   releaseDocumentName?: string;
   clearanceDocumentName?: string;

@@ -18,13 +18,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Edit, Users, MapPin, Send } from 'lucide-react';
+import { FileText, Weight, Box, Edit, Users, MapPin, Send, Briefcase } from 'lucide-react';
 
 const editShipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
+  customerJobNumber: z.string().max(50, 'Customer job number too long').optional(),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
-  importer: z.string().min(1, 'Importer is required').max(50, 'Importer name too long'),
-  exporter: z.string().min(1, 'Exporter is required').max(50, 'Exporter name too long'),
+  importer: z.string().min(1, 'Importer (Consignee) is required').max(50, 'Importer (Consignee) name too long'),
+  exporter: z.string().min(1, 'Exporter (Consignor) is required').max(50, 'Exporter (Consignor) name too long'),
   locationNamesInput: z.string().optional(), // For comma-separated input
   releaseDocument: z.any().optional(),
   clearanceDocument: z.any().optional(),
@@ -50,6 +51,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     resolver: zodResolver(editShipmentSchema),
     defaultValues: {
       stsJob: shipmentToEdit.stsJob,
+      customerJobNumber: shipmentToEdit.customerJobNumber || '',
       quantity: shipmentToEdit.quantity,
       importer: shipmentToEdit.importer,
       exporter: shipmentToEdit.exporter,
@@ -67,6 +69,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     if (shipmentToEdit && isOpen) {
       reset({
         stsJob: shipmentToEdit.stsJob,
+        customerJobNumber: shipmentToEdit.customerJobNumber || '',
         quantity: shipmentToEdit.quantity,
         importer: shipmentToEdit.importer,
         exporter: shipmentToEdit.exporter,
@@ -90,6 +93,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
 
     const updatedData: ShipmentUpdateData = {
       stsJob: data.stsJob,
+      customerJobNumber: data.customerJobNumber || undefined,
       quantity: data.quantity,
       importer: data.importer,
       exporter: data.exporter,
@@ -115,6 +119,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     if (shipmentToEdit) {
       reset({
           stsJob: shipmentToEdit.stsJob,
+          customerJobNumber: shipmentToEdit.customerJobNumber || '',
           quantity: shipmentToEdit.quantity,
           importer: shipmentToEdit.importer,
           exporter: shipmentToEdit.exporter,
@@ -139,10 +144,19 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
-          <div>
-            <Label htmlFor="stsJob">STS Job Number</Label>
-            <Input id="stsJob" type="number" {...register('stsJob')} />
-            {errors.stsJob && <p className="text-sm text-destructive mt-1">{errors.stsJob.message}</p>}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="stsJob">STS Job Number</Label>
+              <Input id="stsJob" type="number" {...register('stsJob')} />
+              {errors.stsJob && <p className="text-sm text-destructive mt-1">{errors.stsJob.message}</p>}
+            </div>
+            <div>
+              <Label htmlFor="customerJobNumber" className="flex items-center">
+                <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" /> Customer Job Number
+              </Label>
+              <Input id="customerJobNumber" {...register('customerJobNumber')} />
+              {errors.customerJobNumber && <p className="text-sm text-destructive mt-1">{errors.customerJobNumber.message}</p>}
+            </div>
           </div>
 
           <div>

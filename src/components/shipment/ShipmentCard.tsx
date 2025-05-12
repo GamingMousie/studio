@@ -130,15 +130,15 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
           <p><span className="font-medium text-muted-foreground">Quantity:</span> {shipment.quantity}</p>
 
           <div className="flex items-center">
-            <Users className="mr-1.5 h-4 w-4 text-muted-foreground" />
-            <span className="font-medium text-muted-foreground">Importer:</span>
-            <span className="ml-1.5">{shipment.importer}</span>
-          </div>
-
-          <div className="flex items-center">
             <Send className="mr-1.5 h-4 w-4 text-muted-foreground" />
             <span className="font-medium text-muted-foreground">Exporter:</span>
             <span className="ml-1.5">{shipment.exporter}</span>
+          </div>
+
+          <div className="flex items-center">
+            <Users className="mr-1.5 h-4 w-4 text-muted-foreground" />
+            <span className="font-medium text-muted-foreground">Importer:</span>
+            <span className="ml-1.5">{shipment.importer}</span>
           </div>
 
           {shipment.weight !== undefined && shipment.weight !== null && (
@@ -247,3 +247,4 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
     </>
   );
 }
+

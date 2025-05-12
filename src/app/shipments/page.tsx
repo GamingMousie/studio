@@ -52,8 +52,8 @@ export default function AllShipmentsPage() {
               </div>
               <Skeleton className="h-4 w-1/2" /> {/* ID */}
               <Skeleton className="h-4 w-1/3 mt-1" /> {/* Quantity */}
-              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Importer */}
               <Skeleton className="h-4 w-2/5 mt-1" /> {/* Exporter */}
+              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Importer */}
               <div className="grid grid-cols-2 gap-2 mt-1">
                 <Skeleton className="h-4 w-3/4" /> {/* Weight */}
                 <Skeleton className="h-4 w-3/4" /> {/* Pallet Space */}
@@ -82,8 +82,8 @@ export default function AllShipmentsPage() {
                 <Skeleton className="h-4 w-2/5" /> {/* ID */}
                 <div className="flex items-center gap-4 text-sm">
                   <Skeleton className="h-4 w-20" /> {/* Quantity */}
-                  <Skeleton className="h-4 w-28" /> {/* Importer */}
                   <Skeleton className="h-4 w-28" /> {/* Exporter */}
+                  <Skeleton className="h-4 w-28" /> {/* Importer */}
                   <Skeleton className="h-5 w-24" /> {/* Location */}
                 </div>
                 <div className="flex items-center gap-4 text-sm mt-1">
@@ -176,3 +176,4 @@ export default function AllShipmentsPage() {
     </div>
   );
 }
+

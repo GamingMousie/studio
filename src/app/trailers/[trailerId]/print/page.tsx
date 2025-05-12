@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 
 // Helper to create a line for data or empty space
 const FormLine = ({ label, value, valueBold = false, fullWidthValue = false, minHeight = 'min-h-[1.5em]' }: { label?: string, value?: string | number | null, valueBold?: boolean, fullWidthValue?: boolean, minHeight?: string }) => {
-  const valueDisplay = value !== undefined && value !== null ? value : '....................................................';
+  const valueDisplay = value !== undefined && value !== null ? String(value) : '';
   return (
     <div className={`flex ${fullWidthValue && label ? 'flex-col items-start' : 'flex-row items-end'} ${minHeight} mb-1 print:mb-0.5`}>
       {label && <span className="text-xs print:text-[7pt] mr-1 whitespace-nowrap">{label}</span>}
@@ -27,10 +27,6 @@ const FormLine = ({ label, value, valueBold = false, fullWidthValue = false, min
       </span>
     </div>
   );
-};
-
-const DottedLine = ({ count = 50 }: { count?: number }) => {
-  return <span className="border-b border-dotted border-foreground flex-grow pb-px mx-1">{'.'.repeat(count)}</span>;
 };
 
 
@@ -65,7 +61,7 @@ export default function PrintTrailerTransferPage() {
   };
 
   const formatDateForForm = (dateString?: string) => {
-    if (!dateString) return '.....................';
+    if (!dateString) return '';
     try {
       return format(parseISO(dateString), 'dd/MM/yyyy');
     } catch (error) {
@@ -167,7 +163,11 @@ export default function PrintTrailerTransferPage() {
           <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">
             <h3 className="font-bold text-sm print:text-[9pt] mb-1 print:mb-0.5">Part A: (Removal Request for Direct imports from a third country)</h3>
             <div className="flex items-end">
-              <span className="mr-1">Customs &amp; Excise at</span><DottedLine count={15}/><span className="font-semibold mx-1">DUBLIN PORT</span><DottedLine count={30}/><span>(import station)</span>
+              <span className="mr-1 text-xs print:text-[7pt] whitespace-nowrap">Customs &amp; Excise at</span>
+              <span className="flex-grow border-b border-foreground text-xs print:text-[8pt] pb-px mx-1 min-w-[10ch]"></span>
+              <span className="font-semibold mx-1 text-xs print:text-[8pt]">DUBLIN PORT</span>
+              <span className="flex-grow border-b border-foreground text-xs print:text-[8pt] pb-px mx-1 min-w-[15ch]"></span>
+              <span className="text-xs print:text-[7pt] whitespace-nowrap">(import station)</span>
             </div>
             <FormLine label="Permission is requested to remove unit/container number:" value={unitContainerNumber} valueBold/>
             <div className="flex flex-wrap items-end">
@@ -179,11 +179,11 @@ export default function PrintTrailerTransferPage() {
             
             <div className="text-xs print:text-[7pt] mt-1 print:mt-0.5">T1 Groupage covered Under Transit MRN No(s):</div>
             <div className="border border-dashed border-muted-foreground print:border-gray-400 p-1 min-h-[2.5em] print:min-h-[1.5em]">
-                <p className="whitespace-pre-wrap text-xs print:text-[7pt]">{t1_1 || '....................................'} {t1_2 && ` / ${t1_2}`}</p>
+                <p className="whitespace-pre-wrap text-xs print:text-[7pt]">{t1_1 || ''} {t1_1 && t1_2 && ' / '} {t1_2 || ''}</p>
             </div>
 
             <div className="grid grid-cols-3 gap-x-2 mt-2 print:mt-1">
-                <FormLine label="Signature" value={reportingPersonName || '............................'} />
+                <FormLine label="Signature" value={reportingPersonName} />
                 <FormLine label="Company" value="Spratt" valueBold />
                 <FormLine label="Date" value={arrivalDateFormatted} valueBold />
             </div>
@@ -218,8 +218,8 @@ export default function PrintTrailerTransferPage() {
                 <FormLine label="Country of Origin" value={null}/>
                 <FormLine label="Customs Seal No." value={null}/>
                 <FormLine label="Company Seal No." value={null}/>
-                <FormLine label="Clearance Agency" value={clearanceAgencyCompany || '............................'} valueBold/>
-                <FormLine label="Person Reporting" value={reportingPersonName || '............................'} valueBold/>
+                <FormLine label="Clearance Agency" value={clearanceAgencyCompany} valueBold/>
+                <FormLine label="Person Reporting" value={reportingPersonName} valueBold/>
                 <FormLine label="Contact No." value="01 8527 100" valueBold/>
             </div>
           </div>

@@ -7,7 +7,7 @@ import type { Shipment, Trailer } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer } from 'lucide-react';
+import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer, ArrowRightCircle, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
@@ -139,14 +139,50 @@ export default function ReportsPage() {
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-card rounded-lg shadow no-print">
         <h1 className="text-3xl font-bold text-foreground flex items-center">
           <ClipboardList className="mr-3 h-8 w-8 text-primary" />
-          Bond Check Report
+          Reports Dashboard
         </h1>
-        <Button onClick={handlePrintReport} variant="outline">
-          <Printer className="mr-2 h-4 w-4" />
-          Print Report (PDF)
-        </Button>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 no-print">
+        <Card className="shadow-lg hover:shadow-xl transition-shadow">
+          <CardHeader>
+            <CardTitle className="flex items-center text-xl text-primary">
+              <PackageSearch className="mr-2 h-6 w-6" />
+              Bond Check Report
+            </CardTitle>
+            <CardDescription>
+              View current unreleased stock in the warehouse.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
+            {/* This card acts as a summary/link, actual report content is below or on its own page */}
+            <p className="text-sm text-muted-foreground">
+              This report is detailed below on this page.
+            </p>
+          </CardFooter>
+        </Card>
+
+        <Link href="/reports/weekly-released" passHref>
+          <Card className="shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col justify-between cursor-pointer">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl text-primary">
+                <Clock className="mr-2 h-6 w-6" />
+                Weekly Released Shipments
+              </CardTitle>
+              <CardDescription>
+                View all shipments that were marked as released this week.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+                <Button variant="link" className="p-0 h-auto text-primary">
+                View Report <ArrowRightCircle className="ml-2 h-4 w-4" />
+              </Button>
+            </CardFooter>
+          </Card>
+        </Link>
+      </div>
+      
+      {/* Bond Check Report (Existing Report) */}
       <Card className="shadow-lg printable-area">
         <CardHeader className="no-print">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -156,21 +192,27 @@ export default function ReportsPage() {
                 This report lists all shipments currently in the warehouse that have not been marked as "Released".
                 </CardDescription>
             </div>
-            <Select value={companyFilter} onValueChange={(value) => setCompanyFilter(value)}>
-                <SelectTrigger className="w-full sm:w-[220px]">
-                <div className="flex items-center">
-                    <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
-                    <SelectValue placeholder="Filter by company" />
-                </div>
-                </SelectTrigger>
-                <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
-                {isClient && uniqueCompanies.map(company => (
-                    <SelectItem key={company} value={company.toLowerCase()}>{company}</SelectItem>
-                ))}
-                {!isClient && <Skeleton className="h-8 w-full my-1" />}
-                </SelectContent>
-            </Select>
+            <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                <Select value={companyFilter} onValueChange={(value) => setCompanyFilter(value)}>
+                    <SelectTrigger className="w-full sm:w-[220px]">
+                    <div className="flex items-center">
+                        <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+                        <SelectValue placeholder="Filter by company" />
+                    </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="all">All Companies</SelectItem>
+                    {isClient && uniqueCompanies.map(company => (
+                        <SelectItem key={company} value={company.toLowerCase()}>{company}</SelectItem>
+                    ))}
+                    {!isClient && <Skeleton className="h-8 w-full my-1" />}
+                    </SelectContent>
+                </Select>
+                 <Button onClick={handlePrintReport} variant="outline" className="w-full sm:w-auto">
+                    <Printer className="mr-2 h-4 w-4" />
+                    Print This Report
+                </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>

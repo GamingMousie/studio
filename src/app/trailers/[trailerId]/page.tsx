@@ -99,7 +99,7 @@ export default function TrailerShipmentsPage() {
         </Button>
         <Button variant="outline" size="sm" asChild>
           <Link href={`/trailers/${trailer.id}/print`}>
-            <Printer className="mr-2 h-4 w-4" /> Print Trailer Manifest
+            <Printer className="mr-2 h-4 w-4" /> Print Trailer ACP Form
           </Link>
         </Button>
       </div>

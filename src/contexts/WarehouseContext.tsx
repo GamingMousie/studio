@@ -23,7 +23,7 @@ interface WarehouseContextType {
   updateShipmentReleasedStatus: (shipmentId: string, released: boolean) => void;
   updateShipmentClearedStatus: (shipmentId: string, cleared: boolean) => void;
   updateShipment: (shipmentId: string, data: ShipmentUpdateData) => void;
-  markShipmentAsPrinted: (shipmentId: string) => void; // New function
+  markShipmentAsPrinted: (shipmentId: string) => void; 
 }
 
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
@@ -202,7 +202,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
         getShipmentById,
         updateShipmentReleasedStatus,
         updateShipmentClearedStatus,
-        markShipmentAsPrinted, // Add new function to context value
+        markShipmentAsPrinted, 
       }}
     >
       {children}
@@ -217,3 +217,4 @@ export const useWarehouse = (): WarehouseContextType => {
   }
   return context;
 };
+

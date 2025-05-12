@@ -1,14 +1,16 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useWarehouse } from '@/contexts/WarehouseContext';
-import type { Shipment, Trailer } from '@/types'; // Assuming Trailer type is also needed
+import type { Shipment, Trailer } from '@/types'; 
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertOctagon, PackageSearch, Printer, Info, Truck, CalendarDays, Hash, Briefcase, TrendingUp, ArrowLeft, ArrowRight, Undo2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   format,
   parseISO,
@@ -26,17 +28,19 @@ interface OverdueReleasedReportItem {
   customerJobNumber?: string;
   trailerId: string;
   trailerName?: string;
-  storageExpiryDate: string; // ISO from trailer
+  trailerCompany?: string; // Added trailer company
+  storageExpiryDate: string; 
   storageExpiryDateFormatted: string;
-  releasedAt: string; // ISO from shipment
+  releasedAt: string; 
   releasedAtFormatted: string;
   daysOverdue: number;
 }
 
 export default function MonthlyOverdueReleasedReportPage() {
-  const { shipments, getTrailerById } = useWarehouse();
+  const { shipments, getTrailerById, trailers: allTrailers } = useWarehouse(); // Added allTrailers
   const [isClient, setIsClient] = useState(false);
-  const [displayDate, setDisplayDate] = useState(new Date()); // Date to determine the month to display
+  const [displayDate, setDisplayDate] = useState(new Date());
+  const [companyFilter, setCompanyFilter] = useState<string>('all'); // State for company filter
 
   useEffect(() => {
     setIsClient(true);
@@ -53,6 +57,17 @@ export default function MonthlyOverdueReleasedReportPage() {
       return "Invalid Date";
     }
   };
+
+  const uniqueCompanies = useMemo(() => {
+    if (!isClient) return [];
+    const companies = new Set<string>();
+    allTrailers.forEach(trailer => {
+      if (trailer.company) {
+        companies.add(trailer.company);
+      }
+    });
+    return Array.from(companies).sort();
+  }, [allTrailers, isClient]);
 
   const reportData = useMemo((): OverdueReleasedReportItem[] => {
     if (!isClient) return [];
@@ -72,6 +87,10 @@ export default function MonthlyOverdueReleasedReportPage() {
         if (!trailer || !trailer.storageExpiryDate || !shipment.releasedAt) {
           return null; 
         }
+        // Company filter check
+        if (companyFilter !== 'all' && trailer.company?.toLowerCase() !== companyFilter.toLowerCase()) {
+          return null;
+        }
 
         try {
           const releasedDate = parseISO(shipment.releasedAt);
@@ -85,6 +104,7 @@ export default function MonthlyOverdueReleasedReportPage() {
               customerJobNumber: shipment.customerJobNumber,
               trailerId: shipment.trailerId,
               trailerName: trailer.name,
+              trailerCompany: trailer.company, // Store company
               storageExpiryDate: trailer.storageExpiryDate,
               storageExpiryDateFormatted: formatDateSafe(trailer.storageExpiryDate),
               releasedAt: shipment.releasedAt,
@@ -98,9 +118,9 @@ export default function MonthlyOverdueReleasedReportPage() {
         }
         return null;
       })
-      .filter((item): item is OverdueReleasedReportItem => item !== null) // Type guard to remove nulls
-      .sort((a, b) => b.daysOverdue - a.daysOverdue); // Sort by most overdue first
-  }, [shipments, getTrailerById, isClient, currentMonthStart, currentMonthEnd]);
+      .filter((item): item is OverdueReleasedReportItem => item !== null) 
+      .sort((a, b) => b.daysOverdue - a.daysOverdue); 
+  }, [shipments, getTrailerById, isClient, currentMonthStart, currentMonthEnd, companyFilter]);
 
   const handlePrintReport = () => {
     window.print();
@@ -119,10 +139,12 @@ export default function MonthlyOverdueReleasedReportPage() {
   };
 
   const displayedMonthFormatted = format(displayDate, 'MMMM yyyy');
+  const selectedCompanyName = companyFilter === 'all' ? 'All Companies' : uniqueCompanies.find(c => c.toLowerCase() === companyFilter) || companyFilter;
+
 
   const pageTitle = 'Monthly Overdue Released Shipments';
   const cardTitleText = `Overdue Shipments Released in ${displayedMonthFormatted}`;
-  const cardDescriptionText = `Shipments released in ${displayedMonthFormatted} after their trailer's storage expiry date.`;
+  const cardDescriptionText = `Shipments released in ${displayedMonthFormatted} after their trailer's storage expiry date. ${companyFilter !== 'all' ? `Filtered by company: ${selectedCompanyName}.` : ''}`;
   const printTitleText = 'Monthly Overdue Released Shipments Report';
   const printPeriodText = `For month: ${displayedMonthFormatted}`;
 
@@ -134,6 +156,7 @@ export default function MonthlyOverdueReleasedReportPage() {
           <TableHead>Trailer ID</TableHead>
           <TableHead>STS Job</TableHead>
           <TableHead>Trailer Name</TableHead>
+          <TableHead>Company</TableHead>
           <TableHead>Storage Expiry</TableHead>
           <TableHead>Released At</TableHead>
           <TableHead className="text-right">Days Overdue</TableHead>
@@ -144,6 +167,7 @@ export default function MonthlyOverdueReleasedReportPage() {
           <TableRow key={i}>
             <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
@@ -171,6 +195,21 @@ export default function MonthlyOverdueReleasedReportPage() {
           <Button variant="outline" onClick={handleNextMonth} aria-label="Next month">
              <span className="hidden sm:inline">Next Month</span><ArrowRight className="h-4 w-4 ml-0 sm:ml-2" />
           </Button>
+           <Select value={companyFilter} onValueChange={(value) => setCompanyFilter(value)}>
+            <SelectTrigger className="w-full sm:w-auto min-w-[180px]">
+               <div className="flex items-center">
+                 <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+                 <SelectValue placeholder="Filter by company" />
+               </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {isClient && uniqueCompanies.map(company => (
+                <SelectItem key={company} value={company.toLowerCase()}>{company}</SelectItem>
+              ))}
+              {!isClient && <Skeleton className="h-8 w-full my-1" />}
+            </SelectContent>
+          </Select>
           <Button onClick={handlePrintReport} variant="outline">
             <Printer className="mr-2 h-4 w-4" />
             Print Report
@@ -191,6 +230,7 @@ export default function MonthlyOverdueReleasedReportPage() {
             <p className="text-sm text-muted-foreground">
               {printPeriodText}
             </p>
+            {companyFilter !== 'all' && <p className="text-sm text-muted-foreground">Filtered by Company: {selectedCompanyName}</p>}
              <p className="text-xs text-muted-foreground">Date Generated: {new Date().toLocaleDateString()}</p>
           </div>
 
@@ -200,10 +240,10 @@ export default function MonthlyOverdueReleasedReportPage() {
             <div className="min-h-[200px] flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-md p-8">
               <PackageSearch className="h-16 w-16 text-muted-foreground mb-4" />
               <p className="text-xl text-muted-foreground">
-                No overdue shipments found released in {displayedMonthFormatted}.
+                No overdue shipments found released in {displayedMonthFormatted} {companyFilter !== 'all' ? `for ${selectedCompanyName}` : ''}.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                This means all shipments released this month were done so before their storage expiry date, or no shipments met the criteria.
+                This means all shipments released this month {companyFilter !== 'all' ? `for ${selectedCompanyName}` : ''} were done so before their storage expiry date, or no shipments met the criteria.
               </p>
             </div>
           ) : (
@@ -214,6 +254,7 @@ export default function MonthlyOverdueReleasedReportPage() {
                     <TableHead className="whitespace-nowrap"><Truck className="inline-block mr-1 h-4 w-4 print:hidden"/>Trailer ID</TableHead>
                     <TableHead className="whitespace-nowrap"><Hash className="inline-block mr-1 h-4 w-4 print:hidden"/>STS Job</TableHead>
                     <TableHead className="whitespace-nowrap">Trailer Name</TableHead>
+                    <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4 print:hidden"/>Trailer Company</TableHead>
                     <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4 print:hidden"/>Cust. Job No.</TableHead>
                     <TableHead className="whitespace-nowrap"><CalendarDays className="inline-block mr-1 h-4 w-4 print:hidden"/>Storage Expiry</TableHead>
                     <TableHead className="whitespace-nowrap"><CalendarDays className="inline-block mr-1 h-4 w-4 print:hidden"/>Released At</TableHead>
@@ -234,6 +275,7 @@ export default function MonthlyOverdueReleasedReportPage() {
                         </Link>
                       </TableCell>
                       <TableCell>{item.trailerName || 'N/A'}</TableCell>
+                      <TableCell>{item.trailerCompany || 'N/A'}</TableCell>
                       <TableCell>{item.customerJobNumber || 'N/A'}</TableCell>
                       <TableCell className="text-destructive font-medium">{item.storageExpiryDateFormatted}</TableCell>
                       <TableCell>{item.releasedAtFormatted}</TableCell>
@@ -248,10 +290,11 @@ export default function MonthlyOverdueReleasedReportPage() {
          {isClient && reportData.length > 0 && (
             <CardFooter className="text-sm text-muted-foreground border-t pt-4 no-print">
                 <Info className="h-4 w-4 mr-2 text-primary" />
-                Displaying {reportData.length} overdue shipment(s) released in {displayedMonthFormatted}.
+                Displaying {reportData.length} overdue shipment(s) released in {displayedMonthFormatted} {companyFilter !== 'all' ? `for ${selectedCompanyName}` : ''}.
             </CardFooter>
         )}
       </Card>
     </div>
   );
 }
+

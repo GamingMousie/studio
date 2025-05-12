@@ -15,11 +15,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 // Helper to create a line for data or empty space
-const FormLine = ({ label, value, valueBold = false, fullWidthValue = false, minHeight = 'min-h-[1.5em]' }: { label?: string, value?: string | number | null, valueBold?: boolean, fullWidthValue?: boolean, minHeight?: string }) => {
+const FormLine = ({ label, value, valueBold = false, fullWidthValue = false, minHeight = 'min-h-[1.5em]', className }: { label?: string, value?: string | number | null, valueBold?: boolean, fullWidthValue?: boolean, minHeight?: string, className?: string }) => {
   const valueDisplay = value !== undefined && value !== null ? String(value) : '';
   return (
-    <div className={`flex ${fullWidthValue && label ? 'flex-col items-start' : 'flex-row items-end'} ${minHeight} mb-1 print:mb-0.5`}>
-      {label && <span className="text-xs print:text-[7pt] mr-1 whitespace-nowrap">{label}:</span>}
+    <div className={`flex ${fullWidthValue && label ? 'flex-col items-start' : 'flex-row items-end'} ${minHeight} mb-1 print:mb-0.5 ${className}`}>
+      {label && <span className="text-xs print:text-[7pt] mr-1 whitespace-nowrap shrink-0">{label}:</span>}
       <span 
         className={`flex-grow border-b border-foreground ${valueBold ? 'font-semibold' : ''} text-xs print:text-[8pt] pb-px overflow-hidden text-ellipsis whitespace-nowrap`}
       >
@@ -251,20 +251,22 @@ export default function PrintTrailerTransferPage() {
           {/* Part B */}
           <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">
             <h3 className="font-bold text-sm print:text-[9pt] mb-1 print:mb-0.5">Part B (Official use only)</h3>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 print:gap-y-0">
+            <div className="grid grid-cols-[2fr_1fr] gap-x-4 print:gap-x-2"> {/* Adjusted grid for Part B layout */}
+              <div className="space-y-1 print:space-y-0.5"> {/* Left column for fields */}
                 <FormLine label="Customs seal number applied" />
+                <FormLine label="Lorry Reg. Number" />
+                <FormLine label="Sealing Official’s signature" />
+              </div>
+              <div className="space-y-1 print:space-y-0.5 flex flex-col justify-between"> {/* Right column for Local Ref and Date Stamp */}
                 <FormLine label="Local Ref Number" />
+                <div className="border border-foreground print:border-black flex items-center justify-center text-center min-h-[3em] print:min-h-[2.5em] p-1 text-xs print:text-[7pt]">
+                  Date Stamp and Time
+                </div>
+                 {/* Empty div to push signature to bottom if needed, or remove if Date Stamp box handles height */}
+              </div>
             </div>
-            <FormLine label="Date Stamp and Time" fullWidthValue />
-            <FormLine label="Lorry Reg. Number" />
-            <div className="grid grid-cols-2 gap-x-4 mt-2 print:mt-1">
-              <div> {/* Empty div for spacing or if Lorry Reg takes full width conceptually */} </div>
-              <FormLine label="Sealing Official’s signature" fullWidthValue />
-            </div>
-             <div className="border-t border-foreground print:border-black mt-2 pt-1">
-               <FormLine label="Sealing Official’s signature" fullWidthValue />
-             </div>
           </div>
+
 
           {/* Part C */}
            <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">

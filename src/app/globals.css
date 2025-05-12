@@ -98,7 +98,7 @@
 @media print {
   html, body {
     height: auto !important;
-    font-size: 10pt !important; /* Base font size for print */
+    font-size: 9pt !important; /* Reduced base font size for print */
     margin: 0 !important;
     padding: 0 !important;
     background-color: #fff !important;
@@ -118,7 +118,7 @@
   }
 
   .printable-area {
-    margin: 0.5in !important; /* Standard print margins */
+    margin: 0.35in !important; /* Reduced print margins */
     padding: 0 !important; /* Padding will be handled by inner elements or specific needs */
     border: none !important;
     box-shadow: none !important;
@@ -130,54 +130,54 @@
   }
 
   /* Font size adjustments within printable area */
-  .printable-area h1, .printable-area .text-3xl, .printable-area .md\:text-3xl { font-size: 18pt !important; line-height: 1.2 !important; }
-  .printable-area h2, .printable-area .text-2xl, .printable-area .md\:text-2xl { font-size: 16pt !important; line-height: 1.2 !important; }
-  .printable-area h3, .printable-area .text-xl { font-size: 14pt !important; line-height: 1.2 !important; }
-  .printable-area h4, .printable-area .text-lg { font-size: 12pt !important; line-height: 1.3 !important; }
-  .printable-area p, .printable-area div, .printable-area span, .printable-area .text-base { font-size: 10pt !important; line-height: 1.4 !important; }
-  .printable-area .text-sm { font-size: 9pt !important; line-height: 1.4 !important; }
-  .printable-area .text-xs { font-size: 8pt !important; line-height: 1.4 !important; }
+  .printable-area h1, .printable-area .text-3xl, .printable-area .md\:text-3xl { font-size: 16pt !important; line-height: 1.2 !important; } /* Was 18pt */
+  .printable-area h2, .printable-area .text-2xl, .printable-area .md\:text-2xl { font-size: 14pt !important; line-height: 1.2 !important; } /* Was 16pt */
+  .printable-area h3, .printable-area .text-xl { font-size: 12pt !important; line-height: 1.2 !important; } /* Was 14pt */
+  .printable-area h4, .printable-area .text-lg { font-size: 11pt !important; line-height: 1.3 !important; } /* Was 12pt */
+  .printable-area p, .printable-area div, .printable-area span, .printable-area .text-base { font-size: 9pt !important; line-height: 1.3 !important; } /* Line height slightly reduced */
+  .printable-area .text-sm { font-size: 8pt !important; line-height: 1.3 !important; } /* Was 9pt */
+  .printable-area .text-xs { font-size: 7pt !important; line-height: 1.3 !important; } /* Was 8pt */
   
   /* Spacing adjustments for Card components & general elements within printable area */
-  .printable-area .p-6 { padding: 0.2in 0 !important; } /* For CardContent etc. */
+  .printable-area .p-6 { padding: 0.15in 0 !important; } /* Reduced */
   .printable-area .px-6 { padding-left: 0 !important; padding-right: 0 !important; }
-  .printable-area .pb-6 { padding-bottom: 0.2in !important; }
-  .printable-area .pt-6 { padding-top: 0.2in !important; } /* Affects CardContent's default pt-6 */
-  .printable-area .pb-4 { padding-bottom: 0.15in !important; } /* Affects CardHeader's default pb-4 */
-  .printable-area .pt-4 { padding-top: 0.15in !important; } /* Affects CardFooter's default pt-4 */
+  .printable-area .pb-6 { padding-bottom: 0.15in !important; } /* Reduced */
+  .printable-area .pt-6 { padding-top: 0.15in !important; } /* Reduced */
+  .printable-area .pb-4 { padding-bottom: 0.1in !important; } /* Reduced */
+  .printable-area .pt-4 { padding-top: 0.1in !important; } /* Reduced */
 
   /* Margin adjustments */
-  .printable-area .mt-8 { margin-top: 0.4in !important; }
-  .printable-area .mt-6 { margin-top: 0.3in !important; }
-  .printable-area .mt-4 { margin-top: 0.2in !important; }
-  .printable-area .mt-2 { margin-top: 0.1in !important; }
-  .printable-area .mt-1 { margin-top: 0.05in !important; }
-  .printable-area .mb-8 { margin-bottom: 0.4in !important; }
-  .printable-area .mb-6 { margin-bottom: 0.3in !important; }
-  .printable-area .mb-4 { margin-bottom: 0.2in !important; }
-  .printable-area .mb-2 { margin-bottom: 0.1in !important; }
-  .printable-area .mb-1 { margin-bottom: 0.05in !important; }
+  .printable-area .mt-8 { margin-top: 0.3in !important; } /* Reduced */
+  .printable-area .mt-6 { margin-top: 0.25in !important; } /* Reduced */
+  .printable-area .mt-4 { margin-top: 0.15in !important; } /* Reduced */
+  .printable-area .mt-2 { margin-top: 0.08in !important; } /* Reduced */
+  .printable-area .mt-1 { margin-top: 0.04in !important; } /* Reduced */
+  .printable-area .mb-8 { margin-bottom: 0.3in !important; } /* Reduced */
+  .printable-area .mb-6 { margin-bottom: 0.25in !important; } /* Reduced */
+  .printable-area .mb-4 { margin-bottom: 0.15in !important; } /* Reduced */
+  .printable-area .mb-2 { margin-bottom: 0.08in !important; } /* Reduced */
+  .printable-area .mb-1 { margin-bottom: 0.04in !important; } /* Reduced */
 
   /* Gap adjustments */
-  .printable-area [class*="gap-x-"] { column-gap: 0.2in !important; }
-  .printable-area [class*="gap-y-"] { row-gap: 0.1in !important; }
-  .printable-area .gap-8 { gap: 0.3in !important; }
-  .printable-area .gap-6 { gap: 0.2in !important; }
-  .printable-area .gap-4 { gap: 0.15in !important; }
-  .printable-area .gap-2 { gap: 0.1in !important; }
-  .printable-area .space-y-1 > * + * { margin-top: 0.05in !important; }
-  .printable-area .space-y-2 > * + * { margin-top: 0.1in !important; }
-  .printable-area .space-y-3 > * + * { margin-top: 0.15in !important; }
-  .printable-area .space-y-4 > * + * { margin-top: 0.2in !important; }
-  .printable-area .space-y-6 > * + * { margin-top: 0.3in !important; }
+  .printable-area [class*="gap-x-"] { column-gap: 0.15in !important; } /* Reduced */
+  .printable-area [class*="gap-y-"] { row-gap: 0.08in !important; } /* Reduced */
+  .printable-area .gap-8 { gap: 0.25in !important; } /* Reduced */
+  .printable-area .gap-6 { gap: 0.15in !important; } /* Reduced */
+  .printable-area .gap-4 { gap: 0.1in !important; } /* Reduced */
+  .printable-area .gap-2 { gap: 0.08in !important; } /* Reduced */
+  .printable-area .space-y-1 > * + * { margin-top: 0.04in !important; } /* Reduced */
+  .printable-area .space-y-2 > * + * { margin-top: 0.08in !important; } /* Reduced */
+  .printable-area .space-y-3 > * + * { margin-top: 0.12in !important; } /* Reduced */
+  .printable-area .space-y-4 > * + * { margin-top: 0.15in !important; } /* Reduced */
+  .printable-area .space-y-6 > * + * { margin-top: 0.25in !important; } /* Reduced */
   
   /* Specific to Card components if they add their own padding internally */
   .printable-area > .card > .p-6, 
   .printable-area > .card > div[class*="p-"], 
   .printable-area > .card > header[class*="p-"],
   .printable-area > .card > footer[class*="p-"] {
-    padding-top: 0.15in !important;
-    padding-bottom: 0.15in !important;
+    padding-top: 0.1in !important;    /* Reduced */
+    padding-bottom: 0.1in !important; /* Reduced */
     padding-left: 0 !important;
     padding-right: 0 !important;
   }
@@ -193,28 +193,35 @@
   /* Signature Block specific */
   .printable-area .print-only-block {
     display: block !important;
-    margin-top: 0.3in !important; 
-    padding-top: 0.2in !important;
+    margin-top: 0.25in !important; /* Reduced */
+    padding-top: 0.15in !important; /* Reduced */
   }
-  .printable-area .print-only-block .text-lg { /* "Driver's Acknowledgment..." */
-    font-size: 11pt !important;
-    margin-bottom: 0.3in !important; /* Was mb-8 */
+  .printable-area .print-only-block .text-lg { /* "Driver's Acknowledgment..." was text-lg -> 11pt, now 10pt */
+    font-size: 10pt !important;
+    margin-bottom: 0.25in !important; /* Reduced */
   }
    .printable-area .print-only-block .h-12 { /* Signature lines */
-     height: 0.4in !important; 
-     margin-bottom: 0.15in !important;
+     height: 0.35in !important; /* Reduced */
+     margin-bottom: 0.1in !important; /* Reduced */
    }
   .printable-area .print-only-block .grid { /* Grid for signature fields */
-     row-gap: 0.2in !important; /* was gap-y-12 */
-     column-gap: 0.5in !important; /* was gap-x-12 */
+     row-gap: 0.15in !important; /* Reduced */
+     column-gap: 0.4in !important; /* Reduced */
   }
   .printable-area .print-only-block label.block { /* Signature labels */
-      font-size: 8pt !important;
+      font-size: 7pt !important; /* Reduced */
   }
+
+  /* Reduce badge padding and font size for print */
+  .printable-area .inline-flex.items-center.rounded-full.border { /* Targeting ShadCN Badge structure */
+    font-size: 7pt !important;
+    padding: 1px 4px !important; /* equivalent to py-0.5 px-1 or similar */
+    line-height: 1.2 !important;
+  }
+
 
   /* Hide scrollbars just in case */
   ::-webkit-scrollbar {
     display: none !important;
   }
 }
-

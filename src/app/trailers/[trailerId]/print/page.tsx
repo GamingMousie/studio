@@ -170,7 +170,7 @@ export default function PrintTrailerTransferPage() {
               <span className="text-xs print:text-[7pt] whitespace-nowrap">(import station)</span>
             </div>
             <FormLine label="Permission is requested to remove unit/container number:" value={unitContainerNumber} valueBold/>
-            <div className="flex flex-wrap items-end">
+            <div className="grid grid-cols-3 gap-x-2 items-end">
                 <FormLine label="Which arrived per MV" value={null} />
                 <FormLine label="date" value={null} />
                 <FormLine label="Manifest Ref" value={manifestRef} valueBold />

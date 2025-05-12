@@ -9,7 +9,7 @@ import ShipmentCard from '@/components/shipment/ShipmentCard';
 import AddShipmentDialog from '@/components/shipment/AddShipmentDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight } from 'lucide-react';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 
@@ -114,6 +114,12 @@ export default function TrailerShipmentsPage() {
                   Company: <span className="font-semibold ml-1">{trailer.company}</span>
                 </CardDescription>
               )}
+              {trailer.weight !== undefined && trailer.weight !== null && (
+                <CardDescription className="mt-1 flex items-center">
+                  <Weight className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Weight: <span className="font-semibold ml-1">{trailer.weight} kg</span>
+                </CardDescription>
+              )}
                {trailer.arrivalDate && (
                 <CardDescription className="mt-1 flex items-center">
                   <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -167,3 +173,4 @@ export default function TrailerShipmentsPage() {
     </div>
   );
 }
+

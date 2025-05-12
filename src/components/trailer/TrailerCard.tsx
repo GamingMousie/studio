@@ -5,7 +5,7 @@ import type { Trailer, TrailerStatus } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Package, Edit, Trash2, MoreVertical, ChevronRight, Briefcase, CalendarDays, Boxes } from 'lucide-react';
+import { Truck, Package, Edit, Trash2, MoreVertical, ChevronRight, Briefcase, CalendarDays, Boxes, Weight } from 'lucide-react';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import {
   DropdownMenu,
@@ -124,6 +124,17 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           <Skeleton className="h-3 w-1/2 mt-1" />
         )
       ) : null}
+
+      {trailer.weight !== undefined && trailer.weight !== null && (
+        isMounted ? (
+          <div className="flex items-center text-xs text-muted-foreground mt-1">
+            <Weight className="mr-1.5 h-3.5 w-3.5" />
+            <span>Weight: {trailer.weight} kg</span>
+          </div>
+        ) : (
+           <Skeleton className="h-3 w-1/3 mt-1" />
+        )
+      )}
       
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between text-sm">
@@ -241,6 +252,17 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
                      <Skeleton className="h-3 w-1/2 mt-1" />
                   )
                 ) : null}
+
+                {trailer.weight !== undefined && trailer.weight !== null && (
+                  isMounted ? (
+                    <div className="flex items-center text-xs text-muted-foreground mt-1">
+                      <Weight className="mr-1.5 h-3.5 w-3.5" />
+                      <span>Weight: {trailer.weight} kg</span>
+                    </div>
+                  ) : (
+                    <Skeleton className="h-3 w-1/3 mt-1" />
+                  )
+                )}
               </Link>
               <div className="mt-2 flex items-center gap-4 text-sm">
                 <div className="flex items-center">
@@ -333,3 +355,4 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
     </>
   );
 }
+

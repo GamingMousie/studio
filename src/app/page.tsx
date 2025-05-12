@@ -50,7 +50,8 @@ export default function HomePage() {
               <Skeleton className="h-4 w-1/2 mt-1 mb-1" /> {/* ID */}
               <Skeleton className="h-4 w-1/3 mt-1 mb-1" /> {/* Company */}
               <Skeleton className="h-3 w-2/5 mt-1 mb-1" /> {/* Arrival Date */}
-              <Skeleton className="h-3 w-2/5 mt-1 mb-4" /> {/* Storage Expiry Date */}
+              <Skeleton className="h-3 w-2/5 mt-1 mb-1" /> {/* Storage Expiry Date */}
+              <Skeleton className="h-3 w-1/4 mt-1 mb-4" /> {/* Weight */}
               
               <div className="mt-4 space-y-2">
                 <div className="flex items-center justify-between text-sm">
@@ -82,7 +83,8 @@ export default function HomePage() {
                 <Skeleton className="h-4 w-2/5 mb-1" /> {/* ID */}
                 <Skeleton className="h-3 w-1/3 mt-1 mb-1" /> {/* Company */}
                 <Skeleton className="h-3 w-1/4 mt-1 mb-1" /> {/* Arrival Date */}
-                <Skeleton className="h-3 w-1/4 mt-1 mb-2" /> {/* Storage Expiry Date */}
+                <Skeleton className="h-3 w-1/4 mt-1 mb-1" /> {/* Storage Expiry Date */}
+                <Skeleton className="h-3 w-1/5 mt-1 mb-2" /> {/* Weight */}
                 <div className="mt-2 flex items-center gap-4 text-sm">
                   <Skeleton className="h-5 w-20" /> {/* Status Badge */}
                   <Skeleton className="h-4 w-28" /> {/* Shipment Count */}

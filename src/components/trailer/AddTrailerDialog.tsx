@@ -18,15 +18,16 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Weight } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
 
 // Internal form data type to handle Date objects from picker
-type TrailerFormData = Omit<ExternalTrailerFormData, 'arrivalDate' | 'storageExpiryDate'> & {
+type TrailerFormData = Omit<ExternalTrailerFormData, 'arrivalDate' | 'storageExpiryDate' | 'weight'> & {
   arrivalDate?: Date | null;
   storageExpiryDate?: Date | null;
+  weight?: number | null;
 };
 
 const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Empty'];
@@ -38,6 +39,7 @@ const trailerSchema = z.object({
   status: z.enum(allStatuses as [TrailerStatus, ...TrailerStatus[]]).default('Scheduled'),
   arrivalDate: z.date().nullable().optional(),
   storageExpiryDate: z.date().nullable().optional(),
+  weight: z.coerce.number().positive('Weight must be a positive number').optional().nullable(),
 }).refine(data => {
   if (data.arrivalDate && data.storageExpiryDate && data.storageExpiryDate < data.arrivalDate) {
     return false;
@@ -65,6 +67,7 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
       company: '',
       arrivalDate: null,
       storageExpiryDate: null,
+      weight: null,
     }
   });
   
@@ -90,6 +93,7 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
       status: data.status,
       arrivalDate: data.arrivalDate ? data.arrivalDate.toISOString() : undefined,
       storageExpiryDate: data.storageExpiryDate ? data.storageExpiryDate.toISOString() : undefined,
+      weight: data.weight ?? undefined,
     });
     toast({
       title: "Success!",
@@ -123,6 +127,13 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
             <Label htmlFor="company">Company (Optional)</Label>
             <Input id="company" {...register('company')} placeholder="e.g., Logistics Inc." />
             {errors.company && <p className="text-sm text-destructive mt-1">{errors.company.message}</p>}
+          </div>
+          <div>
+            <Label htmlFor="weight" className="flex items-center">
+              <Weight className="mr-2 h-4 w-4 text-muted-foreground" /> Weight (kg) (Optional)
+            </Label>
+            <Input id="weight" type="number" step="any" {...register('weight')} placeholder="e.g., 3500" />
+            {errors.weight && <p className="text-sm text-destructive mt-1">{errors.weight.message}</p>}
           </div>
            <div>
             <Label htmlFor="status">Initial Status</Label>

@@ -18,7 +18,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Edit } from "lucide-react";
+import { CalendarIcon, Edit, Weight } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
@@ -30,6 +30,7 @@ type EditTrailerFormDataInternal = {
   status: TrailerStatus;
   arrivalDate?: Date | null;
   storageExpiryDate?: Date | null;
+  weight?: number | null;
 };
 
 const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Empty'];
@@ -40,6 +41,7 @@ const editTrailerSchema = z.object({
   status: z.enum(allStatuses as [TrailerStatus, ...TrailerStatus[]]),
   arrivalDate: z.date().nullable().optional(),
   storageExpiryDate: z.date().nullable().optional(),
+  weight: z.coerce.number().positive('Weight must be a positive number').optional().nullable(),
 }).refine(data => {
   if (data.arrivalDate && data.storageExpiryDate && data.storageExpiryDate < data.arrivalDate) {
     return false;
@@ -74,6 +76,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
         status: trailerToEdit.status,
         arrivalDate: trailerToEdit.arrivalDate ? parseISO(trailerToEdit.arrivalDate) : null,
         storageExpiryDate: trailerToEdit.storageExpiryDate ? parseISO(trailerToEdit.storageExpiryDate) : null,
+        weight: trailerToEdit.weight ?? null,
       });
     }
   }, [trailerToEdit, isOpen, reset]);
@@ -91,6 +94,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
       status: data.status,
       arrivalDate: data.arrivalDate ? data.arrivalDate.toISOString() : null, // Send null to clear
       storageExpiryDate: data.storageExpiryDate ? data.storageExpiryDate.toISOString() : null, // Send null to clear
+      weight: data.weight ?? undefined,
     };
 
     updateTrailer(trailerToEdit.id, updateData);
@@ -110,6 +114,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
         status: trailerToEdit.status,
         arrivalDate: trailerToEdit.arrivalDate ? parseISO(trailerToEdit.arrivalDate) : null,
         storageExpiryDate: trailerToEdit.storageExpiryDate ? parseISO(trailerToEdit.storageExpiryDate) : null,
+        weight: trailerToEdit.weight ?? null,
       });
     }
   }
@@ -139,6 +144,13 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
             <Label htmlFor="company">Company (Optional)</Label>
             <Input id="company" {...register('company')} placeholder="e.g., Logistics Inc." />
             {errors.company && <p className="text-sm text-destructive mt-1">{errors.company.message}</p>}
+          </div>
+           <div>
+            <Label htmlFor="weight" className="flex items-center">
+              <Weight className="mr-2 h-4 w-4 text-muted-foreground" /> Weight (kg) (Optional)
+            </Label>
+            <Input id="weight" type="number" step="any" {...register('weight')} placeholder="e.g., 3500" />
+            {errors.weight && <p className="text-sm text-destructive mt-1">{errors.weight.message}</p>}
           </div>
            <div>
             <Label htmlFor="status">Status</Label>

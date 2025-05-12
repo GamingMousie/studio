@@ -49,7 +49,6 @@ export default function PrintTrailerTransferPage() {
   const [shipDateArrivalC, setShipDateArrivalC] = useState('');
   const [countryOfOriginC, setCountryOfOriginC] = useState(''); 
   const [customsSealNoC, setCustomsSealNoC] = useState('');
-  const [companySealNoC, setCompanySealNoC] = useState(''); 
 
   const [showAdditionalDetailsForm, setShowAdditionalDetailsForm] = useState(false);
 
@@ -190,10 +189,7 @@ export default function PrintTrailerTransferPage() {
               <Label htmlFor="customsSealNoC" className="text-sm font-medium">Customs Seal No. (Part C)</Label>
               <Input id="customsSealNoC" value={customsSealNoC} onChange={(e) => setCustomsSealNoC(e.target.value)} placeholder="Customs Seal" className="mt-1"/>
             </div>
-            <div>
-              <Label htmlFor="companySealNoC" className="text-sm font-medium">Company Seal No. (Part C)</Label>
-              <Input id="companySealNoC" value={companySealNoC} onChange={(e) => setCompanySealNoC(e.target.value)} placeholder="Company Seal" className="mt-1"/>
-            </div>
+            {/* Company Seal No. C removed */}
           </CardContent>
         </Card>
       )}
@@ -278,7 +274,7 @@ export default function PrintTrailerTransferPage() {
                 <FormLine label="Number of T1/Non-EU consignments" value={totalShipments} valueBold/>
                 <FormLine label="Country of Origin" value={countryOfOriginC}/>
                 <FormLine label="Customs Seal No." value={customsSealNoC}/>
-                <FormLine label="Company Seal No." value={companySealNoC}/>
+                {/* Company Seal No. C removed */}
                 <FormLine label="Clearance Agency" value={clearanceAgencyCompany} valueBold/>
                 <FormLine label="Person Reporting" value={reportingPersonName} valueBold/>
                 <FormLine label="Contact No." value="01 8527 100" valueBold/>

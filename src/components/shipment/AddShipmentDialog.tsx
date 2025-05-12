@@ -162,7 +162,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             </div>
              <div>
               <Label htmlFor="initialLocationPallets" className="flex items-center">
-                <Box className="mr-2 h-4 w-4 text-muted-foreground" /> Pallets in Loc. (Optional)
+                <Box className="mr-2 h-4 w-4 text-muted-foreground" /> Plt Spaces in Loc. (Optional)
               </Label>
               <Input id="initialLocationPallets" type="number" {...register('initialLocationPallets')} placeholder="e.g., 2" />
               {errors.initialLocationPallets && <p className="text-sm text-destructive mt-1">{errors.initialLocationPallets.message}</p>}

@@ -23,7 +23,7 @@ import { useWarehouse } from '@/contexts/WarehouseContext';
 
 const newLocationSchema = z.object({
   newLocationName: z.string().min(1, 'Location name cannot be empty').max(30, 'Location name too long'),
-  newLocationPallets: z.coerce.number().int('Pallets must be a whole number.').min(0, 'Pallets cannot be negative.').optional().nullable(),
+  newLocationPallets: z.coerce.number().int('Plt spaces must be a whole number.').min(0, 'Plt spaces cannot be negative.').optional().nullable(),
 });
 type NewLocationFormData = z.infer<typeof newLocationSchema>;
 
@@ -247,7 +247,7 @@ export default function ManageLocationsDialog({
                 </div>
                 <div>
                   <Label htmlFor="newLocationPallets" className="flex items-center">
-                    <Box className="mr-1 h-3 w-3 text-muted-foreground" /> Pallets
+                    <Box className="mr-1 h-3 w-3 text-muted-foreground" /> Plt Spaces
                   </Label>
                   <Input
                     id="newLocationPallets"

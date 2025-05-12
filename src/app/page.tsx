@@ -37,15 +37,17 @@ export default function HomePage() {
     return Array.from(companies).sort();
   }, [trailers, isClient]);
 
-  const filteredTrailers = trailers.filter(trailer => {
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = trailer.id.toLowerCase().includes(searchLower) ||
-                          trailer.name.toLowerCase().includes(searchLower) ||
-                          (trailer.company && trailer.company.toLowerCase().includes(searchLower));
-    const matchesStatus = statusFilter === 'all' || trailer.status === statusFilter;
-    const matchesCompany = companyFilter === 'all' || (trailer.company?.toLowerCase() === companyFilter.toLowerCase());
-    return matchesSearch && matchesStatus && matchesCompany;
-  });
+  const filteredTrailers = useMemo(() => {
+    return trailers.filter(trailer => {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = trailer.id.toLowerCase().includes(searchLower) ||
+                            trailer.name.toLowerCase().includes(searchLower) ||
+                            (trailer.company && trailer.company.toLowerCase().includes(searchLower));
+      const matchesStatus = statusFilter === 'all' || trailer.status === statusFilter;
+      const matchesCompany = companyFilter === 'all' || (trailer.company?.toLowerCase() === companyFilter.toLowerCase());
+      return matchesSearch && matchesStatus && matchesCompany;
+    });
+  }, [trailers, searchTerm, statusFilter, companyFilter]);
   
   const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Devanned'];
 

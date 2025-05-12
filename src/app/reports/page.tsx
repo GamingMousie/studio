@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -6,9 +7,10 @@ import type { Shipment, Trailer } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays } from 'lucide-react';
+import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer } from 'lucide-react';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from '@/components/ui/button';
 import { format, parseISO } from 'date-fns';
 
 interface BondCheckReportItem {
@@ -97,6 +99,9 @@ export default function ReportsPage() {
     );
   }, [rawBondCheckReportData, companyFilter]);
 
+  const handlePrintReport = () => {
+    window.print();
+  };
 
   const ReportSkeleton = () => (
     <Table>
@@ -131,15 +136,19 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-card rounded-lg shadow">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-card rounded-lg shadow no-print">
         <h1 className="text-3xl font-bold text-foreground flex items-center">
           <ClipboardList className="mr-3 h-8 w-8 text-primary" />
           Bond Check Report
         </h1>
+        <Button onClick={handlePrintReport} variant="outline">
+          <Printer className="mr-2 h-4 w-4" />
+          Print Report (PDF)
+        </Button>
       </div>
 
-      <Card className="shadow-lg">
-        <CardHeader>
+      <Card className="shadow-lg printable-area">
+        <CardHeader className="no-print">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <CardTitle className="text-xl sm:text-2xl text-primary">Current Warehouse Stock (Unreleased)</CardTitle>
@@ -165,6 +174,13 @@ export default function ReportsPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Title and description for printed version */}
+          <div className="print-only-block mb-4">
+            <h2 className="text-xl font-semibold text-foreground">Bond Check Report - Current Warehouse Stock (Unreleased)</h2>
+            {companyFilter !== 'all' && <p className="text-sm text-muted-foreground">Filtered by Company: {uniqueCompanies.find(c => c.toLowerCase() === companyFilter) || companyFilter}</p>}
+             <p className="text-xs text-muted-foreground">Date Generated: {new Date().toLocaleDateString()}</p>
+          </div>
+
           {!isClient ? (
             <ReportSkeleton />
           ) : filteredBondCheckReportData.length === 0 ? (
@@ -187,7 +203,7 @@ export default function ReportsPage() {
                     <TableHead className="whitespace-nowrap">Company</TableHead>
                     <TableHead className="whitespace-nowrap">
                       <div className="flex items-center">
-                        <CalendarDays className="mr-1.5 h-4 w-4" />
+                        <CalendarDays className="mr-1.5 h-4 w-4 print:hidden" />
                         Arrival Date
                       </div>
                     </TableHead>
@@ -201,7 +217,7 @@ export default function ReportsPage() {
                   {filteredBondCheckReportData.map((item) => (
                     <TableRow key={item.shipmentId}>
                       <TableCell className="font-medium">
-                        <Link href={`/trailers/${item.trailerId}`} className="text-primary hover:underline">
+                        <Link href={`/trailers/${item.trailerId}`} className="text-primary hover:underline print:text-foreground print:no-underline">
                           {item.trailerId}
                         </Link>
                       </TableCell>
@@ -212,7 +228,7 @@ export default function ReportsPage() {
                       <TableCell>{item.customerJobNumber || 'N/A'}</TableCell>
                       <TableCell>{item.locationsDisplay}</TableCell>
                       <TableCell className="text-right">
-                         <Link href={`/shipments/${item.shipmentId}`} className="text-primary hover:underline">
+                         <Link href={`/shipments/${item.shipmentId}`} className="text-primary hover:underline print:text-foreground print:no-underline">
                            {item.shipmentId.substring(0, 8)}...
                          </Link>
                       </TableCell>
@@ -224,7 +240,7 @@ export default function ReportsPage() {
           )}
         </CardContent>
          {isClient && filteredBondCheckReportData.length > 0 && (
-            <CardFooter className="text-sm text-muted-foreground border-t pt-4">
+            <CardFooter className="text-sm text-muted-foreground border-t pt-4 no-print">
                 <Info className="h-4 w-4 mr-2 text-primary" />
                 Displaying {filteredBondCheckReportData.length} unreleased shipment(s) matching filter.
             </CardFooter>

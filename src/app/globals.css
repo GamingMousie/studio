@@ -190,25 +190,43 @@
     display: none !important;
   }
 
-  /* Signature Block specific */
+  /* General print-only block styling */
   .printable-area .print-only-block {
     display: block !important;
-    margin-top: 0.25in !important; /* Reduced */
-    padding-top: 0.15in !important; /* Reduced */
+    margin-top: 0.25in !important;
+    padding-top: 0.15in !important;
   }
-  .printable-area .print-only-block .text-lg { /* "Driver's Acknowledgment..." was text-lg -> 11pt, now 10pt */
+
+  /* Report Page specific print-only block (for report title) */
+  .printable-area .print-only-block.mb-4 { /* Match the margin from ReportsPage.tsx for consistency */
+     margin-top: 0 !important; /* Override general print-only-block for this specific case */
+     padding-top: 0 !important;
+     margin-bottom: 0.15in !important; /* Was mb-4 -> 0.15in */
+  }
+   .printable-area .print-only-block h2 {
+    font-size: 12pt !important; /* Consistent with .text-xl */
+    margin-bottom: 0.05in !important;
+   }
+  .printable-area .print-only-block p {
+    font-size: 8pt !important; /* Consistent with .text-sm */
+    margin-bottom: 0.05in !important;
+  }
+
+
+  /* Signature Block specific */
+  .printable-area .print-only-block:not(.mb-4) .text-lg { /* "Driver's Acknowledgment..." was text-lg -> 11pt, now 10pt. Exclude report title block */
     font-size: 10pt !important;
     margin-bottom: 0.25in !important; /* Reduced */
   }
-   .printable-area .print-only-block .h-12 { /* Signature lines */
+   .printable-area .print-only-block:not(.mb-4) .h-12 { /* Signature lines */
      height: 0.35in !important; /* Reduced */
      margin-bottom: 0.1in !important; /* Reduced */
    }
-  .printable-area .print-only-block .grid { /* Grid for signature fields */
+  .printable-area .print-only-block:not(.mb-4) .grid { /* Grid for signature fields */
      row-gap: 0.15in !important; /* Reduced */
      column-gap: 0.4in !important; /* Reduced */
   }
-  .printable-area .print-only-block label.block { /* Signature labels */
+  .printable-area .print-only-block:not(.mb-4) label.block { /* Signature labels */
       font-size: 7pt !important; /* Reduced */
   }
 
@@ -217,6 +235,22 @@
     font-size: 7pt !important;
     padding: 1px 4px !important; /* equivalent to py-0.5 px-1 or similar */
     line-height: 1.2 !important;
+  }
+
+  /* Ensure table links are black and not underlined for print */
+  .printable-area table a,
+  .printable-area table a:visited {
+    color: var(--foreground) !important; /* Use foreground color (black in print) */
+    text-decoration: none !important;
+  }
+  .printable-area .print\:text-foreground {
+    color: var(--foreground) !important;
+  }
+  .printable-area .print\:no-underline {
+    text-decoration: none !important;
+  }
+  .printable-area .print\:hidden {
+    display: none !important;
   }
 
 

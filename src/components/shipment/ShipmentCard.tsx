@@ -5,7 +5,7 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send, Briefcase } from 'lucide-react';
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send, Briefcase, Truck } from 'lucide-react';
 import ManageLocationsDialog from './ManageLocationsDialog';
 import EditShipmentDialog from './EditShipmentDialog';
 import AttachDocumentDialog from './AttachDocumentDialog';
@@ -27,7 +27,7 @@ interface ShipmentCardProps {
 }
 
 export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) {
-  const { updateShipment } = useWarehouse();
+  const { updateShipment, getTrailerById } = useWarehouse();
   const { toast } = useToast();
 
   const [isManageLocationsOpen, setIsManageLocationsOpen] = useState(false);
@@ -37,6 +37,7 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
   const [isShipmentDeleteDialogOpen, setIsShipmentDeleteDialogOpen] = useState(false);
 
   const shipmentIdentifier = `STS Job: ${shipment.stsJob}`;
+  const trailer = getTrailerById(shipment.trailerId);
 
   const handleMarkAsPermitted = () => {
     if (!shipment.released) {
@@ -80,12 +81,22 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
       <Card className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow duration-200">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
-            <CardTitle className="text-lg">
-              <Link href={`/shipments/${shipment.id}`} className="hover:underline text-primary flex items-center group">
-                <Package className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
-                STS Job: {shipment.stsJob}
-              </Link>
-            </CardTitle>
+            <div> {/* Wrapper for title and trailer description */}
+              <CardTitle className="text-lg">
+                <Link href={`/shipments/${shipment.id}`} className="hover:underline text-primary flex items-center group">
+                  <Package className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
+                  STS Job: {shipment.stsJob}
+                </Link>
+              </CardTitle>
+              {trailer && (
+                <CardDescription className="text-xs mt-0.5 flex items-center">
+                  <Truck className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+                  <Link href={`/trailers/${trailer.id}`} className="text-muted-foreground hover:text-primary hover:underline">
+                    Trailer: {trailer.name || 'N/A'} ({trailer.id})
+                  </Link>
+                </CardDescription>
+              )}
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7">
@@ -124,7 +135,7 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <CardDescription>ID: {shipment.id.substring(0,8)}...</CardDescription>
+          <CardDescription className="text-xs mt-1">Shipment ID: {shipment.id.substring(0,8)}...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-1.5 text-sm flex-grow">
           {shipment.customerJobNumber && (
@@ -255,3 +266,4 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
     </>
   );
 }
+

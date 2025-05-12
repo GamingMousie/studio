@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -45,13 +46,11 @@ export default function PrintTrailerTransferPage() {
   const [reportingPersonName, setReportingPersonName] = useState('');
   const [mvArrived, setMvArrived] = useState('');
   const [mvDate, setMvDate] = useState('');
-  const [customsSealNumberAppliedB, setCustomsSealNumberAppliedB] = useState('');
-  const [localRefNumberB, setLocalRefNumberB] = useState('');
-  const [lorryRegNumberB, setLorryRegNumberB] = useState('');
+  // Removed Part B fields
   const [shipDateArrivalC, setShipDateArrivalC] = useState('');
-  const [countryOfOriginC, setCountryOfOriginC] = useState('');
+  const [countryOfOriginC, setCountryOfOriginC] = useState(''); // Added
   const [customsSealNoC, setCustomsSealNoC] = useState('');
-  const [companySealNoC, setCompanySealNoC] = useState('');
+  const [companySealNoC, setCompanySealNoC] = useState(''); // Added
 
 
   useEffect(() => {
@@ -166,18 +165,7 @@ export default function PrintTrailerTransferPage() {
             <Label htmlFor="mvDate" className="text-sm font-medium">MV Arrival Date (Part A)</Label>
             <Input id="mvDate" value={mvDate} onChange={(e) => setMvDate(e.target.value)} placeholder="Enter MV arrival date" className="mt-1"/>
           </div>
-          <div>
-            <Label htmlFor="customsSealNumberAppliedB" className="text-sm font-medium">Customs Seal No. Applied (Part B)</Label>
-            <Input id="customsSealNumberAppliedB" value={customsSealNumberAppliedB} onChange={(e) => setCustomsSealNumberAppliedB(e.target.value)} placeholder="Customs Seal No." className="mt-1"/>
-          </div>
-           <div>
-            <Label htmlFor="localRefNumberB" className="text-sm font-medium">Local Ref Number (Part B)</Label>
-            <Input id="localRefNumberB" value={localRefNumberB} onChange={(e) => setLocalRefNumberB(e.target.value)} placeholder="Local Reference" className="mt-1"/>
-          </div>
-           <div>
-            <Label htmlFor="lorryRegNumberB" className="text-sm font-medium">Lorry Reg. Number (Part B)</Label>
-            <Input id="lorryRegNumberB" value={lorryRegNumberB} onChange={(e) => setLorryRegNumberB(e.target.value)} placeholder="Lorry Registration" className="mt-1"/>
-          </div>
+          {/* Part B fields removed */}
           <div>
             <Label htmlFor="shipDateArrivalC" className="text-sm font-medium">Ship/Date of Arrival (Part C)</Label>
             <Input id="shipDateArrivalC" value={shipDateArrivalC} onChange={(e) => setShipDateArrivalC(e.target.value)} placeholder="Ship/Date" className="mt-1"/>
@@ -247,24 +235,8 @@ export default function PrintTrailerTransferPage() {
             </div>
           </div>
 
-          {/* Part B */}
-          <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">
-            <h3 className="font-bold text-sm print:text-[9pt] mb-1 print:mb-0.5">Part B (Official use only)</h3>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 print:gap-y-0">
-                <FormLine label="Customs seal number applied" value={customsSealNumberAppliedB}/>
-                <FormLine label="Local Ref Number" value={localRefNumberB}/>
-            </div>
-            <div className="flex items-start justify-between mt-1 print:mt-0.5">
-                <div className="w-1/2">
-                    <FormLine label="Lorry Reg. Number" value={lorryRegNumberB}/>
-                    <FormLine label="Sealing Official’s signature" value={null} minHeight="min-h-[2em]"/>
-                </div>
-                <div className="border border-foreground print:border-black w-2/5 h-12 print:h-10 flex items-center justify-center text-muted-foreground print:text-gray-500 text-xs print:text-[7pt]">
-                    Date Stamp and Time
-                </div>
-            </div>
-          </div>
-
+          {/* Part B Removed */}
+          
           {/* Part C */}
            <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">
             <h3 className="font-bold text-sm print:text-[9pt] mb-1 print:mb-0.5">Part C: (Notification on arrival of good at T.S. Facility)</h3>

@@ -4,15 +4,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 import type { Shipment, Trailer } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card'; // Added CardFooter and CardDescription
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, PackageSearch, Info } from 'lucide-react';
+import { ClipboardList, PackageSearch, Info, Briefcase } from 'lucide-react';
 import Link from 'next/link';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface BondCheckReportItem {
   trailerId: string;
   trailerName?: string;
+  company?: string;
   stsJob: number;
   shipmentId: string;
   customerJobNumber?: string;
@@ -22,16 +24,17 @@ interface BondCheckReportItem {
 export default function ReportsPage() {
   const { shipments, getTrailerById } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
+  const [companyFilter, setCompanyFilter] = useState<string>('all');
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const bondCheckReportData = useMemo((): BondCheckReportItem[] => {
+  const rawBondCheckReportData = useMemo((): BondCheckReportItem[] => {
     if (!isClient) return [];
 
     return shipments
-      .filter(shipment => !shipment.releasedAt) // Filter for shipments that are not released
+      .filter(shipment => !shipment.releasedAt) 
       .map(shipment => {
         const trailer = getTrailerById(shipment.trailerId);
         const locations = shipment.locations || [{ name: 'Pending Assignment' }];
@@ -47,13 +50,14 @@ export default function ReportsPage() {
         return {
           trailerId: shipment.trailerId,
           trailerName: trailer?.name,
+          company: trailer?.company,
           stsJob: shipment.stsJob,
           shipmentId: shipment.id,
           customerJobNumber: shipment.customerJobNumber,
           locationsDisplay: locationsDisplay,
         };
       })
-      .sort((a, b) => { // Sort by Trailer ID, then by STS Job
+      .sort((a, b) => { 
         if (a.trailerId < b.trailerId) return -1;
         if (a.trailerId > b.trailerId) return 1;
         if (a.stsJob < b.stsJob) return -1;
@@ -62,12 +66,34 @@ export default function ReportsPage() {
       });
   }, [shipments, getTrailerById, isClient]);
 
+  const uniqueCompanies = useMemo(() => {
+    if (!isClient) return [];
+    const companies = new Set<string>();
+    rawBondCheckReportData.forEach(item => {
+      if (item.company) {
+        companies.add(item.company);
+      }
+    });
+    return Array.from(companies).sort();
+  }, [rawBondCheckReportData, isClient]);
+
+  const filteredBondCheckReportData = useMemo(() => {
+    if (companyFilter === 'all') {
+      return rawBondCheckReportData;
+    }
+    return rawBondCheckReportData.filter(item => 
+      item.company?.toLowerCase() === companyFilter.toLowerCase()
+    );
+  }, [rawBondCheckReportData, companyFilter]);
+
+
   const ReportSkeleton = () => (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Trailer ID</TableHead>
           <TableHead>Trailer Name</TableHead>
+          <TableHead>Company</TableHead>
           <TableHead>STS Job</TableHead>
           <TableHead>Customer Job No.</TableHead>
           <TableHead>Locations</TableHead>
@@ -78,6 +104,7 @@ export default function ReportsPage() {
         {[...Array(5)].map((_, i) => (
           <TableRow key={i}>
             <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
@@ -100,22 +127,41 @@ export default function ReportsPage() {
 
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-xl sm:text-2xl text-primary">Current Warehouse Stock (Unreleased)</CardTitle>
-          <CardDescription>
-            This report lists all shipments currently in the warehouse that have not been marked as "Released".
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <CardTitle className="text-xl sm:text-2xl text-primary">Current Warehouse Stock (Unreleased)</CardTitle>
+                <CardDescription>
+                This report lists all shipments currently in the warehouse that have not been marked as "Released".
+                </CardDescription>
+            </div>
+            <Select value={companyFilter} onValueChange={(value) => setCompanyFilter(value)}>
+                <SelectTrigger className="w-full sm:w-[220px]">
+                <div className="flex items-center">
+                    <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Filter by company" />
+                </div>
+                </SelectTrigger>
+                <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {isClient && uniqueCompanies.map(company => (
+                    <SelectItem key={company} value={company.toLowerCase()}>{company}</SelectItem>
+                ))}
+                {!isClient && <Skeleton className="h-8 w-full my-1" />}
+                </SelectContent>
+            </Select>
+          </div>
         </CardHeader>
         <CardContent>
           {!isClient ? (
             <ReportSkeleton />
-          ) : bondCheckReportData.length === 0 ? (
+          ) : filteredBondCheckReportData.length === 0 ? (
             <div className="min-h-[200px] flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-md p-8">
               <PackageSearch className="h-16 w-16 text-muted-foreground mb-4" />
               <p className="text-xl text-muted-foreground">
-                No unreleased shipments found in the warehouse.
+                No unreleased shipments found for the selected filter.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                All shipments have been released, or there are no shipments currently tracked.
+                All shipments have been released, or there are no shipments matching your criteria.
               </p>
             </div>
           ) : (
@@ -125,6 +171,7 @@ export default function ReportsPage() {
                   <TableRow>
                     <TableHead className="whitespace-nowrap">Trailer ID</TableHead>
                     <TableHead className="whitespace-nowrap">Trailer Name</TableHead>
+                    <TableHead className="whitespace-nowrap">Company</TableHead>
                     <TableHead className="whitespace-nowrap">STS Job</TableHead>
                     <TableHead className="whitespace-nowrap">Customer Job No.</TableHead>
                     <TableHead>Locations</TableHead>
@@ -132,7 +179,7 @@ export default function ReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bondCheckReportData.map((item) => (
+                  {filteredBondCheckReportData.map((item) => (
                     <TableRow key={item.shipmentId}>
                       <TableCell className="font-medium">
                         <Link href={`/trailers/${item.trailerId}`} className="text-primary hover:underline">
@@ -140,6 +187,7 @@ export default function ReportsPage() {
                         </Link>
                       </TableCell>
                       <TableCell>{item.trailerName || 'N/A'}</TableCell>
+                      <TableCell>{item.company || 'N/A'}</TableCell>
                       <TableCell>{item.stsJob}</TableCell>
                       <TableCell>{item.customerJobNumber || 'N/A'}</TableCell>
                       <TableCell>{item.locationsDisplay}</TableCell>
@@ -155,10 +203,10 @@ export default function ReportsPage() {
             </div>
           )}
         </CardContent>
-         {isClient && bondCheckReportData.length > 0 && (
+         {isClient && filteredBondCheckReportData.length > 0 && (
             <CardFooter className="text-sm text-muted-foreground border-t pt-4">
                 <Info className="h-4 w-4 mr-2 text-primary" />
-                Displaying {bondCheckReportData.length} unreleased shipment(s).
+                Displaying {filteredBondCheckReportData.length} unreleased shipment(s) matching filter.
             </CardFooter>
         )}
       </Card>

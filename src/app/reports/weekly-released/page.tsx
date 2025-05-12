@@ -7,20 +7,20 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Clock, PackageSearch, Printer, Info, Truck, CalendarDays, Users, Send, Hash, Briefcase, Eye } from 'lucide-react';
+import { Clock, PackageSearch, Printer, Info, Truck, CalendarDays, Users, Send, Hash, Briefcase, ArrowLeft, ArrowRight, Undo2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
   format,
   parseISO,
-  startOfWeek,
-  endOfWeek,
   startOfMonth,
   endOfMonth,
   isWithinInterval,
+  addMonths,
+  subMonths,
 } from 'date-fns';
 
-interface WeeklyReleasedReportItem {
+interface MonthlyReleasedReportItem {
   shipmentId: string;
   stsJob: number;
   customerJobNumber?: string;
@@ -33,31 +33,22 @@ interface WeeklyReleasedReportItem {
   exporter: string;
 }
 
-export default function WeeklyReleasedReportPage() {
+export default function MonthlyReleasedReportPage() {
   const { shipments, getTrailerById } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
-  const [reportPeriod, setReportPeriod] = useState<'week' | 'month'>('week');
+  const [displayDate, setDisplayDate] = useState(new Date()); // Date to determine the month to display
 
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  const weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 = 1; // Monday
-  const currentDate = useMemo(() => new Date(), []); // Only calculate once
   
   const currentPeriodStart = useMemo(() => {
-    if (reportPeriod === 'week') {
-      return startOfWeek(currentDate, { weekStartsOn });
-    }
-    return startOfMonth(currentDate);
-  }, [currentDate, weekStartsOn, reportPeriod]);
+    return startOfMonth(displayDate);
+  }, [displayDate]);
 
   const currentPeriodEnd = useMemo(() => {
-    if (reportPeriod === 'week') {
-      return endOfWeek(currentDate, { weekStartsOn });
-    }
-    return endOfMonth(currentDate);
-  }, [currentDate, weekStartsOn, reportPeriod]);
+    return endOfMonth(displayDate);
+  }, [displayDate]);
 
   const formatDateSafe = (dateString?: string, dateFormat = 'PPpp') => {
     if (!dateString) return 'N/A';
@@ -68,7 +59,7 @@ export default function WeeklyReleasedReportPage() {
     }
   };
 
-  const reportData = useMemo((): WeeklyReleasedReportItem[] => {
+  const reportData = useMemo((): MonthlyReleasedReportItem[] => {
     if (!isClient) return [];
 
     return shipments
@@ -103,21 +94,25 @@ export default function WeeklyReleasedReportPage() {
     window.print();
   };
 
-  const toggleReportPeriod = () => {
-    setReportPeriod(prev => prev === 'week' ? 'month' : 'week');
-  }
+  const handlePreviousMonth = () => {
+    setDisplayDate(prev => subMonths(prev, 1));
+  };
 
-  const periodRangeFormatted = reportPeriod === 'week' 
-    ? `${format(currentPeriodStart, 'MMM d')} - ${format(currentPeriodEnd, 'MMM d, yyyy')}`
-    : `${format(currentPeriodStart, 'MMMM yyyy')}`;
+  const handleNextMonth = () => {
+    setDisplayDate(prev => addMonths(prev, 1));
+  };
 
-  const pageTitle = reportPeriod === 'week' ? 'Weekly Released Shipments' : 'Monthly Released Shipments';
-  const cardTitleText = reportPeriod === 'week' ? 'Released This Week' : `Released in ${format(currentDate, 'MMMM')}`;
-  const cardDescriptionText = reportPeriod === 'week' 
-    ? `Shipments released from ${format(currentPeriodStart, 'PP')} to ${format(currentPeriodEnd, 'PP')}.`
-    : `Shipments released during ${format(currentPeriodStart, 'MMMM yyyy')}.`;
-  const printTitleText = reportPeriod === 'week' ? 'Weekly Released Shipments Report' : 'Monthly Released Shipments Report';
-  const printPeriodText = reportPeriod === 'week' ? `For week: ${periodRangeFormatted}` : `For month: ${periodRangeFormatted}`;
+  const handleThisMonth = () => {
+    setDisplayDate(new Date());
+  };
+
+  const displayedMonthFormatted = format(displayDate, 'MMMM yyyy');
+
+  const pageTitle = 'Monthly Released Shipments';
+  const cardTitleText = `Released in ${displayedMonthFormatted}`;
+  const cardDescriptionText = `Shipments released during ${displayedMonthFormatted}.`;
+  const printTitleText = 'Monthly Released Shipments Report';
+  const printPeriodText = `For month: ${displayedMonthFormatted}`;
 
 
   const ReportSkeleton = () => (
@@ -156,10 +151,15 @@ export default function WeeklyReleasedReportPage() {
           <Clock className="mr-3 h-8 w-8 text-primary" />
           {pageTitle}
         </h1>
-        <div className="flex items-center gap-2">
-          <Button onClick={toggleReportPeriod} variant="outline">
-            <Eye className="mr-2 h-4 w-4" />
-            View {reportPeriod === 'week' ? 'This Month' : 'This Week'}
+        <div className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
+          <Button variant="outline" onClick={handlePreviousMonth} aria-label="Previous month">
+            <ArrowLeft className="h-4 w-4 mr-0 sm:mr-2" /> <span className="hidden sm:inline">Prev Month</span>
+          </Button>
+          <Button variant="outline" onClick={handleThisMonth}>
+             <Undo2 className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">This Month</span>
+          </Button>
+          <Button variant="outline" onClick={handleNextMonth} aria-label="Next month">
+             <span className="hidden sm:inline">Next Month</span><ArrowRight className="h-4 w-4 ml-0 sm:ml-2" />
           </Button>
           <Button onClick={handlePrintReport} variant="outline">
             <Printer className="mr-2 h-4 w-4" />
@@ -190,10 +190,10 @@ export default function WeeklyReleasedReportPage() {
             <div className="min-h-[200px] flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-md p-8">
               <PackageSearch className="h-16 w-16 text-muted-foreground mb-4" />
               <p className="text-xl text-muted-foreground">
-                No shipments were released {reportPeriod === 'week' ? 'this week' : `in ${format(currentDate, 'MMMM')}`}.
+                No shipments were released in {displayedMonthFormatted}.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                Check back later or view previous reports if available.
+                Try navigating to a different month or check back later.
               </p>
             </div>
           ) : (
@@ -238,7 +238,7 @@ export default function WeeklyReleasedReportPage() {
          {isClient && reportData.length > 0 && (
             <CardFooter className="text-sm text-muted-foreground border-t pt-4 no-print">
                 <Info className="h-4 w-4 mr-2 text-primary" />
-                Displaying {reportData.length} shipment(s) released {reportPeriod === 'week' ? 'this week' : `in ${format(currentDate, 'MMMM')}`}.
+                Displaying {reportData.length} shipment(s) released in {displayedMonthFormatted}.
             </CardFooter>
         )}
       </Card>

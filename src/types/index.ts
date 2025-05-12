@@ -32,6 +32,7 @@ export interface Shipment {
   cleared: boolean; // Indicates if the shipment is cleared
   weight?: number; // Optional: Weight of the shipment in kg
   palletSpace?: number; // Optional: Pallet spaces occupied by the shipment (overall for shipment)
+  releasedAt?: string; // Optional: Timestamp for when the shipment was printed/officially released
 }
 
 // Used for the form data when creating or updating a shipment
@@ -65,6 +66,7 @@ export interface ShipmentUpdateData {
   cleared?: boolean;
   weight?: number;
   palletSpace?: number; // Overall pallet space for the shipment
+  releasedAt?: string; // Allow updating releasedAt, though primarily handled by markShipmentAsPrinted
 }
 
 // Specifically for updating an existing trailer via context

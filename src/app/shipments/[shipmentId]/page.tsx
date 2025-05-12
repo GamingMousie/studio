@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase } from 'lucide-react';
+import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
 export default function SingleShipmentPage() {
@@ -18,7 +18,7 @@ export default function SingleShipmentPage() {
   const params = useParams();
   const shipmentId = params.shipmentId as string;
 
-  const { getShipmentById, getTrailerById } = useWarehouse();
+  const { getShipmentById, getTrailerById, markShipmentAsPrinted } = useWarehouse();
 
   const [shipment, setShipment] = useState<Shipment | null | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
@@ -31,15 +31,25 @@ export default function SingleShipmentPage() {
       setShipment(currentShipment);
     }
   }, [shipmentId, getShipmentById]);
+  
+  // Re-fetch shipment data if it changes in context (e.g., after markShipmentAsPrinted)
+  useEffect(() => {
+    if (isClient && shipmentId && getShipmentById) {
+      setShipment(getShipmentById(shipmentId));
+    }
+  }, [isClient, shipmentId, getShipmentById, shipment?.releasedAt]);
+
 
   const trailer = shipment?.trailerId ? getTrailerById(shipment.trailerId) : null;
 
   const canPrint = shipment?.cleared && shipment?.released;
 
   const handlePrint = () => {
-    if (canPrint) {
+    if (canPrint && shipment) {
+      markShipmentAsPrinted(shipment.id); // This updates the persisted state
+      // For the print footer, we use a fresh date for accuracy at the moment of printing.
       setPrintedDateTime(new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
-      // Use setTimeout to allow state to update before print dialog
+      
       setTimeout(() => {
         window.print();
       }, 0);
@@ -48,8 +58,6 @@ export default function SingleShipmentPage() {
 
   const handleViewDocument = (documentName?: string) => {
     if (documentName) {
-      // Simulate opening the document in a new tab
-      // In a real app, this would be a URL to the document or a download trigger
       const newWindow = window.open("", "_blank");
       if (newWindow) {
         newWindow.document.write(`
@@ -81,7 +89,7 @@ export default function SingleShipmentPage() {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
     try {
-      return format(parseISO(dateString), 'PPpp');
+      return format(parseISO(dateString), 'PPpp'); // e.g., Jul 20, 2024, 10:00:00 AM
     } catch (error) {
       return "Invalid Date";
     }
@@ -225,6 +233,14 @@ export default function SingleShipmentPage() {
             </div>
           )}
 
+           {shipment.releasedAt && (
+            <div className="space-y-1">
+              <h3 className="font-semibold text-muted-foreground flex items-center"><CalendarCheck className="mr-2 h-4 w-4" />Released At</h3>
+              <p className="text-base font-medium">{formatDate(shipment.releasedAt)}</p>
+            </div>
+          )}
+
+
           <div className="space-y-1 col-span-1 md:col-span-2">
             <h3 className="font-semibold text-muted-foreground flex items-center"><MapPin className="mr-2 h-4 w-4" />Warehouse Locations</h3>
             <div className="flex flex-wrap gap-2 mt-1">
@@ -336,4 +352,3 @@ export default function SingleShipmentPage() {
     </div>
   );
 }
-

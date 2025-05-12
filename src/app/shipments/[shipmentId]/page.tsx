@@ -305,14 +305,7 @@ export default function SingleShipmentPage() {
               <label className="block text-sm font-medium text-muted-foreground">Printed Name</label>
               <div className="h-12 border-b border-foreground"></div>
             </div>
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-muted-foreground">Date</label>
-              <div className="h-12 border-b border-foreground"></div>
-            </div>
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-muted-foreground">Time</label>
-              <div className="h-12 border-b border-foreground"></div>
-            </div>
+            {/* Date and Time fields removed for printing */}
           </div>
         </div>
 
@@ -320,3 +313,4 @@ export default function SingleShipmentPage() {
     </div>
   );
 }
+

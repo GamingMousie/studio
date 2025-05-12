@@ -264,7 +264,6 @@ export default function PrintTrailerTransferPage() {
              <div className="border-t border-foreground print:border-black mt-2 pt-1">
                <FormLine label="Sealing Official’s signature" fullWidthValue />
              </div>
-
           </div>
 
           {/* Part C */}

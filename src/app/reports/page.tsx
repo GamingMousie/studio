@@ -7,7 +7,7 @@ import type { Shipment, Trailer } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer, ArrowRightCircle, Clock, AlertOctagon, BarChart3 } from 'lucide-react';
+import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer, ArrowRightCircle, Clock, AlertOctagon, BarChart3, Hash } from 'lucide-react';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ interface BondCheckReportItem {
   trailerId: string;
   trailerName?: string;
   company?: string;
-  arrivalDate?: string; // Added arrivalDate
+  arrivalDate?: string; 
   stsJob: number;
   shipmentId: string;
   customerJobNumber?: string;
@@ -63,7 +63,7 @@ export default function ReportsPage() {
           trailerId: shipment.trailerId,
           trailerName: trailer?.name,
           company: trailer?.company,
-          arrivalDate: trailer?.arrivalDate, // Include arrivalDate
+          arrivalDate: trailer?.arrivalDate, 
           stsJob: shipment.stsJob,
           shipmentId: shipment.id,
           customerJobNumber: shipment.customerJobNumber,
@@ -71,6 +71,16 @@ export default function ReportsPage() {
         };
       })
       .sort((a, b) => { 
+        // Primary sort by company, then trailerId, then stsJob
+        if (a.company && b.company) {
+          if (a.company.toLowerCase() < b.company.toLowerCase()) return -1;
+          if (a.company.toLowerCase() > b.company.toLowerCase()) return 1;
+        } else if (a.company) {
+          return -1; // a has company, b doesn't
+        } else if (b.company) {
+          return 1; // b has company, a doesn't
+        }
+
         if (a.trailerId < b.trailerId) return -1;
         if (a.trailerId > b.trailerId) return 1;
         if (a.stsJob < b.stsJob) return -1;
@@ -107,12 +117,12 @@ export default function ReportsPage() {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Trailer ID</TableHead>
-          <TableHead>Trailer Name</TableHead>
           <TableHead>Company</TableHead>
-          <TableHead>Arrival Date</TableHead>
+          <TableHead>Trailer ID</TableHead>
           <TableHead>STS Job</TableHead>
+          <TableHead>Trailer Name</TableHead>
           <TableHead>Customer Job No.</TableHead>
+          <TableHead>Arrival Date</TableHead>
           <TableHead>Locations</TableHead>
           <TableHead className="text-right">Shipment ID</TableHead>
         </TableRow>
@@ -120,12 +130,12 @@ export default function ReportsPage() {
       <TableBody>
         {[...Array(5)].map((_, i) => (
           <TableRow key={i}>
+            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[90px]" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
             <TableCell className="text-right"><Skeleton className="h-4 w-[70px] ml-auto" /></TableCell>
           </TableRow>
@@ -278,17 +288,17 @@ export default function ReportsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4 print:hidden"/>Company</TableHead>
                     <TableHead className="whitespace-nowrap">Trailer ID</TableHead>
+                    <TableHead className="whitespace-nowrap"><Hash className="inline-block mr-1 h-4 w-4 print:hidden"/>STS Job</TableHead>
                     <TableHead className="whitespace-nowrap">Trailer Name</TableHead>
-                    <TableHead className="whitespace-nowrap">Company</TableHead>
+                    <TableHead className="whitespace-nowrap">Customer Job No.</TableHead>
                     <TableHead className="whitespace-nowrap">
                       <div className="flex items-center">
                         <CalendarDays className="mr-1.5 h-4 w-4 print:hidden" />
                         Arrival Date
                       </div>
                     </TableHead>
-                    <TableHead className="whitespace-nowrap">STS Job</TableHead>
-                    <TableHead className="whitespace-nowrap">Customer Job No.</TableHead>
                     <TableHead>Locations</TableHead>
                     <TableHead className="text-right whitespace-nowrap">Shipment ID</TableHead>
                   </TableRow>
@@ -296,16 +306,16 @@ export default function ReportsPage() {
                 <TableBody>
                   {filteredBondCheckReportData.map((item) => (
                     <TableRow key={item.shipmentId}>
+                      <TableCell>{item.company || 'N/A'}</TableCell>
                       <TableCell className="font-medium">
                         <Link href={`/trailers/${item.trailerId}`} className="text-primary hover:underline print:text-foreground print:no-underline">
                           {item.trailerId}
                         </Link>
                       </TableCell>
-                      <TableCell>{item.trailerName || 'N/A'}</TableCell>
-                      <TableCell>{item.company || 'N/A'}</TableCell>
-                      <TableCell>{formatDateSafe(item.arrivalDate)}</TableCell>
                       <TableCell>{item.stsJob}</TableCell>
+                      <TableCell>{item.trailerName || 'N/A'}</TableCell>
                       <TableCell>{item.customerJobNumber || 'N/A'}</TableCell>
+                      <TableCell>{formatDateSafe(item.arrivalDate)}</TableCell>
                       <TableCell>{item.locationsDisplay}</TableCell>
                       <TableCell className="text-right">
                          <Link href={`/shipments/${item.shipmentId}`} className="text-primary hover:underline print:text-foreground print:no-underline">
@@ -329,6 +339,7 @@ export default function ReportsPage() {
     </div>
   );
 }
+
 
 
 

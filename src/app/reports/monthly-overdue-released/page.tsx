@@ -157,7 +157,7 @@ export default function MonthlyOverdueReleasedReportPage() {
           <TableHead>STS Job</TableHead>
           <TableHead>Trailer Name</TableHead>
           <TableHead>Company</TableHead>
-          <TableHead>Storage Expiry</TableHead>
+          <TableHead>Free Storage Expiry</TableHead>
           <TableHead>Released At</TableHead>
           <TableHead className="text-right">Days Overdue</TableHead>
         </TableRow>
@@ -256,7 +256,7 @@ export default function MonthlyOverdueReleasedReportPage() {
                     <TableHead className="whitespace-nowrap">Trailer Name</TableHead>
                     <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4 print:hidden"/>Trailer Company</TableHead>
                     <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4 print:hidden"/>Cust. Job No.</TableHead>
-                    <TableHead className="whitespace-nowrap"><CalendarDays className="inline-block mr-1 h-4 w-4 print:hidden"/>Storage Expiry</TableHead>
+                    <TableHead className="whitespace-nowrap"><CalendarDays className="inline-block mr-1 h-4 w-4 print:hidden"/>Free Storage Expiry</TableHead>
                     <TableHead className="whitespace-nowrap"><CalendarDays className="inline-block mr-1 h-4 w-4 print:hidden"/>Released At</TableHead>
                     <TableHead className="text-right whitespace-nowrap"><TrendingUp className="inline-block mr-1 h-4 w-4 print:hidden"/>Days Overdue</TableHead>
                   </TableRow>

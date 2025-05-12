@@ -46,11 +46,12 @@ export default function PrintTrailerTransferPage() {
   const [reportingPersonName, setReportingPersonName] = useState('');
   const [mvArrived, setMvArrived] = useState('');
   const [mvDate, setMvDate] = useState('');
-  // Removed Part B fields
   const [shipDateArrivalC, setShipDateArrivalC] = useState('');
-  const [countryOfOriginC, setCountryOfOriginC] = useState(''); // Added
+  const [countryOfOriginC, setCountryOfOriginC] = useState(''); 
   const [customsSealNoC, setCustomsSealNoC] = useState('');
-  const [companySealNoC, setCompanySealNoC] = useState(''); // Added
+  const [companySealNoC, setCompanySealNoC] = useState(''); 
+
+  const [showAdditionalDetailsForm, setShowAdditionalDetailsForm] = useState(false);
 
 
   useEffect(() => {
@@ -133,57 +134,69 @@ export default function PrintTrailerTransferPage() {
     <div className="space-y-6 p-2 md:p-4 print:p-0">
       <div className="no-print flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
         <Button variant="outline" onClick={() => router.back()} size="sm">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Trailer Details
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        <div className="flex flex-col sm:flex-row items-center gap-2">
-            <Label htmlFor="reportingPersonName" className="whitespace-nowrap text-sm">Person Signing (Part A &amp; C):</Label>
+        
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4"> {/* Grouping controls */}
+          <div className="flex items-center gap-2">
+            <Label htmlFor="reportingPersonName" className="whitespace-nowrap text-sm">Person Signing:</Label>
             <Input
                 id="reportingPersonName"
                 value={reportingPersonName}
                 onChange={(e) => setReportingPersonName(e.target.value)}
-                placeholder="Enter name"
-                className="h-9 w-full sm:w-auto"
+                placeholder="Name"
+                className="h-9 w-full sm:w-[150px]"
             />
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAdditionalDetailsForm(!showAdditionalDetailsForm)}
+          >
+            <Edit2 className="mr-2 h-4 w-4" />
+            {showAdditionalDetailsForm ? 'Hide Details Form' : 'Edit Print Details'}
+          </Button>
+          <Button onClick={handlePrint} size="sm">
+            <Printer className="mr-2 h-4 w-4" /> Print Document
+          </Button>
         </div>
-        <Button onClick={handlePrint} size="sm">
-          <Printer className="mr-2 h-4 w-4" /> Print Document
-        </Button>
       </div>
 
-      {/* Editable fields section - no-print */}
-      <Card className="no-print mb-6 shadow-md">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center"><Edit2 className="mr-2 h-5 w-5 text-primary"/>Additional Details for Print</CardTitle>
-          <CardDescription>Fill these fields before printing the document.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-          <div>
-            <Label htmlFor="mvArrived" className="text-sm font-medium">MV Arrived Per (Part A)</Label>
-            <Input id="mvArrived" value={mvArrived} onChange={(e) => setMvArrived(e.target.value)} placeholder="Enter MV name" className="mt-1"/>
-          </div>
-          <div>
-            <Label htmlFor="mvDate" className="text-sm font-medium">MV Arrival Date (Part A)</Label>
-            <Input id="mvDate" value={mvDate} onChange={(e) => setMvDate(e.target.value)} placeholder="Enter MV arrival date" className="mt-1"/>
-          </div>
-          {/* Part B fields removed */}
-          <div>
-            <Label htmlFor="shipDateArrivalC" className="text-sm font-medium">Ship/Date of Arrival (Part C)</Label>
-            <Input id="shipDateArrivalC" value={shipDateArrivalC} onChange={(e) => setShipDateArrivalC(e.target.value)} placeholder="Ship/Date" className="mt-1"/>
-          </div>
-          <div>
-            <Label htmlFor="countryOfOriginC" className="text-sm font-medium">Country of Origin (Part C)</Label>
-            <Input id="countryOfOriginC" value={countryOfOriginC} onChange={(e) => setCountryOfOriginC(e.target.value)} placeholder="Country" className="mt-1"/>
-          </div>
-          <div>
-            <Label htmlFor="customsSealNoC" className="text-sm font-medium">Customs Seal No. (Part C)</Label>
-            <Input id="customsSealNoC" value={customsSealNoC} onChange={(e) => setCustomsSealNoC(e.target.value)} placeholder="Customs Seal" className="mt-1"/>
-          </div>
-          <div>
-            <Label htmlFor="companySealNoC" className="text-sm font-medium">Company Seal No. (Part C)</Label>
-            <Input id="companySealNoC" value={companySealNoC} onChange={(e) => setCompanySealNoC(e.target.value)} placeholder="Company Seal" className="mt-1"/>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Editable fields section - no-print, conditionally rendered */}
+      {showAdditionalDetailsForm && (
+        <Card className="no-print mb-6 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center"><Edit2 className="mr-2 h-5 w-5 text-primary"/>Additional Details for Print</CardTitle>
+            <CardDescription>Fill these fields before printing the document.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+            <div>
+              <Label htmlFor="mvArrived" className="text-sm font-medium">MV Arrived Per (Part A)</Label>
+              <Input id="mvArrived" value={mvArrived} onChange={(e) => setMvArrived(e.target.value)} placeholder="Enter MV name" className="mt-1"/>
+            </div>
+            <div>
+              <Label htmlFor="mvDate" className="text-sm font-medium">MV Arrival Date (Part A)</Label>
+              <Input id="mvDate" value={mvDate} onChange={(e) => setMvDate(e.target.value)} placeholder="Enter MV arrival date" className="mt-1"/>
+            </div>
+            <div>
+              <Label htmlFor="shipDateArrivalC" className="text-sm font-medium">Ship/Date of Arrival (Part C)</Label>
+              <Input id="shipDateArrivalC" value={shipDateArrivalC} onChange={(e) => setShipDateArrivalC(e.target.value)} placeholder="Ship/Date" className="mt-1"/>
+            </div>
+            <div>
+              <Label htmlFor="countryOfOriginC" className="text-sm font-medium">Country of Origin (Part C)</Label>
+              <Input id="countryOfOriginC" value={countryOfOriginC} onChange={(e) => setCountryOfOriginC(e.target.value)} placeholder="Country" className="mt-1"/>
+            </div>
+            <div>
+              <Label htmlFor="customsSealNoC" className="text-sm font-medium">Customs Seal No. (Part C)</Label>
+              <Input id="customsSealNoC" value={customsSealNoC} onChange={(e) => setCustomsSealNoC(e.target.value)} placeholder="Customs Seal" className="mt-1"/>
+            </div>
+            <div>
+              <Label htmlFor="companySealNoC" className="text-sm font-medium">Company Seal No. (Part C)</Label>
+              <Input id="companySealNoC" value={companySealNoC} onChange={(e) => setCompanySealNoC(e.target.value)} placeholder="Company Seal" className="mt-1"/>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
 
       <Card className="printable-area shadow-lg print:shadow-none print:border-none">
@@ -234,8 +247,6 @@ export default function PrintTrailerTransferPage() {
                 <FormLine label="Date" value={arrivalDateFormatted} valueBold />
             </div>
           </div>
-
-          {/* Part B Removed */}
           
           {/* Part C */}
            <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">

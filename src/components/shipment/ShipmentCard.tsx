@@ -81,22 +81,39 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
       <Card className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow duration-200">
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
-            <div> {/* Wrapper for title and trailer description */}
+            {/* Left side: Title, Trailer Info, Shipment ID */}
+            <div>
+              {/* STS Job as CardTitle */}
               <CardTitle className="text-lg">
                 <Link href={`/shipments/${shipment.id}`} className="hover:underline text-primary flex items-center group">
                   <Package className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
                   STS Job: {shipment.stsJob}
                 </Link>
               </CardTitle>
-              {trailer && (
-                <CardDescription className="text-xs mt-0.5 flex items-center">
-                  <Truck className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-                  <Link href={`/trailers/${trailer.id}`} className="text-muted-foreground hover:text-primary hover:underline">
-                    Trailer: {trailer.name || 'N/A'} ({trailer.id})
-                  </Link>
-                </CardDescription>
+
+              {/* Trailer ID and Name - made more prominent */}
+              {shipment.trailerId && (
+                <div className="text-sm font-medium text-muted-foreground mt-1 flex items-center group">
+                  <Truck className="mr-1.5 h-4 w-4 text-primary" />
+                  {trailer ? (
+                    <Link href={`/trailers/${trailer.id}`} className="text-foreground hover:text-primary hover:underline">
+                      Trailer: {trailer.name || 'Unknown'} ({trailer.id})
+                    </Link>
+                  ) : (
+                    <span className="text-foreground">
+                      Trailer ID: {shipment.trailerId} (Name N/A)
+                    </span>
+                  )}
+                </div>
               )}
+
+              {/* Shipment ID as a smaller description */}
+              <CardDescription className="text-xs mt-1">
+                Shipment ID: {shipment.id.substring(0,8)}...
+              </CardDescription>
             </div>
+
+            {/* Right side: Dropdown Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7">
@@ -135,7 +152,6 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <CardDescription className="text-xs mt-1">Shipment ID: {shipment.id.substring(0,8)}...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-1.5 text-sm flex-grow">
           {shipment.customerJobNumber && (
@@ -266,4 +282,3 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
     </>
   );
 }
-

@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid'; // Using uuid for unique shipment IDs
 
 interface WarehouseContextType {
   trailers: Trailer[];
-  addTrailer: (trailer: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number }) => void;
+  addTrailer: (trailer: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'company' | 'customField1' | 'customField2'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number; customField1?: string; customField2?: string; }) => void;
   updateTrailerStatus: (trailerId: string, status: TrailerStatus) => void;
   updateTrailer: (trailerId: string, data: TrailerUpdateData) => void;
   deleteTrailer: (trailerId: string) => void;
@@ -28,9 +28,9 @@ interface WarehouseContextType {
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
 
 const initialTrailers: Trailer[] = [
-  { id: 'T-001', name: 'Alpha Transporter', status: 'Arrived', company: 'Logistics Inc.', arrivalDate: new Date('2024-07-20T10:00:00Z').toISOString(), storageExpiryDate: new Date('2024-08-20T10:00:00Z').toISOString(), weight: 3500 },
+  { id: 'T-001', name: 'Alpha Transporter', status: 'Arrived', company: 'Logistics Inc.', arrivalDate: new Date('2024-07-20T10:00:00Z').toISOString(), storageExpiryDate: new Date('2024-08-20T10:00:00Z').toISOString(), weight: 3500, customField1: 'CF1-Alpha', customField2: 'CF2-Alpha' },
   { id: 'T-002', name: 'Beta Hauler', status: 'Scheduled', company: 'QuickShip Co.', arrivalDate: new Date('2024-07-22T14:30:00Z').toISOString(), weight: 3200 },
-  { id: 'T-003', name: 'Gamma Carrier', status: 'Empty', company: 'Cargo Movers', weight: 3000 },
+  { id: 'T-003', name: 'Gamma Carrier', status: 'Empty', company: 'Cargo Movers', weight: 3000, customField1: 'CF1-Gamma' },
   { id: 'T-004', name: 'Delta Freighter', status: 'Loading', company: 'Logistics Inc.', weight: 4000 },
   { id: 'T-005', name: 'Epsilon Mover', status: 'Offloading', company: 'QuickShip Co.', arrivalDate: new Date('2024-07-25T09:00:00Z').toISOString(), weight: 3300},
   { id: 'T-006', name: 'Zeta Voyager', status: 'Scheduled', company: 'Cargo Movers', arrivalDate: new Date('2024-07-28T16:00:00Z').toISOString(), weight: 3700},
@@ -56,14 +56,17 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   const [trailers, setTrailers] = useLocalStorageState<Trailer[]>('trailers', initialTrailers);
   const [shipments, setShipments] = useLocalStorageState<Shipment[]>('shipments', initialShipments);
 
-  const addTrailer = useCallback((trailerData: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number }) => {
+  const addTrailer = useCallback((trailerData: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'company' | 'customField1' | 'customField2'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number; customField1?: string; customField2?: string; }) => {
     const newTrailer: Trailer = {
-      ...trailerData,
+      id: trailerData.id, // id and name come from trailerData directly
+      name: trailerData.name,
       status: trailerData.status || 'Scheduled',
       company: trailerData.company || undefined,
       arrivalDate: trailerData.arrivalDate || undefined,
       storageExpiryDate: trailerData.storageExpiryDate || undefined,
       weight: trailerData.weight || undefined,
+      customField1: trailerData.customField1 || undefined,
+      customField2: trailerData.customField2 || undefined,
     };
     setTrailers((prev) => [...prev, newTrailer]);
   }, [setTrailers]);

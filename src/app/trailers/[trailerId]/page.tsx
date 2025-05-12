@@ -9,7 +9,7 @@ import ShipmentCard from '@/components/shipment/ShipmentCard';
 import AddShipmentDialog from '@/components/shipment/AddShipmentDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 
@@ -132,6 +132,18 @@ export default function TrailerShipmentsPage() {
                   Storage Expiry: <span className="font-semibold ml-1">{formatDate(trailer.storageExpiryDate)}</span>
                 </CardDescription>
               )}
+              {trailer.customField1 && (
+                <CardDescription className="mt-1 flex items-center">
+                  <Tag className="mr-2 h-4 w-4 text-muted-foreground" />
+                  T1.1: <span className="font-semibold ml-1">{trailer.customField1}</span>
+                </CardDescription>
+              )}
+              {trailer.customField2 && (
+                <CardDescription className="mt-1 flex items-center">
+                  <Tag className="mr-2 h-4 w-4 text-muted-foreground" />
+                  T1.2: <span className="font-semibold ml-1">{trailer.customField2}</span>
+                </CardDescription>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -173,4 +185,3 @@ export default function TrailerShipmentsPage() {
     </div>
   );
 }
-

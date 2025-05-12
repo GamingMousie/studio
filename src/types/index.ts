@@ -8,6 +8,8 @@ export interface Trailer {
   arrivalDate?: string; // Optional: Date of arrival, ISO string format
   storageExpiryDate?: string; // Optional: Date when storage expires, ISO string format
   weight?: number; // Optional: Weight of the trailer in kg
+  customField1?: string; // Represents T1.1
+  customField2?: string; // Represents T1.2
 }
 
 export interface Shipment {
@@ -67,6 +69,8 @@ export interface TrailerUpdateData {
   arrivalDate?: string | null; // Allow null to clear the date
   storageExpiryDate?: string | null; // Allow null to clear the date
   weight?: number; // Optional: Weight of the trailer in kg
+  customField1?: string;
+  customField2?: string;
 }
 
 // For AddTrailerDialog form
@@ -78,5 +82,6 @@ export interface TrailerFormData {
   arrivalDate?: Date | null;
   storageExpiryDate?: Date | null;
   weight?: number | null; // Optional: Weight of the trailer in kg
+  customField1?: string;
+  customField2?: string;
 }
-

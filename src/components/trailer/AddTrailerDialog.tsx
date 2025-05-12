@@ -18,16 +18,18 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Weight } from "lucide-react";
+import { CalendarIcon, Weight, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
 
-// Internal form data type to handle Date objects from picker
-type TrailerFormData = Omit<ExternalTrailerFormData, 'arrivalDate' | 'storageExpiryDate' | 'weight'> & {
+// Internal form data type to handle Date objects from picker and new custom fields
+type TrailerFormData = Omit<ExternalTrailerFormData, 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'customField1' | 'customField2'> & {
   arrivalDate?: Date | null;
   storageExpiryDate?: Date | null;
   weight?: number | null;
+  customField1?: string;
+  customField2?: string;
 };
 
 const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Empty'];
@@ -40,6 +42,8 @@ const trailerSchema = z.object({
   arrivalDate: z.date().nullable().optional(),
   storageExpiryDate: z.date().nullable().optional(),
   weight: z.coerce.number().positive('Weight must be a positive number').optional().nullable(),
+  customField1: z.string().max(50, 'T1.1 value too long').optional(),
+  customField2: z.string().max(50, 'T1.2 value too long').optional(),
 }).refine(data => {
   if (data.arrivalDate && data.storageExpiryDate && data.storageExpiryDate < data.arrivalDate) {
     return false;
@@ -63,11 +67,13 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
   const { register, handleSubmit, reset, formState: { errors, isSubmitting }, setValue, watch, control } = useForm<TrailerFormData>({
     resolver: zodResolver(trailerSchema),
     defaultValues: {
-      status: 'Scheduled', // Default to 'Scheduled'
+      status: 'Scheduled', 
       company: '',
       arrivalDate: null,
       storageExpiryDate: null,
       weight: null,
+      customField1: '',
+      customField2: '',
     }
   });
   
@@ -94,6 +100,8 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
       arrivalDate: data.arrivalDate ? data.arrivalDate.toISOString() : undefined,
       storageExpiryDate: data.storageExpiryDate ? data.storageExpiryDate.toISOString() : undefined,
       weight: data.weight ?? undefined,
+      customField1: data.customField1 || undefined,
+      customField2: data.customField2 || undefined,
     });
     toast({
       title: "Success!",
@@ -134,6 +142,20 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
             </Label>
             <Input id="weight" type="number" step="any" {...register('weight')} placeholder="e.g., 3500" />
             {errors.weight && <p className="text-sm text-destructive mt-1">{errors.weight.message}</p>}
+          </div>
+          <div>
+            <Label htmlFor="customField1" className="flex items-center">
+              <Tag className="mr-2 h-4 w-4 text-muted-foreground" /> T1.1 (Optional)
+            </Label>
+            <Input id="customField1" {...register('customField1')} placeholder="Value for T1.1" />
+            {errors.customField1 && <p className="text-sm text-destructive mt-1">{errors.customField1.message}</p>}
+          </div>
+          <div>
+            <Label htmlFor="customField2" className="flex items-center">
+              <Tag className="mr-2 h-4 w-4 text-muted-foreground" /> T1.2 (Optional)
+            </Label>
+            <Input id="customField2" {...register('customField2')} placeholder="Value for T1.2" />
+            {errors.customField2 && <p className="text-sm text-destructive mt-1">{errors.customField2.message}</p>}
           </div>
            <div>
             <Label htmlFor="status">Initial Status</Label>
@@ -235,4 +257,3 @@ export default function AddTrailerDialog({ isOpen, setIsOpen }: AddTrailerDialog
     </Dialog>
   );
 }
-

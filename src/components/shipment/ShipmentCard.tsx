@@ -24,9 +24,10 @@ import { useToast } from '@/hooks/use-toast';
 interface ShipmentCardProps {
   shipment: Shipment;
   onDelete: () => void;
+  viewMode?: 'grid' | 'list'; // Optional, defaults to grid-like style if not provided
 }
 
-export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) {
+export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: ShipmentCardProps) {
   const { updateShipment, getTrailerById } = useWarehouse();
   const { toast } = useToast();
 
@@ -75,170 +76,185 @@ export default function ShipmentCard({ shipment, onDelete }: ShipmentCardProps) 
   const locations = shipment.locationNames;
   const isPendingAssignment = !locations || locations.length === 0 || (locations.length === 1 && locations[0] === 'Pending Assignment');
 
+  const cardContent = (
+    <>
+      <div className="flex items-start justify-between">
+        <div>
+          <CardTitle className={viewMode === 'list' ? "text-base font-semibold" : "text-lg"}>
+            <Link href={`/shipments/${shipment.id}`} className="hover:underline text-primary flex items-center group">
+              <Package className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
+              STS Job: {shipment.stsJob}
+            </Link>
+          </CardTitle>
+          {shipment.trailerId && (
+            <div className="text-xs font-medium text-muted-foreground mt-0.5 flex items-center group">
+              <Truck className="mr-1.5 h-3.5 w-3.5 text-primary/80" />
+              {trailer ? (
+                <Link href={`/trailers/${trailer.id}`} className="text-muted-foreground hover:text-primary hover:underline">
+                  Trailer: {trailer.name || 'Unknown'} ({trailer.id})
+                </Link>
+              ) : (
+                <span className="text-muted-foreground">
+                  Trailer ID: {shipment.trailerId} (Name N/A)
+                </span>
+              )}
+            </div>
+          )}
+          <CardDescription className="text-xs mt-0.5">
+            Shipment ID: {shipment.id.substring(0,8)}...
+          </CardDescription>
+        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem asChild>
+               <Link href={`/shipments/${shipment.id}`} className="flex items-center w-full">
+                 <Package className="mr-2 h-4 w-4" /> View Details
+               </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setIsEditShipmentOpen(true)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit Shipment Details
+            </DropdownMenuItem>
+             <DropdownMenuItem onClick={() => setIsManageLocationsOpen(true)}>
+              <MapPin className="mr-2 h-4 w-4" />
+              Manage Locations
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleMarkAsPermitted}>
+              {shipment.released ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
+              {shipment.released ? 'Mark as Not Permitted' : 'Permit (Attach Doc)'}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleMarkAsCleared}>
+               {shipment.cleared ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
+              {shipment.cleared ? 'Mark as Not Cleared' : 'Clear (Attach Doc)'}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => setIsShipmentDeleteDialogOpen(true)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete Shipment
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className={`space-y-1 text-xs ${viewMode === 'grid' ? 'mt-2' : 'mt-1'}`}>
+        {shipment.customerJobNumber && (
+          <div className="flex items-center">
+            <Briefcase className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+            <span className="font-medium text-muted-foreground">Cust. Job No:</span>
+            <span className="ml-1.5">{shipment.customerJobNumber}</span>
+          </div>
+        )}
+        <p><span className="font-medium text-muted-foreground">Quantity:</span> {shipment.quantity}</p>
+
+        <div className="flex items-center">
+          <Send className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+          <span className="font-medium text-muted-foreground">Exporter (Consignor):</span>
+          <span className="ml-1.5">{shipment.exporter}</span>
+        </div>
+
+        <div className="flex items-center">
+          <Users className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+          <span className="font-medium text-muted-foreground">Importer (Consignee):</span>
+          <span className="ml-1.5">{shipment.importer}</span>
+        </div>
+
+        {shipment.weight !== undefined && shipment.weight !== null && (
+          <div className="flex items-center">
+            <Weight className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+            <span className="font-medium text-muted-foreground">Weight:</span>
+            <span className="ml-1.5">{shipment.weight} kg</span>
+          </div>
+        )}
+
+        {shipment.palletSpace !== undefined && shipment.palletSpace !== null && (
+          <div className="flex items-center">
+            <Box className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+            <span className="font-medium text-muted-foreground">Pallet Spaces:</span>
+            <span className="ml-1.5">{shipment.palletSpace}</span>
+          </div>
+        )}
+
+        <div className="flex items-start pt-0.5">
+          <MapPin className="mr-1 h-3.5 w-3.5 text-muted-foreground mt-px flex-shrink-0" />
+          <span className="font-medium text-muted-foreground mr-1">Locations:</span>
+          <div className="flex flex-wrap gap-1">
+            {isPendingAssignment ? (
+              <Badge variant="outline" className="text-xs">Pending Assignment</Badge>
+            ) : (
+              locations.map((loc, index) => (
+                <Badge key={index} variant="secondary" className="text-xs">
+                  {loc} ({index + 1} of {locations.length})
+                </Badge>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center pt-0.5">
+          {shipment.released ? <CheckCircle2 className="mr-1.5 h-3.5 w-3.5 text-green-600" /> : <CircleOff className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />}
+          <span className="font-medium text-muted-foreground">Permitted:</span>
+          <span className="ml-1.5 font-semibold">{shipment.released ? 'Yes' : 'No'}</span>
+        </div>
+        <div className="flex items-center">
+          {shipment.cleared ? <CheckCircle2 className="mr-1.5 h-3.5 w-3.5 text-green-600" /> : <CircleOff className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />}
+          <span className="font-medium text-muted-foreground">Cleared:</span>
+          <span className="ml-1.5 font-semibold">{shipment.cleared ? 'Yes' : 'No'}</span>
+        </div>
+
+        {shipment.releaseDocumentName && (
+          <div className="flex items-center pt-0.5">
+            <FileText className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+            <span className="font-medium text-muted-foreground">Release Doc:</span>
+            <span className="ml-1.5 text-foreground truncate" title={shipment.releaseDocumentName}>{shipment.releaseDocumentName}</span>
+          </div>
+        )}
+        {shipment.clearanceDocumentName && (
+           <div className="flex items-center">
+            <FileText className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+            <span className="font-medium text-muted-foreground">Clearance Doc:</span>
+            <span className="ml-1.5 text-foreground truncate" title={shipment.clearanceDocumentName}>{shipment.clearanceDocumentName}</span>
+          </div>
+        )}
+      </div>
+    </>
+  );
 
   return (
     <>
-      <Card className="flex flex-col h-full shadow-md hover:shadow-lg transition-shadow duration-200">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            {/* Left side: Title, Trailer Info, Shipment ID */}
-            <div>
-              {/* STS Job as CardTitle */}
-              <CardTitle className="text-lg">
-                <Link href={`/shipments/${shipment.id}`} className="hover:underline text-primary flex items-center group">
-                  <Package className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
-                  STS Job: {shipment.stsJob}
-                </Link>
-              </CardTitle>
-
-              {/* Trailer ID and Name - made more prominent */}
-              {shipment.trailerId && (
-                <div className="text-sm font-medium text-muted-foreground mt-1 flex items-center group">
-                  <Truck className="mr-1.5 h-4 w-4 text-primary" />
-                  {trailer ? (
-                    <Link href={`/trailers/${trailer.id}`} className="text-foreground hover:text-primary hover:underline">
-                      Trailer: {trailer.name || 'Unknown'} ({trailer.id})
-                    </Link>
-                  ) : (
-                    <span className="text-foreground">
-                      Trailer ID: {shipment.trailerId} (Name N/A)
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Shipment ID as a smaller description */}
-              <CardDescription className="text-xs mt-1">
-                Shipment ID: {shipment.id.substring(0,8)}...
-              </CardDescription>
+      <Card className={`flex flex-col h-full shadow-md hover:shadow-lg transition-shadow duration-200 ${viewMode === 'list' ? 'w-full' : ''}`}>
+        {viewMode === 'grid' ? (
+          <>
+            <CardHeader className="pb-2">
+              {/* Grid view doesn't typically have its own header for title etc. Title is part of content. */}
+            </CardHeader>
+            <CardContent className="text-sm flex-grow p-4 space-y-2">
+              {cardContent}
+            </CardContent>
+            <CardFooter className="pt-3 p-4">
+              <Button variant="outline" size="sm" className="w-full" onClick={() => setIsManageLocationsOpen(true)}>
+                <MapPin className="mr-2 h-4 w-4" /> Manage Locations
+              </Button>
+            </CardFooter>
+          </>
+        ) : ( // List View
+          <div className="p-4 flex flex-col sm:flex-row items-start justify-between gap-4 w-full">
+            <div className="flex-grow space-y-1.5">
+              {cardContent}
             </div>
-
-            {/* Right side: Dropdown Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                   <Link href={`/shipments/${shipment.id}`} className="flex items-center w-full">
-                     <Package className="mr-2 h-4 w-4" /> View Details
-                   </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setIsEditShipmentOpen(true)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit Shipment Details
-                </DropdownMenuItem>
-                 <DropdownMenuItem onClick={() => setIsManageLocationsOpen(true)}>
-                  <MapPin className="mr-2 h-4 w-4" />
-                  Manage Locations
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleMarkAsPermitted}>
-                  {shipment.released ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
-                  {shipment.released ? 'Mark as Not Permitted' : 'Permit (Attach Doc)'}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleMarkAsCleared}>
-                   {shipment.cleared ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
-                  {shipment.cleared ? 'Mark as Not Cleared' : 'Clear (Attach Doc)'}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setIsShipmentDeleteDialogOpen(true)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete Shipment
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-1.5 text-sm flex-grow">
-          {shipment.customerJobNumber && (
-            <div className="flex items-center">
-              <Briefcase className="mr-1.5 h-4 w-4 text-muted-foreground" />
-              <span className="font-medium text-muted-foreground">Cust. Job No:</span>
-              <span className="ml-1.5">{shipment.customerJobNumber}</span>
-            </div>
-          )}
-          <p><span className="font-medium text-muted-foreground">Quantity:</span> {shipment.quantity}</p>
-
-          <div className="flex items-center">
-            <Send className="mr-1.5 h-4 w-4 text-muted-foreground" />
-            <span className="font-medium text-muted-foreground">Exporter (Consignor):</span>
-            <span className="ml-1.5">{shipment.exporter}</span>
-          </div>
-
-          <div className="flex items-center">
-            <Users className="mr-1.5 h-4 w-4 text-muted-foreground" />
-            <span className="font-medium text-muted-foreground">Importer (Consignee):</span>
-            <span className="ml-1.5">{shipment.importer}</span>
-          </div>
-
-
-          {shipment.weight !== undefined && shipment.weight !== null && (
-            <div className="flex items-center">
-              <Weight className="mr-1.5 h-4 w-4 text-muted-foreground" />
-              <span className="font-medium text-muted-foreground">Weight:</span>
-              <span className="ml-1.5">{shipment.weight} kg</span>
-            </div>
-          )}
-
-          {shipment.palletSpace !== undefined && shipment.palletSpace !== null && (
-            <div className="flex items-center">
-              <Box className="mr-1.5 h-4 w-4 text-muted-foreground" />
-              <span className="font-medium text-muted-foreground">Pallet Spaces:</span>
-              <span className="ml-1.5">{shipment.palletSpace}</span>
-            </div>
-          )}
-
-          <div className="flex items-start pt-1">
-            <MapPin className="mr-1 h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <span className="font-medium text-muted-foreground mr-1">Locations:</span>
-            <div className="flex flex-wrap gap-1">
-              {isPendingAssignment ? (
-                <Badge variant="outline" className="text-xs">Pending Assignment</Badge>
-              ) : (
-                locations.map((loc, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {loc} ({index + 1} of {locations.length})
-                  </Badge>
-                ))
-              )}
+            <div className="mt-2 sm:mt-0 sm:ml-auto flex-shrink-0">
+               <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => setIsManageLocationsOpen(true)}>
+                <MapPin className="mr-2 h-4 w-4" /> Manage Locations
+              </Button>
             </div>
           </div>
-
-          <div className="flex items-center pt-1">
-            {shipment.released ? <CheckCircle2 className="mr-1.5 h-4 w-4 text-green-600" /> : <CircleOff className="mr-1.5 h-4 w-4 text-muted-foreground" />}
-            <span className="font-medium text-muted-foreground">Permitted to be Released:</span>
-            <span className="ml-1.5 font-semibold">{shipment.released ? 'Yes' : 'No'}</span>
-          </div>
-          <div className="flex items-center">
-            {shipment.cleared ? <CheckCircle2 className="mr-1.5 h-4 w-4 text-green-600" /> : <CircleOff className="mr-1.5 h-4 w-4 text-muted-foreground" />}
-            <span className="font-medium text-muted-foreground">Cleared:</span>
-            <span className="ml-1.5 font-semibold">{shipment.cleared ? 'Yes' : 'No'}</span>
-          </div>
-
-          {shipment.releaseDocumentName && (
-            <div className="flex items-center pt-1">
-              <FileText className="mr-1.5 h-4 w-4 text-muted-foreground" />
-              <span className="font-medium text-muted-foreground">Release Doc:</span>
-              <span className="ml-1.5 text-foreground truncate" title={shipment.releaseDocumentName}>{shipment.releaseDocumentName}</span>
-            </div>
-          )}
-          {shipment.clearanceDocumentName && (
-             <div className="flex items-center">
-              <FileText className="mr-1.5 h-4 w-4 text-muted-foreground" />
-              <span className="font-medium text-muted-foreground">Clearance Doc:</span>
-              <span className="ml-1.5 text-foreground truncate" title={shipment.clearanceDocumentName}>{shipment.clearanceDocumentName}</span>
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="pt-3">
-          <Button variant="outline" size="sm" className="w-full" onClick={() => setIsManageLocationsOpen(true)}>
-            <MapPin className="mr-2 h-4 w-4" /> Manage Locations
-          </Button>
-        </CardFooter>
+        )}
       </Card>
 
       {isManageLocationsOpen && (

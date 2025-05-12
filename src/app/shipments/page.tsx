@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
-import { PackageSearch, Search, ListFilter, LayoutGrid, Package as PackageIcon } from 'lucide-react';
+import { PackageSearch, Search, ListFilter, LayoutGrid, Package as PackageIcon, Truck } from 'lucide-react';
 import type { Shipment } from '@/types';
 import { Badge } from '@/components/ui/badge';
 
@@ -48,28 +48,31 @@ export default function AllShipmentsPage() {
           <Card className="shadow-md flex flex-col h-full" key={i}>
             <CardContent className="p-6 flex-grow space-y-3">
               <div className="flex items-start justify-between">
-                <Skeleton className="h-6 w-3/4" /> {/* STS Job */}
+                <div className='space-y-1'>
+                  <Skeleton className="h-5 w-3/4" /> {/* STS Job */}
+                  <Skeleton className="h-4 w-1/2" /> {/* Trailer ID */}
+                </div>
                 <Skeleton className="h-7 w-7 rounded-md" />
               </div>
-              <Skeleton className="h-4 w-1/2" /> {/* ID */}
-              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Customer Job No. */}
-              <Skeleton className="h-4 w-1/3 mt-1" /> {/* Quantity */}
-              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Exporter */}
-              <Skeleton className="h-4 w-2/5 mt-1" /> {/* Importer */}
+              <Skeleton className="h-3 w-2/5" /> {/* Shipment ID */}
+              <Skeleton className="h-3 w-1/3 mt-1" /> {/* Customer Job No. */}
+              <Skeleton className="h-3 w-1/4 mt-1" /> {/* Quantity */}
+              <Skeleton className="h-3 w-2/5 mt-1" /> {/* Exporter */}
+              <Skeleton className="h-3 w-2/5 mt-1" /> {/* Importer */}
               <div className="grid grid-cols-2 gap-2 mt-1">
-                <Skeleton className="h-4 w-3/4" /> {/* Weight */}
-                <Skeleton className="h-4 w-3/4" /> {/* Pallet Space */}
+                <Skeleton className="h-3 w-3/4" /> {/* Weight */}
+                <Skeleton className="h-3 w-3/4" /> {/* Pallet Space */}
               </div>
               <div className="flex items-center mt-1">
                 <Skeleton className="h-4 w-4 mr-1" />
-                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-3 w-1/4" />
                 <Skeleton className="h-5 w-20 ml-2" /> {/* Location Badge */}
               </div>
               <div className="flex items-center mt-2 space-x-2">
-                <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-20" /> {/* Released Status */}
+                <Skeleton className="h-4 w-4" /> <Skeleton className="h-3 w-20" /> {/* Released Status */}
               </div>
               <div className="flex items-center mt-1 space-x-2">
-                <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-20" /> {/* Cleared Status */}
+                <Skeleton className="h-4 w-4" /> <Skeleton className="h-3 w-20" /> {/* Cleared Status */}
               </div>
             </CardContent>
             <div className="p-4 pt-0 border-t mt-auto">
@@ -79,25 +82,26 @@ export default function AllShipmentsPage() {
         ) : (
            <Card className="shadow-md w-full" key={i}>
             <div className="p-4 flex items-center justify-between">
-              <div className="flex-grow space-y-2">
-                <Skeleton className="h-6 w-3/5" /> {/* STS Job */}
-                <Skeleton className="h-4 w-2/5" /> {/* ID */}
-                <Skeleton className="h-4 w-1/2 mb-1" /> {/* Customer Job No. */}
+              <div className="flex-grow space-y-1.5">
+                <Skeleton className="h-5 w-3/5" /> {/* STS Job */}
+                <Skeleton className="h-4 w-2/5" /> {/* Trailer ID */}
+                <Skeleton className="h-3 w-1/2" /> {/* Shipment ID */}
+                <Skeleton className="h-3 w-1/3 mb-1" /> {/* Customer Job No. */}
                 <div className="flex items-center gap-4 text-sm">
-                  <Skeleton className="h-4 w-20" /> {/* Quantity */}
-                  <Skeleton className="h-4 w-28" /> {/* Exporter */}
-                  <Skeleton className="h-4 w-28" /> {/* Importer */}
-                  <Skeleton className="h-5 w-24" /> {/* Location */}
+                  <Skeleton className="h-3 w-16" /> {/* Quantity */}
+                  <Skeleton className="h-3 w-24" /> {/* Exporter */}
+                  <Skeleton className="h-3 w-24" /> {/* Importer */}
+                  <Skeleton className="h-5 w-20" /> {/* Location */}
                 </div>
                 <div className="flex items-center gap-4 text-sm mt-1">
-                  <Skeleton className="h-4 w-24" /> {/* Weight */}
-                  <Skeleton className="h-4 w-24" /> {/* Pallet Space */}
+                  <Skeleton className="h-3 w-20" /> {/* Weight */}
+                  <Skeleton className="h-3 w-20" /> {/* Pallet Space */}
                 </div>
                  <div className="flex items-center mt-1 space-x-2">
-                    <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-24" /> {/* Released */}
+                    <Skeleton className="h-4 w-4" /> <Skeleton className="h-3 w-24" /> {/* Released */}
                  </div>
                  <div className="flex items-center mt-1 space-x-2">
-                    <Skeleton className="h-4 w-4" /> <Skeleton className="h-4 w-24" /> {/* Cleared */}
+                    <Skeleton className="h-4 w-4" /> <Skeleton className="h-3 w-24" /> {/* Cleared */}
                  </div>
               </div>
               <div className="flex items-center gap-2">
@@ -135,15 +139,19 @@ export default function AllShipmentsPage() {
           </div>
           <Select value={trailerFilter} onValueChange={(value) => setTrailerFilter(value)}>
             <SelectTrigger className="w-full md:w-[220px]">
-              <SelectValue placeholder="Filter by trailer" />
+              <div className="flex items-center">
+                <Truck className="mr-2 h-4 w-4 text-muted-foreground" />
+                <SelectValue placeholder="Filter by trailer" />
+              </div>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Trailers</SelectItem>
-              {trailers.map(trailer => (
+              {isClient && trailers.map(trailer => (
                 <SelectItem key={trailer.id} value={trailer.id}>
                   {trailer.name} ({trailer.id})
                 </SelectItem>
               ))}
+              {!isClient && <Skeleton className="h-8 w-full my-1" />}
             </SelectContent>
           </Select>
           <div className="flex gap-2">
@@ -172,6 +180,7 @@ export default function AllShipmentsPage() {
               key={shipment.id}
               shipment={shipment}
               onDelete={() => deleteShipment(shipment.id)}
+              viewMode={viewMode}
             />
           ))}
         </div>

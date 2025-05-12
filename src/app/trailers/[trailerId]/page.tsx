@@ -37,7 +37,7 @@ export default function TrailerShipmentsPage() {
         setIsTrailerFound(true);
       } else {
         setIsTrailerFound(false);
-        console.error("Trailer not found during effect execution");
+        // Removed console.error as the UI handles this state
       }
     }
   }, [trailerId, getTrailerById]); 

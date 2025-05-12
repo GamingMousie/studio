@@ -16,7 +16,7 @@ export default function AllShipmentsPage() {
   const { shipments, trailers, deleteShipment } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [trailerIdFilter, setTrailerIdFilter] = useState<string | 'all'>('all'); // Changed from trailerFilter to trailerIdFilter
+  const [trailerIdFilter, setTrailerIdFilter] = useState<string | 'all'>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
@@ -27,18 +27,19 @@ export default function AllShipmentsPage() {
     return shipments.filter(shipment => {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
-        shipment.id.toLowerCase().includes(searchLower) ||
+        shipment.id.toLowerCase().includes(searchLower) || // Shipment ID
+        shipment.trailerId.toLowerCase().includes(searchLower) || // Trailer ID
         shipment.stsJob.toString().toLowerCase().includes(searchLower) ||
         (shipment.customerJobNumber && shipment.customerJobNumber.toLowerCase().includes(searchLower)) ||
         shipment.importer.toLowerCase().includes(searchLower) ||
         shipment.exporter.toLowerCase().includes(searchLower) || 
         (shipment.locationNames && shipment.locationNames.some(loc => loc.toLowerCase().includes(searchLower)));
 
-      const matchesTrailerId = trailerIdFilter === 'all' || shipment.trailerId === trailerIdFilter; // Updated to filter by trailerId
+      const matchesTrailerId = trailerIdFilter === 'all' || shipment.trailerId === trailerIdFilter;
 
       return matchesSearch && matchesTrailerId;
     });
-  }, [shipments, searchTerm, trailerIdFilter]); // Updated dependency
+  }, [shipments, searchTerm, trailerIdFilter]);
 
   const ShipmentListSkeleton = () => (
     <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
@@ -130,7 +131,7 @@ export default function AllShipmentsPage() {
           <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
-              placeholder="Search by ID, STS Job, Cust. Job, Importer, Exporter, Location..."
+              placeholder="Search by ID, STS Job, Cust. Job, Trailer ID, Importer, Exporter, Location..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"

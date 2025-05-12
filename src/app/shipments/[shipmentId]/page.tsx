@@ -101,7 +101,7 @@ export default function SingleShipmentPage() {
             <Skeleton className="h-4 w-1/2" />
           </CardHeader>
           <CardContent className="space-y-3">
-            {[...Array(8)].map((_, i) => ( // Increased to 8 for customer job number
+            {[...Array(8)].map((_, i) => ( 
               <div key={i} className="flex items-center space-x-2">
                 <Skeleton className="h-5 w-5 rounded-full" />
                 <Skeleton className="h-4 w-1/4" />
@@ -129,8 +129,8 @@ export default function SingleShipmentPage() {
 
   if (!shipment) return null;
 
-  const locations = shipment.locationNames;
-  const isPendingAssignment = !locations || locations.length === 0 || (locations.length === 1 && locations[0] === 'Pending Assignment');
+  const locations = shipment.locations || [{ name: 'Pending Assignment' }];
+  const isPendingAssignment = locations.length === 1 && locations[0].name === 'Pending Assignment';
 
 
   return (
@@ -202,7 +202,7 @@ export default function SingleShipmentPage() {
 
           {shipment.palletSpace !== undefined && shipment.palletSpace !== null && (
             <div className="space-y-1">
-              <h3 className="font-semibold text-muted-foreground flex items-center"><Box className="mr-2 h-4 w-4" />Pallet Spaces</h3>
+              <h3 className="font-semibold text-muted-foreground flex items-center"><Box className="mr-2 h-4 w-4" />Total Pallet Spaces</h3>
               <p>{shipment.palletSpace}</p>
             </div>
           )}
@@ -233,7 +233,9 @@ export default function SingleShipmentPage() {
               ) : (
                 locations.map((loc, index) => (
                   <Badge key={index} variant="secondary" className="text-base">
-                    {loc} ({index + 1} of {locations.length})
+                    {loc.name}
+                    {loc.pallets !== undefined && ` (${loc.pallets} plts)`}
+                    {locations.length > 1 && ` (${index + 1} of ${locations.length})`}
                   </Badge>
                 ))
               )}
@@ -327,4 +329,3 @@ export default function SingleShipmentPage() {
     </div>
   );
 }
-

@@ -16,13 +16,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, AlertTriangle, MapPin, XIcon, PlusCircle } from 'lucide-react';
+import { Camera, AlertTriangle, MapPin, XIcon, PlusCircle, Box } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import type { Shipment } from '@/types';
+import type { Shipment, LocationInfo } from '@/types';
 import { useWarehouse } from '@/contexts/WarehouseContext';
 
 const newLocationSchema = z.object({
   newLocationName: z.string().min(1, 'Location name cannot be empty').max(30, 'Location name too long'),
+  newLocationPallets: z.coerce.number().int('Pallets must be a whole number.').min(0, 'Pallets cannot be negative.').optional().nullable(),
 });
 type NewLocationFormData = z.infer<typeof newLocationSchema>;
 
@@ -42,9 +43,13 @@ export default function ManageLocationsDialog({
   
   const { register, handleSubmit: handleNewLocationSubmit, reset: resetNewLocationForm, setValue: setNewLocationValue, formState: { errors: newLocationErrors } } = useForm<NewLocationFormData>({
     resolver: zodResolver(newLocationSchema),
+    defaultValues: {
+      newLocationName: "",
+      newLocationPallets: null,
+    }
   });
 
-  const [currentEditedLocations, setCurrentEditedLocations] = useState<string[]>([]);
+  const [currentEditedLocations, setCurrentEditedLocations] = useState<LocationInfo[]>([]);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isScanning, setIsScanning] = useState(false);
@@ -53,17 +58,16 @@ export default function ManageLocationsDialog({
 
   useEffect(() => {
     if (isOpen && shipmentToManage) {
-      // Initialize with current locations, filtering out "Pending Assignment" if other locations exist
-      const initialLocations = shipmentToManage.locationNames || [];
-      if (initialLocations.length > 1 && initialLocations.includes('Pending Assignment')) {
-        setCurrentEditedLocations(initialLocations.filter(loc => loc !== 'Pending Assignment'));
+      const initialLocations = shipmentToManage.locations || [{ name: 'Pending Assignment' }];
+      if (initialLocations.length > 1 && initialLocations.some(loc => loc.name === 'Pending Assignment')) {
+        setCurrentEditedLocations(initialLocations.filter(loc => loc.name !== 'Pending Assignment'));
       } else {
         setCurrentEditedLocations(initialLocations);
       }
-      resetNewLocationForm({ newLocationName: "" });
+      resetNewLocationForm({ newLocationName: "", newLocationPallets: null });
     } else {
-      setIsScanning(false); // Turn off scanner when dialog closes
-      setHasCameraPermission(null); // Reset camera permission state
+      setIsScanning(false); 
+      setHasCameraPermission(null); 
     }
   }, [isOpen, shipmentToManage, resetNewLocationForm]);
 
@@ -108,34 +112,36 @@ export default function ManageLocationsDialog({
         }
       }
     }
-    return () => { // Cleanup on unmount or when isScanning changes
+    return () => { 
       if (activeStream) {
         activeStream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [isScanning, toast, activeStream]); // Added activeStream to dependency array
+  }, [isScanning, toast, activeStream]); 
 
   const handleAddLocationToList = (data: NewLocationFormData) => {
     const nameToAdd = data.newLocationName.trim();
-    if (nameToAdd && !currentEditedLocations.includes(nameToAdd)) {
-      let newLocations = [...currentEditedLocations];
-      // Remove "Pending Assignment" if it's the only item and a real location is being added
-      if (newLocations.length === 1 && newLocations[0] === 'Pending Assignment') {
-        newLocations = [];
+    const pallets = data.newLocationPallets ?? undefined;
+
+    if (nameToAdd && !currentEditedLocations.some(loc => loc.name === nameToAdd)) {
+      let newLocationsList = [...currentEditedLocations];
+      if (newLocationsList.length === 1 && newLocationsList[0].name === 'Pending Assignment') {
+        newLocationsList = [];
       }
-      newLocations.push(nameToAdd);
-      setCurrentEditedLocations(newLocations);
+      newLocationsList.push({ name: nameToAdd, pallets });
+      setCurrentEditedLocations(newLocationsList);
     }
-    resetNewLocationForm({ newLocationName: "" });
+    resetNewLocationForm({ newLocationName: "", newLocationPallets: null });
   };
 
-  const handleRemoveLocationFromList = (locationToRemove: string) => {
-    setCurrentEditedLocations(currentEditedLocations.filter(loc => loc !== locationToRemove));
+  const handleRemoveLocationFromList = (locationNameToRemove: string) => {
+    setCurrentEditedLocations(currentEditedLocations.filter(loc => loc.name !== locationNameToRemove));
   };
 
   const handleSimulateScan = () => {
     const scannedValue = `SCANNED-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
     setNewLocationValue('newLocationName', scannedValue, { shouldValidate: true });
+    setNewLocationValue('newLocationPallets', Math.floor(Math.random() * 5) + 1); // Simulate 1-5 pallets
     toast({
       title: "Barcode Scanned (Simulated)",
       description: `Location "${scannedValue}" ready to be added.`,
@@ -144,8 +150,8 @@ export default function ManageLocationsDialog({
   };
 
   const handleSaveChanges = () => {
-    const finalLocations = currentEditedLocations.length > 0 ? currentEditedLocations : ['Pending Assignment'];
-    updateShipment(shipmentToManage.id, { locationNames: finalLocations });
+    const finalLocations = currentEditedLocations.length > 0 ? currentEditedLocations : [{ name: 'Pending Assignment' }];
+    updateShipment(shipmentToManage.id, { locations: finalLocations });
     toast({
       title: "Locations Updated!",
       description: `Locations for shipment STS Job: ${shipmentToManage.stsJob} have been saved.`,
@@ -156,13 +162,12 @@ export default function ManageLocationsDialog({
   const closeDialogCleanup = () => {
     setIsOpen(false);
     setIsScanning(false);
-    resetNewLocationForm({ newLocationName: "" });
-    // currentEditedLocations will reset on next open via useEffect
+    resetNewLocationForm({ newLocationName: "", newLocationPallets: null });
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) closeDialogCleanup(); else setIsOpen(true); }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <MapPin className="mr-2 h-5 w-5" /> 
@@ -170,7 +175,7 @@ export default function ManageLocationsDialog({
           </DialogTitle>
           {!isScanning && (
             <DialogDescription>
-              For Shipment STS Job: <span className="font-semibold">{shipmentToManage.stsJob}</span>. Add or remove locations.
+              For Shipment STS Job: <span className="font-semibold">{shipmentToManage.stsJob}</span>. Add or remove locations and specify pallet counts.
             </DialogDescription>
           )}
         </DialogHeader>
@@ -207,18 +212,19 @@ export default function ManageLocationsDialog({
           <div className="py-4 space-y-6">
             <div>
               <Label className="text-sm font-medium">Current Locations:</Label>
-              <div className="mt-2 flex flex-wrap gap-2 p-2 border rounded-md min-h-[40px] bg-muted/50">
-                {currentEditedLocations.length === 0 || (currentEditedLocations.length === 1 && currentEditedLocations[0] === 'Pending Assignment') ? (
+              <div className="mt-2 flex flex-wrap gap-2 p-2 border rounded-md min-h-[40px] bg-muted/50 max-h-40 overflow-y-auto">
+                {currentEditedLocations.length === 0 || (currentEditedLocations.length === 1 && currentEditedLocations[0].name === 'Pending Assignment') ? (
                   <Badge variant="outline">Pending Assignment</Badge>
                 ) : (
-                  currentEditedLocations.filter(loc => loc !== 'Pending Assignment').map((loc, index) => (
-                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                      {loc}
+                  currentEditedLocations.filter(loc => loc.name !== 'Pending Assignment').map((loc, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1.5 py-1 px-2">
+                      <span>{loc.name}</span>
+                      {loc.pallets !== undefined && <span className="text-xs text-muted-foreground">({loc.pallets} plts)</span>}
                       <Button
                         variant="ghost"
                         size="icon"
                         className="h-4 w-4 rounded-full hover:bg-destructive/20"
-                        onClick={() => handleRemoveLocationFromList(loc)}
+                        onClick={() => handleRemoveLocationFromList(loc.name)}
                       >
                         <XIcon className="h-3 w-3" />
                       </Button>
@@ -229,23 +235,42 @@ export default function ManageLocationsDialog({
             </div>
 
             <form onSubmit={handleNewLocationSubmit(handleAddLocationToList)} className="space-y-3">
-              <div>
-                <Label htmlFor="newLocationName">Add New Location</Label>
-                <div className="flex gap-2 mt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_auto] gap-2 items-end">
+                <div>
+                  <Label htmlFor="newLocationName">New Location Name</Label>
                   <Input
                     id="newLocationName"
                     {...register('newLocationName')}
                     placeholder="e.g., Shelf A1 or scan"
-                    className="flex-grow"
+                    className="mt-1"
                   />
-                  <Button type="submit" size="icon" variant="outline">
-                    <PlusCircle className="h-4 w-4" />
-                  </Button>
                 </div>
-                {newLocationErrors.newLocationName && <p className="text-sm text-destructive mt-1">{newLocationErrors.newLocationName.message}</p>}
+                <div>
+                  <Label htmlFor="newLocationPallets" className="flex items-center">
+                    <Box className="mr-1 h-3 w-3 text-muted-foreground" /> Pallets
+                  </Label>
+                  <Input
+                    id="newLocationPallets"
+                    type="number"
+                    {...register('newLocationPallets')}
+                    placeholder="No."
+                    className="mt-1"
+                  />
+                </div>
+                <Button type="submit" size="icon" variant="outline" className="self-end mb-px sm:mb-0"> {/* Adjusted margin for alignment */}
+                  <PlusCircle className="h-4 w-4" />
+                </Button>
               </div>
+               <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_auto] gap-2">
+                {newLocationErrors.newLocationName && <p className="text-sm text-destructive mt-0 sm:col-span-1">{newLocationErrors.newLocationName.message}</p>}
+                <div className={newLocationErrors.newLocationName ? "sm:col-start-2" : "sm:col-start-1 sm:col-span-1"}> {/* Adjust based on first error */}
+                 {newLocationErrors.newLocationPallets && <p className="text-sm text-destructive mt-0">{newLocationErrors.newLocationPallets.message}</p>}
+                </div>
+              </div>
+
+
               <Button type="button" variant="outline" onClick={() => setIsScanning(true)} className="w-full">
-                <Camera className="mr-2 h-4 w-4" /> Scan Barcode for Location
+                <Camera className="mr-2 h-4 w-4" /> Scan Barcode for Location Name
               </Button>
             </form>
             

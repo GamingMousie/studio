@@ -24,13 +24,14 @@ const shipmentSchema = z.object({
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   importer: z.string().min(1, 'Importer (Consignee) is required').max(50, 'Importer (Consignee) name too long'),
   exporter: z.string().min(1, 'Exporter (Consignor) is required').max(50, 'Exporter (Consignor) name too long'),
-  locationNameInput: z.string().optional(), 
+  initialLocationName: z.string().optional(),
+  initialLocationPallets: z.coerce.number().int().positive().optional().nullable(),
   releaseDocument: z.any().optional(),
   clearanceDocument: z.any().optional(),
   released: z.boolean().optional(),
   cleared: z.boolean().optional(),
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
-  palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(),
+  palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(), // Overall pallet space
 });
 
 type ShipmentFormData = z.infer<typeof shipmentSchema>;
@@ -51,7 +52,8 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       cleared: false,
       weight: null,
       palletSpace: null,
-      locationNameInput: '',
+      initialLocationName: '',
+      initialLocationPallets: null,
       customerJobNumber: '',
     }
   });
@@ -67,7 +69,8 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       quantity: data.quantity,
       importer: data.importer,
       exporter: data.exporter,
-      initialLocationName: data.locationNameInput || undefined, 
+      initialLocationName: data.initialLocationName || undefined,
+      initialLocationPallets: data.initialLocationPallets ?? undefined,
       releaseDocumentName,
       clearanceDocumentName,
       released: data.released,
@@ -142,20 +145,30 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             </div>
             <div>
               <Label htmlFor="palletSpace" className="flex items-center">
-                <Box className="mr-2 h-4 w-4 text-muted-foreground" /> Pallet Spaces (Optional)
+                <Box className="mr-2 h-4 w-4 text-muted-foreground" /> Pallet Spaces (Shipment Total) (Optional)
               </Label>
               <Input id="palletSpace" type="number" {...register('palletSpace')} placeholder="e.g., 4" />
               {errors.palletSpace && <p className="text-sm text-destructive mt-1">{errors.palletSpace.message}</p>}
             </div>
           </div>
 
-           <div>
-            <Label htmlFor="locationNameInput" className="flex items-center">
-              <MapPin className="mr-2 h-4 w-4 text-muted-foreground" /> Initial Location (Optional)
-            </Label>
-            <Input id="locationNameInput" {...register('locationNameInput')} placeholder="e.g., Bay C2" />
-            {errors.locationNameInput && <p className="text-sm text-destructive mt-1">{errors.locationNameInput.message}</p>}
+           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="initialLocationName" className="flex items-center">
+                <MapPin className="mr-2 h-4 w-4 text-muted-foreground" /> Initial Location (Optional)
+              </Label>
+              <Input id="initialLocationName" {...register('initialLocationName')} placeholder="e.g., Bay C2" />
+              {errors.initialLocationName && <p className="text-sm text-destructive mt-1">{errors.initialLocationName.message}</p>}
+            </div>
+             <div>
+              <Label htmlFor="initialLocationPallets" className="flex items-center">
+                <Box className="mr-2 h-4 w-4 text-muted-foreground" /> Pallets in Loc. (Optional)
+              </Label>
+              <Input id="initialLocationPallets" type="number" {...register('initialLocationPallets')} placeholder="e.g., 2" />
+              {errors.initialLocationPallets && <p className="text-sm text-destructive mt-1">{errors.initialLocationPallets.message}</p>}
+            </div>
           </div>
+
 
           <div className="space-y-2">
             <Label htmlFor="releaseDocument" className="flex items-center">

@@ -1,5 +1,10 @@
 export type TrailerStatus = 'Scheduled' | 'Arrived' | 'Loading' | 'Offloading' | 'Devanned';
 
+export interface LocationInfo {
+  name: string;
+  pallets?: number;
+}
+
 export interface Trailer {
   id: string; // User-defined unique ID
   name: string; // Optional descriptive name
@@ -20,13 +25,13 @@ export interface Shipment {
   quantity: number;
   importer: string; // Consignee
   exporter: string; // Consignor
-  locationNames: string[]; // Changed from locationName: string
+  locations: LocationInfo[]; // Changed from locationNames: string[]
   releaseDocumentName?: string; // Optional: Name of the release document
   clearanceDocumentName?: string; // Optional: Name of the clearance document
   released: boolean; // Indicates if the shipment has permission to be released
   cleared: boolean; // Indicates if the shipment is cleared
   weight?: number; // Optional: Weight of the shipment in kg
-  palletSpace?: number; // Optional: Pallet spaces occupied by the shipment
+  palletSpace?: number; // Optional: Pallet spaces occupied by the shipment (overall for shipment)
 }
 
 // Used for the form data when creating or updating a shipment
@@ -36,13 +41,14 @@ export interface ShipmentFormData {
   quantity: number;
   importer: string; // Consignee
   exporter: string; // Consignor
-  locationNameInput?: string; // For initial single location input, will be processed into locationNames
+  initialLocationName?: string; 
+  initialLocationPallets?: number;
   releaseDocument?: FileList | File | null;
   clearanceDocument?: FileList | File | null;
   released?: boolean;
   cleared?: boolean;
   weight?: number | null;
-  palletSpace?: number | null;
+  palletSpace?: number | null; // Overall pallet space for the shipment
 }
 
 // Specifically for updating an existing shipment via context
@@ -52,13 +58,13 @@ export interface ShipmentUpdateData {
   quantity?: number;
   importer?: string; // Consignee
   exporter?: string; // Consignor
-  locationNames?: string[]; // Changed from locationName: string
+  locations?: LocationInfo[]; 
   releaseDocumentName?: string;
   clearanceDocumentName?: string;
   released?: boolean;
   cleared?: boolean;
   weight?: number;
-  palletSpace?: number;
+  palletSpace?: number; // Overall pallet space for the shipment
 }
 
 // Specifically for updating an existing trailer via context

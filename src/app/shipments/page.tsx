@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -27,13 +28,13 @@ export default function AllShipmentsPage() {
     return shipments.filter(shipment => {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
-        shipment.id.toLowerCase().includes(searchLower) || // Shipment ID
-        shipment.trailerId.toLowerCase().includes(searchLower) || // Trailer ID
+        shipment.id.toLowerCase().includes(searchLower) || 
+        shipment.trailerId.toLowerCase().includes(searchLower) || 
         shipment.stsJob.toString().toLowerCase().includes(searchLower) ||
         (shipment.customerJobNumber && shipment.customerJobNumber.toLowerCase().includes(searchLower)) ||
         shipment.importer.toLowerCase().includes(searchLower) ||
         shipment.exporter.toLowerCase().includes(searchLower) || 
-        (shipment.locationNames && shipment.locationNames.some(loc => loc.toLowerCase().includes(searchLower)));
+        (shipment.locations && shipment.locations.some(loc => loc.name.toLowerCase().includes(searchLower)));
 
       const matchesTrailerId = trailerIdFilter === 'all' || shipment.trailerId === trailerIdFilter;
 

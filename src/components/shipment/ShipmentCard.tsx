@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 interface ShipmentCardProps {
   shipment: Shipment;
   onDelete: () => void;
-  viewMode?: 'grid' | 'list'; // Optional, defaults to grid-like style if not provided
+  viewMode?: 'grid' | 'list'; 
 }
 
 export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: ShipmentCardProps) {
@@ -73,8 +73,8 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
     setIsAttachDocumentOpen(false);
   };
 
-  const locations = shipment.locationNames;
-  const isPendingAssignment = !locations || locations.length === 0 || (locations.length === 1 && locations[0] === 'Pending Assignment');
+  const locations = shipment.locations || [{ name: 'Pending Assignment' }];
+  const isPendingAssignment = locations.length === 1 && locations[0].name === 'Pending Assignment';
 
   const cardContent = (
     <>
@@ -176,7 +176,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
         {shipment.palletSpace !== undefined && shipment.palletSpace !== null && (
           <div className="flex items-center">
             <Box className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
-            <span className="font-medium text-muted-foreground">Pallet Spaces:</span>
+            <span className="font-medium text-muted-foreground">Total Pallet Spaces:</span>
             <span className="ml-1.5">{shipment.palletSpace}</span>
           </div>
         )}
@@ -190,7 +190,9 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
             ) : (
               locations.map((loc, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
-                  {loc} ({index + 1} of {locations.length})
+                  {loc.name}
+                  {loc.pallets !== undefined && ` (${loc.pallets} plts)`}
+                  {locations.length > 1 && ` (${index + 1} of ${locations.length})`}
                 </Badge>
               ))
             )}

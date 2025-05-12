@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Edit, Users, MapPin, Send, Briefcase } from 'lucide-react';
+import { FileText, Weight, Box, Edit, Users, Send, Briefcase } from 'lucide-react'; // Removed MapPin
 
 const editShipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
@@ -26,7 +26,7 @@ const editShipmentSchema = z.object({
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   importer: z.string().min(1, 'Importer (Consignee) is required').max(50, 'Importer (Consignee) name too long'),
   exporter: z.string().min(1, 'Exporter (Consignor) is required').max(50, 'Exporter (Consignor) name too long'),
-  locationNamesInput: z.string().optional(), // For comma-separated input
+  // locationNamesInput is removed. Location management is separate.
   releaseDocument: z.any().optional(),
   clearanceDocument: z.any().optional(),
   released: z.boolean().optional(),
@@ -49,20 +49,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
 
   const { register, handleSubmit, reset, control, formState: { errors, isSubmitting }, watch, setValue } = useForm<EditShipmentFormDataType>({
     resolver: zodResolver(editShipmentSchema),
-    defaultValues: {
-      stsJob: shipmentToEdit.stsJob,
-      customerJobNumber: shipmentToEdit.customerJobNumber || '',
-      quantity: shipmentToEdit.quantity,
-      importer: shipmentToEdit.importer,
-      exporter: shipmentToEdit.exporter,
-      locationNamesInput: (shipmentToEdit.locationNames || []).join(', '),
-      released: shipmentToEdit.released,
-      cleared: shipmentToEdit.cleared,
-      weight: shipmentToEdit.weight ?? null,
-      palletSpace: shipmentToEdit.palletSpace ?? null,
-      releaseDocument: null,
-      clearanceDocument: null,
-    }
+    // Default values will be set by useEffect
   });
 
   useEffect(() => {
@@ -73,11 +60,13 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
         quantity: shipmentToEdit.quantity,
         importer: shipmentToEdit.importer,
         exporter: shipmentToEdit.exporter,
-        locationNamesInput: (shipmentToEdit.locationNames || []).join(', '),
+        // No locationNamesInput here
         released: shipmentToEdit.released,
         cleared: shipmentToEdit.cleared,
         weight: shipmentToEdit.weight ?? null,
         palletSpace: shipmentToEdit.palletSpace ?? null,
+        releaseDocument: null,
+        clearanceDocument: null,
       });
     }
   }, [shipmentToEdit, isOpen, reset]);
@@ -87,17 +76,12 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     const newReleaseDocumentFile = data.releaseDocument && data.releaseDocument.length > 0 ? data.releaseDocument[0] : null;
     const newClearanceDocumentFile = data.clearanceDocument && data.clearanceDocument.length > 0 ? data.clearanceDocument[0] : null;
 
-    const locationNamesArray = data.locationNamesInput
-      ? data.locationNamesInput.split(',').map(name => name.trim()).filter(Boolean)
-      : [];
-
-    const updatedData: ShipmentUpdateData = {
+    const updatedData: Omit<ShipmentUpdateData, 'locations'> = { // Locations are not updated here
       stsJob: data.stsJob,
       customerJobNumber: data.customerJobNumber || undefined,
       quantity: data.quantity,
       importer: data.importer,
       exporter: data.exporter,
-      locationNames: locationNamesArray.length > 0 ? locationNamesArray : ['Pending Assignment'],
       releaseDocumentName: newReleaseDocumentFile ? newReleaseDocumentFile.name : shipmentToEdit.releaseDocumentName,
       clearanceDocumentName: newClearanceDocumentFile ? newClearanceDocumentFile.name : shipmentToEdit.clearanceDocumentName,
       released: data.released ?? false,
@@ -109,29 +93,14 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     updateShipment(shipmentToEdit.id, updatedData);
     toast({
       title: "Success!",
-      description: `Shipment STS Job "${data.stsJob}" updated.`,
+      description: `Shipment STS Job "${data.stsJob}" updated. Locations managed separately.`,
     });
     setIsOpen(false);
   };
 
   const handleClose = () => {
     setIsOpen(false);
-    if (shipmentToEdit) {
-      reset({
-          stsJob: shipmentToEdit.stsJob,
-          customerJobNumber: shipmentToEdit.customerJobNumber || '',
-          quantity: shipmentToEdit.quantity,
-          importer: shipmentToEdit.importer,
-          exporter: shipmentToEdit.exporter,
-          locationNamesInput: (shipmentToEdit.locationNames || []).join(', '),
-          released: shipmentToEdit.released,
-          cleared: shipmentToEdit.cleared,
-          weight: shipmentToEdit.weight ?? null,
-          palletSpace: shipmentToEdit.palletSpace ?? null,
-          releaseDocument: null,
-          clearanceDocument: null,
-      });
-    }
+    // Reset logic is handled by useEffect on open
   }
 
   return (
@@ -140,7 +109,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
         <DialogHeader>
           <DialogTitle className="flex items-center"><Edit className="mr-2 h-5 w-5" /> Edit Shipment</DialogTitle>
           <DialogDescription>
-            Modify the details for shipment ID: {shipmentToEdit.id.substring(0,8)}...
+            Modify the details for shipment ID: {shipmentToEdit.id.substring(0,8)}... Location details are managed in a separate dialog.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
@@ -191,20 +160,14 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
             </div>
             <div>
               <Label htmlFor="palletSpace" className="flex items-center">
-                <Box className="mr-2 h-4 w-4 text-muted-foreground" /> Pallet Spaces
+                <Box className="mr-2 h-4 w-4 text-muted-foreground" /> Pallet Spaces (Shipment Total)
               </Label>
               <Input id="palletSpace" type="number" {...register('palletSpace')} />
               {errors.palletSpace && <p className="text-sm text-destructive mt-1">{errors.palletSpace.message}</p>}
             </div>
           </div>
 
-           <div>
-            <Label htmlFor="locationNamesInput" className="flex items-center">
-              <MapPin className="mr-2 h-4 w-4 text-muted-foreground" /> Location Names (comma-separated)
-            </Label>
-            <Input id="locationNamesInput" {...register('locationNamesInput')} placeholder="e.g., Bay A1, Shelf C2, Zone 3" />
-            {errors.locationNamesInput && <p className="text-sm text-destructive mt-1">{errors.locationNamesInput.message}</p>}
-          </div>
+          {/* LocationNamesInput removed */}
 
           <div className="space-y-2">
             <Label htmlFor="releaseDocument" className="flex items-center">

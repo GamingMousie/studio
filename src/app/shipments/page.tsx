@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -17,7 +16,7 @@ export default function AllShipmentsPage() {
   const { shipments, trailers, deleteShipment } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [trailerFilter, setTrailerFilter] = useState<string | 'all'>('all');
+  const [trailerIdFilter, setTrailerIdFilter] = useState<string | 'all'>('all'); // Changed from trailerFilter to trailerIdFilter
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
@@ -35,11 +34,11 @@ export default function AllShipmentsPage() {
         shipment.exporter.toLowerCase().includes(searchLower) || 
         (shipment.locationNames && shipment.locationNames.some(loc => loc.toLowerCase().includes(searchLower)));
 
-      const matchesTrailer = trailerFilter === 'all' || shipment.trailerId === trailerFilter;
+      const matchesTrailerId = trailerIdFilter === 'all' || shipment.trailerId === trailerIdFilter; // Updated to filter by trailerId
 
-      return matchesSearch && matchesTrailer;
+      return matchesSearch && matchesTrailerId;
     });
-  }, [shipments, searchTerm, trailerFilter]);
+  }, [shipments, searchTerm, trailerIdFilter]); // Updated dependency
 
   const ShipmentListSkeleton = () => (
     <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
@@ -137,11 +136,11 @@ export default function AllShipmentsPage() {
               className="pl-10"
             />
           </div>
-          <Select value={trailerFilter} onValueChange={(value) => setTrailerFilter(value)}>
+          <Select value={trailerIdFilter} onValueChange={(value) => setTrailerIdFilter(value)}>
             <SelectTrigger className="w-full md:w-[220px]">
               <div className="flex items-center">
                 <Truck className="mr-2 h-4 w-4 text-muted-foreground" />
-                <SelectValue placeholder="Filter by trailer" />
+                <SelectValue placeholder="Filter by trailer ID" />
               </div>
             </SelectTrigger>
             <SelectContent>

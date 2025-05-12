@@ -22,6 +22,7 @@ export default function SingleShipmentPage() {
 
   const [shipment, setShipment] = useState<Shipment | null | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
+  const [printedDateTime, setPrintedDateTime] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -37,7 +38,11 @@ export default function SingleShipmentPage() {
 
   const handlePrint = () => {
     if (canPrint) {
-      window.print();
+      setPrintedDateTime(new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
+      // Use setTimeout to allow state to update before print dialog
+      setTimeout(() => {
+        window.print();
+      }, 0);
     }
   };
 
@@ -308,6 +313,15 @@ export default function SingleShipmentPage() {
             {/* Date and Time fields removed for printing */}
           </div>
         </div>
+        
+        {/* Released (printed) on Date - Print Only */}
+        {printedDateTime && (
+          <div className="print-only-block mt-4 pt-4 text-center border-t border-border px-6 pb-6">
+            <p className="text-xs text-muted-foreground">
+              Released (printed) on: {printedDateTime}
+            </p>
+          </div>
+        )}
 
       </Card>
     </div>

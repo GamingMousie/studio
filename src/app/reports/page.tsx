@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -106,7 +105,7 @@ export default function ReportsPage() {
           <TableHead>Trailer ID</TableHead>
           <TableHead>Trailer Name</TableHead>
           <TableHead>Company</TableHead>
-          <TableHead>Arrival Date</TableHead> {/* New Skeleton Head */}
+          <TableHead>Arrival Date</TableHead>
           <TableHead>STS Job</TableHead>
           <TableHead>Customer Job No.</TableHead>
           <TableHead>Locations</TableHead>
@@ -119,7 +118,7 @@ export default function ReportsPage() {
             <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[90px]" /></TableCell> {/* New Skeleton Cell */}
+            <TableCell><Skeleton className="h-4 w-[90px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
@@ -191,7 +190,7 @@ export default function ReportsPage() {
                         <CalendarDays className="mr-1.5 h-4 w-4" />
                         Arrival Date
                       </div>
-                    </TableHead> {/* New Head */}
+                    </TableHead>
                     <TableHead className="whitespace-nowrap">STS Job</TableHead>
                     <TableHead className="whitespace-nowrap">Customer Job No.</TableHead>
                     <TableHead>Locations</TableHead>
@@ -208,7 +207,7 @@ export default function ReportsPage() {
                       </TableCell>
                       <TableCell>{item.trailerName || 'N/A'}</TableCell>
                       <TableCell>{item.company || 'N/A'}</TableCell>
-                      <TableCell>{formatDateSafe(item.arrivalDate)}</TableCell> {/* New Cell */}
+                      <TableCell>{formatDateSafe(item.arrivalDate)}</TableCell>
                       <TableCell>{item.stsJob}</TableCell>
                       <TableCell>{item.customerJobNumber || 'N/A'}</TableCell>
                       <TableCell>{item.locationsDisplay}</TableCell>

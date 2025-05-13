@@ -122,6 +122,7 @@
   .printable-area {
     box-shadow: none !important;
     border: none !important;
+    page-break-inside: avoid; /* Attempt to keep the entire printable area on one page */
   }
   .print-only-block {
     display: block !important; /* Ensure it's block, could be other display types too */
@@ -177,4 +178,8 @@
 /* Ensure this is outside @media print if it applies generally */
 .print-only-block {
   display: none; /* Hidden by default, shown only for print */
+}
+
+html {
+  scroll-padding-top: 4rem; /* Adjust based on your fixed header's height */
 }

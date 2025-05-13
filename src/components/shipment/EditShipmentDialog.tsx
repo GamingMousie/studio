@@ -8,7 +8,7 @@ import type { Shipment, ShipmentUpdateData } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+// Checkbox removed
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Edit, Users, Send, Briefcase, Archive } from 'lucide-react'; // Removed MapPin
+import { FileText, Weight, Box, Edit, Users, Send, Briefcase, Archive } from 'lucide-react';
 
 const editShipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
@@ -26,14 +26,13 @@ const editShipmentSchema = z.object({
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   importer: z.string().min(1, 'Importer (Consignee) is required').max(50, 'Importer (Consignee) name too long'),
   exporter: z.string().min(1, 'Exporter (Consignor) is required').max(50, 'Exporter (Consignor) name too long'),
-  // locationNamesInput is removed. Location management is separate.
   releaseDocument: z.any().optional(),
   clearanceDocument: z.any().optional(),
   released: z.boolean().optional(),
   cleared: z.boolean().optional(),
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
   palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(),
-  emptyPalletRequired: z.boolean().optional(),
+  emptyPalletRequired: z.coerce.number().int("Must be a whole number").min(0, 'Cannot be negative').optional().nullable(),
 });
 
 type EditShipmentFormDataType = z.infer<typeof editShipmentSchema>;
@@ -50,7 +49,6 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
 
   const { register, handleSubmit, reset, control, formState: { errors, isSubmitting }, watch, setValue } = useForm<EditShipmentFormDataType>({
     resolver: zodResolver(editShipmentSchema),
-    // Default values will be set by useEffect
   });
 
   useEffect(() => {
@@ -61,14 +59,13 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
         quantity: shipmentToEdit.quantity,
         importer: shipmentToEdit.importer,
         exporter: shipmentToEdit.exporter,
-        // No locationNamesInput here
         released: shipmentToEdit.released,
         cleared: shipmentToEdit.cleared,
         weight: shipmentToEdit.weight ?? null,
         palletSpace: shipmentToEdit.palletSpace ?? null,
         releaseDocument: null,
         clearanceDocument: null,
-        emptyPalletRequired: shipmentToEdit.emptyPalletRequired ?? false,
+        emptyPalletRequired: shipmentToEdit.emptyPalletRequired ?? 0,
       });
     }
   }, [shipmentToEdit, isOpen, reset]);
@@ -78,7 +75,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     const newReleaseDocumentFile = data.releaseDocument && data.releaseDocument.length > 0 ? data.releaseDocument[0] : null;
     const newClearanceDocumentFile = data.clearanceDocument && data.clearanceDocument.length > 0 ? data.clearanceDocument[0] : null;
 
-    const updatedData: Omit<ShipmentUpdateData, 'locations'> = { // Locations are not updated here
+    const updatedData: Omit<ShipmentUpdateData, 'locations'> = { 
       stsJob: data.stsJob,
       customerJobNumber: data.customerJobNumber || undefined,
       quantity: data.quantity,
@@ -90,7 +87,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
       cleared: data.cleared ?? false,
       weight: data.weight ?? undefined,
       palletSpace: data.palletSpace ?? undefined,
-      emptyPalletRequired: data.emptyPalletRequired ?? false,
+      emptyPalletRequired: data.emptyPalletRequired ?? 0,
     };
 
     updateShipment(shipmentToEdit.id, updatedData);
@@ -103,7 +100,6 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
 
   const handleClose = () => {
     setIsOpen(false);
-    // Reset logic is handled by useEffect on open
   }
 
   return (
@@ -170,8 +166,6 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
             </div>
           </div>
 
-          {/* LocationNamesInput removed */}
-
           <div className="space-y-2">
             <Label htmlFor="releaseDocument" className="flex items-center">
               <FileText className="mr-2 h-4 w-4 text-muted-foreground" /> Release Document
@@ -193,25 +187,26 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
             <Input id="clearanceDocument" type="file" {...register('clearanceDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
             {errors.clearanceDocument && <p className="text-sm text-destructive mt-1">{(errors.clearanceDocument as any)?.message}</p>}
           </div>
+          
+          <div>
+            <Label htmlFor="emptyPalletRequired" className="flex items-center">
+              <Archive className="mr-2 h-4 w-4 text-muted-foreground" /> Empty Pallets Required (Number)
+            </Label>
+            <Input id="emptyPalletRequired" type="number" {...register('emptyPalletRequired')} />
+            {errors.emptyPalletRequired && <p className="text-sm text-destructive mt-1">{errors.emptyPalletRequired.message}</p>}
+          </div>
 
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="flex items-center space-x-2">
-              <Checkbox id="released" {...register('released')} defaultChecked={shipmentToEdit.released} onCheckedChange={(checked) => setValue('released', !!checked)} />
-              <Label htmlFor="released" className="font-normal">Permitted to be Released</Label>
+              <input type="checkbox" id="releasedEdit" {...register('released')} defaultChecked={shipmentToEdit.released} onChange={(e) => setValue('released', e.target.checked)} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary" />
+              <Label htmlFor="releasedEdit" className="font-normal">Permitted to be Released</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="cleared" {...register('cleared')} defaultChecked={shipmentToEdit.cleared} onCheckedChange={(checked) => setValue('cleared', !!checked)} />
-              <Label htmlFor="cleared" className="font-normal">Mark as Cleared</Label>
+              <input type="checkbox" id="clearedEdit" {...register('cleared')} defaultChecked={shipmentToEdit.cleared} onChange={(e) => setValue('cleared', e.target.checked)} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary" />
+              <Label htmlFor="clearedEdit" className="font-normal">Mark as Cleared</Label>
             </div>
           </div>
           
-          <div className="flex items-center space-x-2 pt-2">
-            <Checkbox id="emptyPalletRequired" {...register('emptyPalletRequired')} defaultChecked={shipmentToEdit.emptyPalletRequired} onCheckedChange={(checked) => setValue('emptyPalletRequired', !!checked)} />
-            <Label htmlFor="emptyPalletRequired" className="font-normal flex items-center">
-                <Archive className="mr-2 h-4 w-4 text-muted-foreground" /> Empty Pallet Required
-            </Label>
-          </div>
-
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>

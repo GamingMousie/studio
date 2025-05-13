@@ -210,10 +210,12 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
           <span className="ml-1.5 font-semibold">{shipment.cleared ? 'Yes' : 'No'}</span>
         </div>
         
-        <div className="flex items-center">
-          <Archive className={`mr-1.5 h-3.5 w-3.5 ${shipment.emptyPalletRequired ? 'text-destructive' : 'text-muted-foreground'}`} />
-          <span className="font-medium text-muted-foreground">Empty Pallet Required:</span>
-          <span className={`ml-1.5 font-semibold ${shipment.emptyPalletRequired ? 'text-destructive text-base' : ''}`}>{shipment.emptyPalletRequired ? 'Yes' : 'No'}</span>
+         <div className="flex items-center">
+          <Archive className={`mr-1.5 h-3.5 w-3.5 ${shipment.emptyPalletRequired && shipment.emptyPalletRequired > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
+          <span className="font-medium text-muted-foreground">Empty Pallets Required:</span>
+          <span className={`ml-1.5 font-semibold ${shipment.emptyPalletRequired && shipment.emptyPalletRequired > 0 ? 'text-destructive text-base' : ''}`}>
+            {shipment.emptyPalletRequired && shipment.emptyPalletRequired > 0 ? shipment.emptyPalletRequired : 'No'}
+          </span>
         </div>
 
         {shipment.releaseDocumentName && (

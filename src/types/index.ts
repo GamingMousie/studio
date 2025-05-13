@@ -33,7 +33,7 @@ export interface Shipment {
   weight?: number; // Optional: Weight of the shipment in kg
   palletSpace?: number; // Optional: Pallet spaces occupied by the shipment (overall for shipment)
   releasedAt?: string; // Optional: Timestamp for when the shipment was printed/officially released
-  emptyPalletRequired?: boolean; // Optional: Indicates if an empty pallet is required for this shipment
+  emptyPalletRequired?: number; // Changed from boolean to number. 0 means no, >0 means yes and how many.
 }
 
 // Used for the form data when creating or updating a shipment
@@ -51,7 +51,7 @@ export interface ShipmentFormData {
   cleared?: boolean;
   weight?: number | null;
   palletSpace?: number | null; // Overall pallet space for the shipment
-  emptyPalletRequired?: boolean;
+  emptyPalletRequired?: number | null; // Changed from boolean to number
 }
 
 // Specifically for updating an existing shipment via context
@@ -69,7 +69,7 @@ export interface ShipmentUpdateData {
   weight?: number;
   palletSpace?: number; // Overall pallet space for the shipment
   releasedAt?: string; // Allow updating releasedAt, though primarily handled by markShipmentAsPrinted
-  emptyPalletRequired?: boolean;
+  emptyPalletRequired?: number; // Changed from boolean to number
 }
 
 // Specifically for updating an existing trailer via context

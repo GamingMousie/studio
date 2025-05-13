@@ -6,7 +6,7 @@ import { useWarehouse } from '@/contexts/WarehouseContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+// Checkbox removed as emptyPalletRequired is now a number
 import {
   Dialog,
   DialogContent,
@@ -31,8 +31,8 @@ const shipmentSchema = z.object({
   released: z.boolean().optional(),
   cleared: z.boolean().optional(),
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
-  palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(), // Overall pallet space
-  emptyPalletRequired: z.boolean().optional(),
+  palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(),
+  emptyPalletRequired: z.coerce.number().int("Must be a whole number").min(0, 'Cannot be negative').optional().nullable(),
 });
 
 type ShipmentFormData = z.infer<typeof shipmentSchema>;
@@ -56,7 +56,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       initialLocationName: '',
       initialLocationPallets: null,
       customerJobNumber: '',
-      emptyPalletRequired: false,
+      emptyPalletRequired: 0, // Default to 0
     }
   });
 
@@ -79,7 +79,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       cleared: data.cleared,
       weight: data.weight ?? undefined,
       palletSpace: data.palletSpace ?? undefined,
-      emptyPalletRequired: data.emptyPalletRequired,
+      emptyPalletRequired: data.emptyPalletRequired ?? 0,
     });
     toast({
       title: "Success!",
@@ -189,24 +189,24 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             {errors.clearanceDocument && <p className="text-sm text-destructive mt-1">{(errors.clearanceDocument as any)?.message}</p>}
           </div>
 
+           <div>
+              <Label htmlFor="emptyPalletRequired" className="flex items-center">
+                <Archive className="mr-2 h-4 w-4 text-muted-foreground" /> Empty Pallets Required (Number, Optional)
+              </Label>
+              <Input id="emptyPalletRequired" type="number" {...register('emptyPalletRequired')} placeholder="e.g., 0 or 2" />
+              {errors.emptyPalletRequired && <p className="text-sm text-destructive mt-1">{errors.emptyPalletRequired.message}</p>}
+            </div>
+
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="flex items-center space-x-2">
-              <Checkbox id="released" {...register('released')} />
+              <input type="checkbox" id="released" {...register('released')} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary"/>
               <Label htmlFor="released" className="font-normal">Permitted to be Released</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox id="cleared" {...register('cleared')} />
+              <input type="checkbox" id="cleared" {...register('cleared')} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary" />
               <Label htmlFor="cleared" className="font-normal">Mark as Cleared</Label>
             </div>
           </div>
-
-           <div className="flex items-center space-x-2 pt-2">
-              <Checkbox id="emptyPalletRequired" {...register('emptyPalletRequired')} />
-              <Label htmlFor="emptyPalletRequired" className="font-normal flex items-center">
-                <Archive className="mr-2 h-4 w-4 text-muted-foreground" /> Empty Pallet Required
-              </Label>
-            </div>
-
 
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={() => { setIsOpen(false); reset(); }}>Cancel</Button>

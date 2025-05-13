@@ -32,7 +32,6 @@ export default function SingleShipmentPage() {
     }
   }, [shipmentId, getShipmentById]);
   
-  // Re-fetch shipment data if it changes in context (e.g., after markShipmentAsPrinted)
   useEffect(() => {
     if (isClient && shipmentId && getShipmentById) {
       setShipment(getShipmentById(shipmentId));
@@ -46,8 +45,7 @@ export default function SingleShipmentPage() {
 
   const handlePrint = () => {
     if (canPrint && shipment) {
-      markShipmentAsPrinted(shipment.id); // This updates the persisted state
-      // For the print footer, we use a fresh date for accuracy at the moment of printing.
+      markShipmentAsPrinted(shipment.id); 
       setPrintedDateTime(new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
       
       setTimeout(() => {
@@ -89,7 +87,7 @@ export default function SingleShipmentPage() {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
     try {
-      return format(parseISO(dateString), 'PPpp'); // e.g., Jul 20, 2024, 10:00:00 AM
+      return format(parseISO(dateString), 'PPpp'); 
     } catch (error) {
       return "Invalid Date";
     }
@@ -309,10 +307,10 @@ export default function SingleShipmentPage() {
                  </div>
             </div>
             <div className="flex items-center pt-2">
-              <Archive className={`mr-2 h-5 w-5 ${shipment.emptyPalletRequired ? 'text-destructive' : 'text-muted-foreground'}`} />
-              <span className="font-medium">Empty Pallet Required:</span>
-              <span className={`ml-2 font-bold ${shipment.emptyPalletRequired ? 'text-destructive text-lg' : ''}`}>
-                {shipment.emptyPalletRequired ? 'Yes' : 'No'}
+              <Archive className={`mr-2 h-5 w-5 ${shipment.emptyPalletRequired && shipment.emptyPalletRequired > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
+              <span className="font-medium">Empty Pallets Required:</span>
+              <span className={`ml-2 font-bold ${shipment.emptyPalletRequired && shipment.emptyPalletRequired > 0 ? 'text-destructive text-lg' : ''}`}>
+                {shipment.emptyPalletRequired && shipment.emptyPalletRequired > 0 ? shipment.emptyPalletRequired : 'No'}
               </span>
             </div>
           </div>

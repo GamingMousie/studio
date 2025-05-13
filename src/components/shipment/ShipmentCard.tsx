@@ -83,7 +83,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
           <CardTitle className={viewMode === 'list' ? "text-base font-semibold" : "text-lg"}>
             <Link href={`/shipments/${shipment.id}`} className="hover:underline text-primary flex items-center group">
               <Package className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
-              Trailer ID: "{trailer ? trailer.id : shipment.trailerId} Job: {shipment.stsJob}"
+              Trailer {trailer ? trailer.id : shipment.trailerId} Job: {shipment.stsJob}
             </Link>
           </CardTitle>
           <CardDescription className="text-xs mt-0.5">
@@ -294,3 +294,4 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
     </>
   );
 }
+

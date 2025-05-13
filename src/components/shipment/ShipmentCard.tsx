@@ -37,7 +37,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
   const [attachDocumentType, setAttachDocumentType] = useState<'release' | 'clearance' | null>(null);
   const [isShipmentDeleteDialogOpen, setIsShipmentDeleteDialogOpen] = useState(false);
 
-  const shipmentIdentifier = `STS Job: ${shipment.stsJob}`;
+  const shipmentIdentifier = `STS Job: ${shipment.stsJob}`; // Used for toast messages, etc.
   const trailer = getTrailerById(shipment.trailerId);
 
   const handleMarkAsPermitted = () => {
@@ -83,10 +83,12 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
           <CardTitle className={viewMode === 'list' ? "text-base font-semibold" : "text-lg"}>
             <Link href={`/shipments/${shipment.id}`} className="hover:underline text-primary flex items-center group">
               <Package className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
-              STS Job: {shipment.stsJob}
+              {/* Updated title format */}
+              Trailer: {trailer ? `${trailer.name || trailer.id}` : shipment.trailerId} Job: {shipment.stsJob}
             </Link>
           </CardTitle>
-          {shipment.trailerId && (
+          {/* Trailer ID is now part of the title, so this separate display might be redundant or can be removed if not needed for styling */}
+          {/* {shipment.trailerId && ( // This part displays trailer ID separately
             <div className="text-xs font-medium text-muted-foreground mt-0.5 flex items-center group">
               <Truck className="mr-1.5 h-3.5 w-3.5 text-primary/80" />
               {trailer ? (
@@ -99,7 +101,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
                 </span>
               )}
             </div>
-          )}
+          )} */}
           <CardDescription className="text-xs mt-0.5">
             Shipment ID: {shipment.id.substring(0,8)}...
           </CardDescription>
@@ -275,7 +277,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
         />
       )}
 
-      {isEditShipmentOpen && (
+      {isEditShipmentOpen && shipment && ( 
         <EditShipmentDialog
           isOpen={isEditShipmentOpen}
           setIsOpen={setIsEditShipmentOpen}
@@ -288,7 +290,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
           isOpen={isAttachDocumentOpen}
           setIsOpen={setIsAttachDocumentOpen}
           shipmentId={shipment.id}
-          shipmentIdentifier={shipmentIdentifier}
+          shipmentIdentifier={shipmentIdentifier} 
           documentType={attachDocumentType}
           onDocumentAttached={handleDocumentAttached}
         />

@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Edit, Users, Send, Briefcase } from 'lucide-react'; // Removed MapPin
+import { FileText, Weight, Box, Edit, Users, Send, Briefcase, Archive } from 'lucide-react'; // Removed MapPin
 
 const editShipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
@@ -33,6 +33,7 @@ const editShipmentSchema = z.object({
   cleared: z.boolean().optional(),
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
   palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(),
+  emptyPalletRequired: z.boolean().optional(),
 });
 
 type EditShipmentFormDataType = z.infer<typeof editShipmentSchema>;
@@ -67,6 +68,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
         palletSpace: shipmentToEdit.palletSpace ?? null,
         releaseDocument: null,
         clearanceDocument: null,
+        emptyPalletRequired: shipmentToEdit.emptyPalletRequired ?? false,
       });
     }
   }, [shipmentToEdit, isOpen, reset]);
@@ -88,6 +90,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
       cleared: data.cleared ?? false,
       weight: data.weight ?? undefined,
       palletSpace: data.palletSpace ?? undefined,
+      emptyPalletRequired: data.emptyPalletRequired ?? false,
     };
 
     updateShipment(shipmentToEdit.id, updatedData);
@@ -200,6 +203,13 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
               <Checkbox id="cleared" {...register('cleared')} defaultChecked={shipmentToEdit.cleared} onCheckedChange={(checked) => setValue('cleared', !!checked)} />
               <Label htmlFor="cleared" className="font-normal">Mark as Cleared</Label>
             </div>
+          </div>
+          
+          <div className="flex items-center space-x-2 pt-2">
+            <Checkbox id="emptyPalletRequired" {...register('emptyPalletRequired')} defaultChecked={shipmentToEdit.emptyPalletRequired} onCheckedChange={(checked) => setValue('emptyPalletRequired', !!checked)} />
+            <Label htmlFor="emptyPalletRequired" className="font-normal flex items-center">
+                <Archive className="mr-2 h-4 w-4 text-muted-foreground" /> Empty Pallet Required
+            </Label>
           </div>
 
           <DialogFooter className="pt-4">

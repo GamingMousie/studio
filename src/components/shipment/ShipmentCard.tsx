@@ -5,7 +5,7 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send, Briefcase, Truck } from 'lucide-react';
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send, Briefcase, Truck, Archive } from 'lucide-react';
 import ManageLocationsDialog from './ManageLocationsDialog';
 import EditShipmentDialog from './EditShipmentDialog';
 import AttachDocumentDialog from './AttachDocumentDialog';
@@ -208,6 +208,12 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
           {shipment.cleared ? <CheckCircle2 className="mr-1.5 h-3.5 w-3.5 text-green-600" /> : <CircleOff className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />}
           <span className="font-medium text-muted-foreground">Cleared:</span>
           <span className="ml-1.5 font-semibold">{shipment.cleared ? 'Yes' : 'No'}</span>
+        </div>
+        
+        <div className="flex items-center">
+          <Archive className={`mr-1.5 h-3.5 w-3.5 ${shipment.emptyPalletRequired ? 'text-primary' : 'text-muted-foreground'}`} />
+          <span className="font-medium text-muted-foreground">Empty Pallet Required:</span>
+          <span className={`ml-1.5 font-semibold ${shipment.emptyPalletRequired ? 'text-primary' : ''}`}>{shipment.emptyPalletRequired ? 'Yes' : 'No'}</span>
         </div>
 
         {shipment.releaseDocumentName && (

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck } from 'lucide-react';
+import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck, Archive } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
 export default function SingleShipmentPage() {
@@ -307,6 +307,13 @@ export default function SingleShipmentPage() {
                       </div>
                     )}
                  </div>
+            </div>
+            <div className="flex items-center pt-2">
+              <Archive className={`mr-2 h-5 w-5 ${shipment.emptyPalletRequired ? 'text-primary' : 'text-muted-foreground'}`} />
+              <span className="font-medium">Empty Pallet Required:</span>
+              <span className={`ml-2 font-bold ${shipment.emptyPalletRequired ? 'text-primary' : ''}`}>
+                {shipment.emptyPalletRequired ? 'Yes' : 'No'}
+              </span>
             </div>
           </div>
         </CardContent>

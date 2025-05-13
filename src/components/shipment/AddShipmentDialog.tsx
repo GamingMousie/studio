@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Users, MapPin, Send, Briefcase } from 'lucide-react';
+import { FileText, Weight, Box, Users, MapPin, Send, Briefcase, Archive } from 'lucide-react';
 
 const shipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
@@ -32,6 +32,7 @@ const shipmentSchema = z.object({
   cleared: z.boolean().optional(),
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
   palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(), // Overall pallet space
+  emptyPalletRequired: z.boolean().optional(),
 });
 
 type ShipmentFormData = z.infer<typeof shipmentSchema>;
@@ -55,6 +56,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       initialLocationName: '',
       initialLocationPallets: null,
       customerJobNumber: '',
+      emptyPalletRequired: false,
     }
   });
 
@@ -77,6 +79,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       cleared: data.cleared,
       weight: data.weight ?? undefined,
       palletSpace: data.palletSpace ?? undefined,
+      emptyPalletRequired: data.emptyPalletRequired,
     });
     toast({
       title: "Success!",
@@ -196,6 +199,13 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
               <Label htmlFor="cleared" className="font-normal">Mark as Cleared</Label>
             </div>
           </div>
+
+           <div className="flex items-center space-x-2 pt-2">
+              <Checkbox id="emptyPalletRequired" {...register('emptyPalletRequired')} />
+              <Label htmlFor="emptyPalletRequired" className="font-normal flex items-center">
+                <Archive className="mr-2 h-4 w-4 text-muted-foreground" /> Empty Pallet Required
+              </Label>
+            </div>
 
 
           <DialogFooter className="pt-4">

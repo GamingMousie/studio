@@ -309,9 +309,9 @@ export default function SingleShipmentPage() {
                  </div>
             </div>
             <div className="flex items-center pt-2">
-              <Archive className={`mr-2 h-5 w-5 ${shipment.emptyPalletRequired ? 'text-primary' : 'text-muted-foreground'}`} />
+              <Archive className={`mr-2 h-5 w-5 ${shipment.emptyPalletRequired ? 'text-destructive' : 'text-muted-foreground'}`} />
               <span className="font-medium">Empty Pallet Required:</span>
-              <span className={`ml-2 font-bold ${shipment.emptyPalletRequired ? 'text-primary' : ''}`}>
+              <span className={`ml-2 font-bold ${shipment.emptyPalletRequired ? 'text-destructive text-lg' : ''}`}>
                 {shipment.emptyPalletRequired ? 'Yes' : 'No'}
               </span>
             </div>

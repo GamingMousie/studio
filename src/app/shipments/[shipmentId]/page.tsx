@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck, Archive } from 'lucide-react';
+import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck, Archive, Edit3 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import EditShipmentDialog from '@/components/shipment/EditShipmentDialog'; // Import EditShipmentDialog
 
 export default function SingleShipmentPage() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function SingleShipmentPage() {
   const [shipment, setShipment] = useState<Shipment | null | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
   const [printedDateTime, setPrintedDateTime] = useState<string | null>(null);
+  const [isEditShipmentDialogOpen, setIsEditShipmentDialogOpen] = useState(false); // State for EditShipmentDialog
 
   useEffect(() => {
     setIsClient(true);
@@ -34,9 +36,10 @@ export default function SingleShipmentPage() {
   
   useEffect(() => {
     if (isClient && shipmentId && getShipmentById) {
+      // Re-fetch shipment if context updates, e.g., after an edit
       setShipment(getShipmentById(shipmentId));
     }
-  }, [isClient, shipmentId, getShipmentById, shipment?.releasedAt]);
+  }, [isClient, shipmentId, getShipmentById, shipment?.releasedAt, shipment?.stsJob]); // Added more dependencies to refresh on edit
 
 
   const trailer = shipment?.trailerId ? getTrailerById(shipment.trailerId) : null;
@@ -145,10 +148,15 @@ export default function SingleShipmentPage() {
         <Button variant="outline" onClick={() => router.back()} size="sm">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        <Button onClick={handlePrint} disabled={!canPrint} size="sm">
-          <Printer className="mr-2 h-4 w-4" /> Print Shipment
-          {!canPrint && <span className="ml-2 text-xs">(Requires Cleared & Permitted)</span>}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setIsEditShipmentDialogOpen(true)} variant="outline" size="sm">
+            <Edit3 className="mr-2 h-4 w-4" /> Edit Shipment
+          </Button>
+          <Button onClick={handlePrint} disabled={!canPrint} size="sm">
+            <Printer className="mr-2 h-4 w-4" /> Print Shipment
+            {!canPrint && <span className="ml-2 text-xs">(Requires Cleared & Permitted)</span>}
+          </Button>
+        </div>
       </div>
 
       <Card className="printable-area shadow-lg">
@@ -354,6 +362,15 @@ export default function SingleShipmentPage() {
         )}
 
       </Card>
+
+      {isEditShipmentDialogOpen && shipment && ( // Ensure shipment is not null or undefined
+        <EditShipmentDialog
+          isOpen={isEditShipmentDialogOpen}
+          setIsOpen={setIsEditShipmentDialogOpen}
+          shipmentToEdit={shipment}
+        />
+      )}
     </div>
   );
 }
+

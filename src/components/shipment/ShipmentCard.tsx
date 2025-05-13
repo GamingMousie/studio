@@ -83,25 +83,9 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
           <CardTitle className={viewMode === 'list' ? "text-base font-semibold" : "text-lg"}>
             <Link href={`/shipments/${shipment.id}`} className="hover:underline text-primary flex items-center group">
               <Package className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
-              {/* Updated title format */}
-              Trailer: {trailer ? `${trailer.name || trailer.id}` : shipment.trailerId} Job: {shipment.stsJob}
+              Trailer ID: "{trailer ? trailer.id : shipment.trailerId} Job: {shipment.stsJob}"
             </Link>
           </CardTitle>
-          {/* Trailer ID is now part of the title, so this separate display might be redundant or can be removed if not needed for styling */}
-          {/* {shipment.trailerId && ( // This part displays trailer ID separately
-            <div className="text-xs font-medium text-muted-foreground mt-0.5 flex items-center group">
-              <Truck className="mr-1.5 h-3.5 w-3.5 text-primary/80" />
-              {trailer ? (
-                <Link href={`/trailers/${trailer.id}`} className="text-muted-foreground hover:text-primary hover:underline">
-                  Trailer: {trailer.name || 'Unknown'} ({trailer.id})
-                </Link>
-              ) : (
-                <span className="text-muted-foreground">
-                  Trailer ID: {shipment.trailerId} (Name N/A)
-                </span>
-              )}
-            </div>
-          )} */}
           <CardDescription className="text-xs mt-0.5">
             Shipment ID: {shipment.id.substring(0,8)}...
           </CardDescription>

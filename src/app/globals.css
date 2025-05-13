@@ -142,7 +142,7 @@
     text-decoration: none !important;
   }
 
-  /* Specific for ACP form print */
+  /* Specific for ACP form print and general report printing */
   .printable-area h1, .printable-area h2, .printable-area h3, .printable-area p, .printable-area span, .printable-area label, .printable-area div {
     color: black !important; /* Ensure all text is black */
     font-size: 9pt !important; /* Adjust font size for print */
@@ -172,6 +172,33 @@
   /* Remove page breaks inside important blocks if possible, or manage them */
   .printable-area .border {
     page-break-inside: avoid;
+  }
+
+  /* Styles for the signature block in print view */
+  .print-signature-block { /* The wrapper div for signature section */
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    margin-top: 1rem !important;
+    border-top-color: black !important;
+  }
+  .print-signature-block h3 {
+    font-size: 8pt !important;
+    margin-bottom: 0.5rem !important; 
+  }
+  .print-signature-block label {
+    font-size: 7pt !important;
+    margin-bottom: 0.05rem !important; /* minimal space below label */
+  }
+  .print-signature-block .grid {
+    gap: 0.5rem !important; 
+  }
+  .print-signature-block .h-12 { /* The signature line */
+    height: 2em !important; 
+    margin-bottom: 0.1rem !important; /* minimal space after each line */
+    border-bottom-color: black !important;
+  }
+  .print-signature-block .space-y-1 > :not([hidden]) ~ :not([hidden]) { 
+    margin-top: 0.1rem !important; /* reduce space between label and line */
   }
 }
 

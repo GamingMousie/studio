@@ -342,7 +342,7 @@ export default function SingleShipmentPage() {
         )}
 
         {/* Signature Block - Print Only */}
-        <div className="print-only-block px-6 pb-6 pt-8 mt-8 border-t border-border">
+        <div className="print-only-block print-signature-block px-6 pb-6 pt-8 mt-8 border-t border-border">
           <h3 className="text-lg font-semibold mb-8 text-center text-foreground">Driver's Acknowledgment of Receipt</h3>
           <div className="grid grid-cols-2 gap-x-12 gap-y-12">
             <div className="space-y-1">
@@ -385,4 +385,5 @@ export default function SingleShipmentPage() {
     </div>
   );
 }
+
 

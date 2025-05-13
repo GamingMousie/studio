@@ -37,9 +37,15 @@ export default function SingleShipmentPage() {
   useEffect(() => {
     if (isClient && shipmentId && getShipmentById) {
       // Re-fetch shipment if context updates, e.g., after an edit
-      setShipment(getShipmentById(shipmentId));
+      const currentShipment = getShipmentById(shipmentId);
+      setShipment(currentShipment);
+      if (currentShipment?.releasedAt) {
+        setPrintedDateTime(new Date(currentShipment.releasedAt).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
+      } else {
+        setPrintedDateTime(null);
+      }
     }
-  }, [isClient, shipmentId, getShipmentById, shipment?.releasedAt, shipment?.stsJob]); // Added more dependencies to refresh on edit
+  }, [isClient, shipmentId, getShipmentById, shipment?.releasedAt, shipment?.stsJob]);
 
 
   const trailer = shipment?.trailerId ? getTrailerById(shipment.trailerId) : null;
@@ -48,8 +54,13 @@ export default function SingleShipmentPage() {
 
   const handlePrint = () => {
     if (canPrint && shipment) {
-      markShipmentAsPrinted(shipment.id); 
-      setPrintedDateTime(new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
+      if (!shipment.releasedAt) { // Only mark as printed if not already marked
+        markShipmentAsPrinted(shipment.id); 
+        setPrintedDateTime(new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
+      } else {
+        // If already printed, just use existing printedDateTime
+        setPrintedDateTime(new Date(shipment.releasedAt).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
+      }
       
       setTimeout(() => {
         window.print();
@@ -59,6 +70,8 @@ export default function SingleShipmentPage() {
 
   const handleViewDocument = (documentName?: string) => {
     if (documentName) {
+      // In a real app, this would fetch and display the document.
+      // For now, it opens a new tab with a placeholder message.
       const newWindow = window.open("", "_blank");
       if (newWindow) {
         newWindow.document.write(`
@@ -75,7 +88,7 @@ export default function SingleShipmentPage() {
             <body>
               <div class="container">
                 <h1>Viewing Document: ${documentName}</h1>
-                <p>(This is a placeholder. In a real application, the document would be displayed here.)</p>
+                <p>(This is a placeholder. In a real application, the document content for "${documentName}" would be displayed here.)</p>
               </div>
             </body>
           </html>
@@ -182,13 +195,13 @@ export default function SingleShipmentPage() {
             )}
           </div>
         </CardHeader>
-        <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm card-content-print">
+        <CardContent className="pt-6 grid grid-cols-1 print:grid-cols-2 md:grid-cols-2 print:gap-x-4 print:gap-y-3 gap-x-8 gap-y-6 text-sm card-content-print">
 
           {trailer && (
-            <div className="space-y-1 md:col-span-1">
+            <div className="space-y-1">
               <h3 className="font-semibold text-muted-foreground flex items-center"><Truck className="mr-2 h-4 w-4" />Associated Trailer ID</h3>
               <p className="text-2xl font-bold text-foreground">
-                <Link href={`/trailers/${trailer.id}`} className="hover:underline">
+                <Link href={`/trailers/${trailer.id}`} className="hover:underline print:text-foreground print:no-underline">
                   {trailer.id}
                 </Link>
                  {trailer.name && <span className="text-base font-medium text-muted-foreground ml-2">({trailer.name})</span>}
@@ -196,13 +209,13 @@ export default function SingleShipmentPage() {
             </div>
           )}
 
-          <div className="space-y-1 md:col-span-1">
+          <div className="space-y-1">
             <h3 className="font-semibold text-muted-foreground flex items-center"><Hash className="mr-2 h-4 w-4" />STS Job Number</h3>
             <p className="text-2xl font-bold text-foreground">{shipment.stsJob}</p>
           </div>
           
           {shipment.customerJobNumber && (
-            <div className="space-y-1 md:col-span-1">
+            <div className="space-y-1">
               <h3 className="font-semibold text-muted-foreground flex items-center"><Briefcase className="mr-2 h-4 w-4" />Customer Job Number</h3>
               <p className="text-lg font-medium">{shipment.customerJobNumber}</p>
             </div>
@@ -246,8 +259,7 @@ export default function SingleShipmentPage() {
             </div>
           )}
 
-
-          <div className="space-y-1 col-span-1 md:col-span-2">
+          <div className="space-y-1 col-span-1 print:col-span-2 md:col-span-2">
             <h3 className="font-semibold text-muted-foreground flex items-center"><MapPin className="mr-2 h-4 w-4" />Warehouse Locations</h3>
             <div className="flex flex-wrap gap-2 mt-1">
             {isPendingAssignment ? (
@@ -264,9 +276,9 @@ export default function SingleShipmentPage() {
             </div>
           </div>
 
-          <div className="space-y-3 col-span-1 md:col-span-2 border-t pt-4 mt-2">
+          <div className="space-y-3 col-span-1 print:col-span-2 md:col-span-2 border-t pt-4 mt-2">
             <h3 className="font-semibold text-muted-foreground mb-2">Status & Documents</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 print:grid-cols-2 sm:grid-cols-2 print:gap-2 gap-4">
                  <div>
                     <div className="flex items-center mb-1">
                       {shipment.released ? <CheckCircle2 className="mr-2 h-5 w-5 text-green-600" /> : <CircleOff className="mr-2 h-5 w-5 text-red-500" />}
@@ -325,7 +337,7 @@ export default function SingleShipmentPage() {
         </CardContent>
         {trailer && trailer.arrivalDate && (
           <CardFooter className="border-t pt-4 text-xs text-muted-foreground">
-              <p>Associated with Trailer <Link href={`/trailers/${trailer.id}`} className="text-primary hover:underline font-semibold">{trailer.name} (ID: {trailer.id})</Link>, arrived on {formatDate(trailer.arrivalDate)}.</p>
+              <p>Associated with Trailer <Link href={`/trailers/${trailer.id}`} className="text-primary hover:underline font-semibold print:text-foreground print:no-underline">{trailer.name} (ID: {trailer.id})</Link>, arrived on {formatDate(trailer.arrivalDate)}.</p>
           </CardFooter>
         )}
 
@@ -363,7 +375,7 @@ export default function SingleShipmentPage() {
 
       </Card>
 
-      {isEditShipmentDialogOpen && shipment && ( // Ensure shipment is not null or undefined
+      {isEditShipmentDialogOpen && shipment && ( 
         <EditShipmentDialog
           isOpen={isEditShipmentDialogOpen}
           setIsOpen={setIsEditShipmentDialogOpen}

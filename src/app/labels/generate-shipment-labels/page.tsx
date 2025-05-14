@@ -169,7 +169,7 @@ export default function GenerateShipmentLabelsPage() {
       )}
       
       {/* Section for labels - visible on screen and for printing */}
-      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 printable-area label-grid ${(!isLoading && selectedTrailer && shipmentsToLabel.length > 0) ? '' : 'hidden print:hidden'}`} style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(108mm, 1fr))' }}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 printable-area label-grid ${(!isLoading && selectedTrailer && shipmentsToLabel.length > 0) ? '' : 'hidden print:hidden'}`} style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150mm, 1fr))' }}>
         {isClient && selectedTrailer && shipmentsToLabel.length > 0 && !isLoading &&
           shipmentsToLabel.map((shipment) => (
             <ShipmentLabel

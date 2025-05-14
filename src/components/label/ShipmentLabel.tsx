@@ -63,8 +63,8 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
   const handleDownloadImage = async () => {
     if (!labelRef.current) return;
 
-    const targetWidthPx = Math.round((10.8 / 2.54) * 150); // Approx 638px for 10.8cm at 150 DPI
-    const targetHeightPx = Math.round((15 / 2.54) * 150);  // Approx 887px for 15cm at 150 DPI
+    const targetWidthPx = Math.round((15 / 2.54) * 150); // Approx 886px for 15cm at 150 DPI
+    const targetHeightPx = Math.round((10.8 / 2.54) * 150);  // Approx 638px for 10.8cm at 150 DPI
 
     try {
       const canvas = await html2canvas(labelRef.current, {
@@ -143,52 +143,51 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
       <div 
         ref={labelRef}
         id={`shipment-label-${shipment.id}`}
-        className="border border-foreground rounded-md shadow-sm w-full bg-background text-foreground print:shadow-none print:border-black print:w-[108mm] print:h-[150mm] print:p-1.5 print:break-words label-item flex flex-col justify-between"
+        className="border border-foreground rounded-md shadow-sm w-full bg-background text-foreground print:shadow-none print:border-black print:w-[150mm] print:h-[108mm] print:p-1.5 print:break-words label-item flex flex-col justify-between print:leading-normal"
       >
         {/* Top part of the label */}
-        <div className="print:leading-normal print:mb-1">
+        <div className="flex-grow space-y-1 print:space-y-0.5">
           {/* Date Row */}
-          <div className="flex justify-between items-baseline print:mb-3">
-            <span className="text-sm print:text-[32pt] print:font-bold">Date:</span>
-            <span className="text-sm print:text-[32pt] print:font-bold">{labelDate}</span>
+          <div className="flex justify-between items-baseline print:mb-1">
+            <p className="text-sm print:text-[22pt] print:font-semibold">Date:</p>
+            <p className="text-sm print:text-[22pt] print:font-semibold">{labelDate}</p>
           </div>
           
           {/* Agent Row */}
-          <div className="flex justify-between items-baseline print:mb-3">
-            <span className="text-sm print:text-[36pt] print:font-semibold">Agent:</span>
-            <span className="text-sm print:text-[36pt] print:font-semibold text-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span>
+          <div className="flex justify-between items-baseline print:mb-1">
+            <p className="text-sm print:text-[28pt] print:font-semibold">Agent:</p>
+            <p className="text-sm print:text-[28pt] print:font-semibold text-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</p>
           </div>
 
           {/* Importer Row */}
           <div className="flex justify-between items-baseline print:mb-1">
-            <span className="text-xs print:text-[18pt] print:font-semibold">Importer:</span>
-            <span className="text-xs print:text-[28pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</span>
+            <p className="text-xs print:text-[18pt] print:font-semibold">Importer:</p>
+            <p className="text-xs print:text-[28pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</p>
           </div>
           
           {/* Pieces Row */}
-          <div className="flex justify-between items-baseline print:mb-3">
-            <span className="text-xs print:text-[18pt]">Pieces:</span>
-            <span className="text-sm print:text-[36pt] print:font-bold">{shipment.quantity}</span>
+          <div className="flex justify-between items-baseline print:mb-1">
+            <p className="text-xs print:text-[18pt]">Pieces:</p>
+            <p className="text-sm print:text-[36pt] print:font-bold">{shipment.quantity}</p>
           </div>
 
-          {/* Ref & Job Row */}
-          <div className="flex justify-between items-baseline print:mb-3">
-            <span className="text-base print:text-[40pt] print:font-bold" title={`Trailer ${trailer.id}`}>Ref: {trailer.id}</span>
-            <span className="text-base print:text-[40pt] print:font-bold" title={`Job ${shipment.stsJob}`}>Job: {shipment.stsJob}</span>
-          </div>
+          {/* Ref & Job Row - now a single line */}
+          <p className="text-base print:text-[40pt] print:font-bold print:mb-1 text-center" title={`Trailer ${trailer.id} / Job ${shipment.stsJob}`}>
+            Ref: {trailer.id} / Job: {shipment.stsJob}
+          </p>
         </div>
 
         {/* Barcode Section - Bottom part of the label */}
-        <div className="mt-auto pt-2 border-t border-dashed border-muted-foreground print:border-black print:mt-3 print:pt-2 print:mb-1"> 
-          <p className="text-xs print:text-[16pt] print:font-semibold print:mb-1">BARCODE</p>
-          <div className="flex justify-center items-center mt-1 print:mt-1 print:mb-1 h-16 print:h-24 bg-background print:bg-white border border-foreground print:border-black p-0.5" aria-label="Barcode Placeholder">
+        <div className="mt-auto pt-1 border-t border-dashed border-muted-foreground print:border-black print:mt-1 print:pt-1 print:mb-0"> 
+          <p className="text-xs print:text-[16pt] print:font-semibold print:mb-0.5 text-center">BARCODE</p>
+          <div className="flex justify-center items-center mt-0.5 print:mt-0.5 print:mb-0.5 h-12 print:h-16 bg-background print:bg-white border border-foreground print:border-black p-0.5" aria-label="Barcode Placeholder">
             <div className="flex w-full h-full items-stretch">
               {barcodeBars.map((bar, i) => (
                 <div key={i} className="bg-foreground print:bg-black" style={{ width: bar.width, height: bar.height, marginRight: i < barcodeBars.length -1 ? '1px' : '0' }}></div>
               ))}
             </div>
           </div>
-          <p className="text-center font-mono text-xs print:text-[22pt] print:font-bold break-all mt-1 print:mt-1 leading-tight tracking-tighter" title={barcodeValue}>
+          <p className="text-center font-mono text-xs print:text-[22pt] print:font-bold break-all mt-0.5 print:mt-0.5 leading-tight tracking-tighter" title={barcodeValue}>
             {barcodeValue}
           </p>
         </div>
@@ -206,3 +205,4 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
     </div>
   );
 }
+

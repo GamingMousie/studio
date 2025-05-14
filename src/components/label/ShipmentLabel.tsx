@@ -2,7 +2,7 @@
 'use client';
 
 import type { Shipment, Trailer } from '@/types';
-import { Download } from 'lucide-react'; // Removed unused icons
+import { Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
@@ -76,7 +76,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
           if (clonedLabelRoot && labelRef.current) {
             clonedLabelRoot.style.width = `${targetWidthPx}px`;
             clonedLabelRoot.style.height = `${targetHeightPx}px`;
-            clonedLabelRoot.style.padding = '6px'; 
+            clonedLabelRoot.style.padding = '6px'; // Approx print:p-1.5
             clonedLabelRoot.style.border = '1px solid black';
             clonedLabelRoot.style.display = 'flex';
             clonedLabelRoot.style.flexDirection = 'column';
@@ -128,10 +128,10 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
       <div 
         ref={labelRef}
         id={`shipment-label-${shipment.id}`}
-        className="p-1.5 border border-foreground rounded-md shadow-sm w-full bg-background text-foreground print:shadow-none print:border-black print:w-[108mm] print:h-[150mm] print:p-1.5 print:break-words label-item flex flex-col justify-between"
+        className="border border-foreground rounded-md shadow-sm w-full bg-background text-foreground print:shadow-none print:border-black print:w-[108mm] print:h-[150mm] print:p-1.5 print:break-words label-item flex flex-col justify-between"
       >
         {/* Content Section - Top part of the label */}
-        <div className="print:leading-normal space-y-1 print:space-y-0"> {/* Adjusted spacing for print */}
+        <div className="print:leading-normal print:mb-1"> {/* Adjusted spacing for print */}
           
           {/* Date Row */}
           <div className="flex justify-between items-baseline print:mb-3">
@@ -141,20 +141,20 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
           
           {/* Agent Row */}
           <div className="flex justify-between items-baseline print:mb-3">
-            <span className="text-sm print:text-[32pt] print:font-bold">Agent:</span>
-            <span className="text-sm print:text-[32pt] print:font-bold text-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span>
+            <span className="text-sm print:text-[36pt] print:font-semibold">Agent:</span>
+            <span className="text-sm print:text-[36pt] print:font-semibold text-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span>
           </div>
 
           {/* Importer Row */}
           <div className="flex justify-between items-baseline print:mb-1">
-            <span className="text-xs print:text-[22pt]">Importer:</span>
-            <span className="text-xs print:text-[28pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</span>
+            <span className="text-xs print:text-[36pt] print:font-semibold">Importer:</span>
+            <span className="text-xs print:text-[36pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</span>
           </div>
           
           {/* Pieces Row */}
           <div className="flex justify-between items-baseline print:mb-3">
             <span className="text-xs print:text-[22pt]">Pieces:</span>
-            <span className="text-sm print:text-[36pt] print:font-bold">{shipment.quantity}</span>
+            <span className="text-sm print:text-[48pt] print:font-bold">{shipment.quantity}</span>
           </div>
 
           {/* Ref & Job Row */}
@@ -162,21 +162,11 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
             <span className="text-base print:text-[40pt] print:font-bold" title={`Trailer ${trailer.id}`}>Ref: {trailer.id}</span>
             <span className="text-base print:text-[40pt] print:font-bold" title={`Job ${shipment.stsJob}`}>Job: {shipment.stsJob}</span>
           </div>
-          
-          {/* Customer Job Number Row (if exists) */}
-          {shipment.customerJobNumber && (
-            <div className="flex justify-between items-baseline print:mb-2">
-              <span className="text-xs print:text-[22pt]">Cust. Job:</span>
-              <span className="text-xs print:text-[28pt] print:font-semibold text-right" title={shipment.customerJobNumber}>
-                {shipment.customerJobNumber}
-              </span>
-            </div>
-          )}
         </div>
 
         {/* QR Code Section - Bottom part of the label */}
         <div className="mt-auto pt-2 border-t border-dashed border-muted-foreground print:border-black print:mt-3 print:pt-2 print:mb-1"> 
-          <p className="text-xs print:text-[22pt] print:font-semibold print:mb-1">QR CODE</p>
+          <p className="text-xs print:text-[16pt] print:font-semibold print:mb-1">QR CODE</p>
           <div className="flex justify-center items-center mt-1 print:mt-1 print:mb-1" aria-label="QR Code Placeholder">
             <div className="grid grid-cols-10 gap-px w-16 h-16 print:w-32 print:h-32 bg-background print:bg-white p-0.5 border border-foreground print:border-black">
               {qrPlaceholderGrid.flat().map((isBlack, i) => (
@@ -184,7 +174,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
               ))}
             </div>
           </div>
-          <p className="text-center font-mono text-xs print:text-[18pt] print:font-bold break-all mt-1 print:mt-1 leading-tight tracking-tighter" title={barcodeValue}>
+          <p className="text-center font-mono text-xs print:text-[22pt] print:font-bold break-all mt-1 print:mt-1 leading-tight tracking-tighter" title={barcodeValue}>
             {barcodeValue}
           </p>
         </div>

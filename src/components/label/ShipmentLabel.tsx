@@ -147,14 +147,14 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
 
           {/* Importer Row */}
           <div className="flex justify-between items-baseline print:mb-1">
-            <span className="text-xs print:text-[36pt] print:font-semibold">Importer:</span>
-            <span className="text-xs print:text-[36pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</span>
+            <span className="text-xs print:text-[18pt] print:font-semibold">Importer:</span>
+            <span className="text-xs print:text-[28pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</span>
           </div>
           
           {/* Pieces Row */}
           <div className="flex justify-between items-baseline print:mb-3">
-            <span className="text-xs print:text-[22pt]">Pieces:</span>
-            <span className="text-sm print:text-[48pt] print:font-bold">{shipment.quantity}</span>
+            <span className="text-xs print:text-[18pt]">Pieces:</span>
+            <span className="text-sm print:text-[36pt] print:font-bold">{shipment.quantity}</span>
           </div>
 
           {/* Ref & Job Row */}

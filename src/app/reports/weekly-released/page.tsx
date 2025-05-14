@@ -31,7 +31,6 @@ interface MonthlyReleasedReportItem {
   releasedAtFormatted: string;
   importer: string;
   exporter: string;
-  cleared: boolean;
   clearanceDate?: string | null; // ISO string or null
   clearanceDateFormatted?: string;
   mrn?: string;
@@ -89,7 +88,6 @@ export default function MonthlyReleasedReportPage() {
           releasedAtFormatted: formatDateSafe(shipment.releasedAt),
           importer: shipment.importer,
           exporter: shipment.exporter,
-          cleared: shipment.cleared,
           clearanceDate: shipment.clearanceDate,
           clearanceDateFormatted: formatDateSafe(shipment.clearanceDate, 'PP'),
           mrn: shipment.mrn,
@@ -134,7 +132,6 @@ export default function MonthlyReleasedReportPage() {
           <TableHead>Importer</TableHead>
           <TableHead>Exporter</TableHead>
           <TableHead>Released At</TableHead>
-          <TableHead>Cleared</TableHead>
           <TableHead>Clearance Date</TableHead>
           <TableHead>MRN</TableHead>
         </TableRow>
@@ -149,7 +146,6 @@ export default function MonthlyReleasedReportPage() {
             <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
           </TableRow>
@@ -222,7 +218,6 @@ export default function MonthlyReleasedReportPage() {
                     <TableHead className="whitespace-nowrap"><Users className="inline-block mr-1 h-4 w-4 print:hidden"/>Importer</TableHead>
                     <TableHead className="whitespace-nowrap"><Send className="inline-block mr-1 h-4 w-4 print:hidden"/>Exporter</TableHead>
                     <TableHead className="whitespace-nowrap"><CalendarDays className="inline-block mr-1 h-4 w-4 print:hidden"/>Released At</TableHead>
-                    <TableHead className="whitespace-nowrap">Cleared</TableHead>
                     <TableHead className="whitespace-nowrap"><CalendarClock className="inline-block mr-1 h-4 w-4 print:hidden"/>Clearance Date</TableHead>
                     <TableHead className="whitespace-nowrap"><Fingerprint className="inline-block mr-1 h-4 w-4 print:hidden"/>MRN</TableHead>
                   </TableRow>
@@ -245,9 +240,6 @@ export default function MonthlyReleasedReportPage() {
                       <TableCell>{item.importer}</TableCell>
                       <TableCell>{item.exporter}</TableCell>
                       <TableCell>{item.releasedAtFormatted}</TableCell>
-                      <TableCell className={item.cleared ? 'text-green-700' : 'text-muted-foreground'}>
-                        {item.cleared ? 'Yes' : 'No'}
-                      </TableCell>
                       <TableCell>{item.clearanceDateFormatted}</TableCell>
                       <TableCell>{item.mrn || 'N/A'}</TableCell>
                     </TableRow>

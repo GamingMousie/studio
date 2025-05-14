@@ -35,7 +35,7 @@ export interface Shipment {
   releasedAt?: string; // Optional: Timestamp for when the shipment was printed/officially released
   emptyPalletRequired?: number; 
   mrn?: string; // Movement Reference Number
-  clearanceDate?: string; // Date when clearance document was uploaded/status set
+  clearanceDate?: string | null; // Date when clearance document was uploaded/status set
 }
 
 // Used for the form data when creating or updating a shipment
@@ -55,7 +55,7 @@ export interface ShipmentFormData {
   palletSpace?: number | null; 
   emptyPalletRequired?: number | null;
   mrn?: string;
-  // clearanceDate is not directly in form, managed by context
+  clearanceDate?: Date | null; // Form handles Date object or null
 }
 
 // Specifically for updating an existing shipment via context
@@ -75,7 +75,7 @@ export interface ShipmentUpdateData {
   releasedAt?: string; 
   emptyPalletRequired?: number;
   mrn?: string;
-  clearanceDate?: string; // Allow direct update if needed, though primarily context-managed
+  clearanceDate?: string | null; // Context handles ISO string or null
 }
 
 // Specifically for updating an existing trailer via context
@@ -102,3 +102,4 @@ export interface TrailerFormData {
   customField1?: string;
   customField2?: string;
 }
+

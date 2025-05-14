@@ -39,17 +39,17 @@ const initialTrailers: Trailer[] = [
 
 const initialShipments: Shipment[] = [
   { id: uuidv4(), trailerId: 'T-001', stsJob: 12345, customerJobNumber: 'CUST-001', quantity: 50, importer: 'National Importers Ltd.', exporter: 'Global Exporters Inc.', locations: [{name: 'Bay A', pallets: 10}, {name: 'Section 1-A', pallets: 5}, {name: 'Rack 3, Shelf B', pallets: 10}, {name: 'Pallet Spot 101', pallets:2}, {name: 'Aisle 5, Position 2', pallets:3}, {name: 'Zone Blue-7', pallets:8}, {name: 'Overflow Area 1', pallets:7}, {name: 'QC Hold Area', pallets:1}, {name: 'Staging Lane 4', pallets:3}, {name: 'Dock Door 12', pallets:1}], releaseDocumentName: 'release_electronics_123.pdf', clearanceDocumentName: 'clearance_electronics_123.pdf', released: true, cleared: true, weight: 1200, palletSpace: 42, releasedAt: new Date('2024-07-21T10:00:00Z').toISOString(), emptyPalletRequired: 1, mrn: '24GB000000000000A1', clearanceDate: new Date('2024-07-20T15:30:00Z').toISOString() },
-  { id: uuidv4(), trailerId: 'T-001', stsJob: 67890, customerJobNumber: 'CUST-002', quantity: 200, importer: 'Global Goods Inc.', exporter: 'Domestic Suppliers LLC', locations: [{name: 'Bay B', pallets: 15}], released: false, cleared: false, weight: 800, palletSpace: 15, releasedAt: undefined, emptyPalletRequired: 0, mrn: '24GB000000000000A2' },
-  { id: uuidv4(), trailerId: 'T-002', stsJob: 11223, quantity: 10, importer: 'Cross-Border Traders', exporter: 'International Exports Co.', locations: [{name: 'Bay C', pallets: 1}, {name: 'Section 2-A', pallets:1}], releaseDocumentName: 'industrial_release.docx', released: true, cleared: false, weight: 2500, palletSpace: 2, releasedAt: undefined, emptyPalletRequired: 0 },
+  { id: uuidv4(), trailerId: 'T-001', stsJob: 67890, customerJobNumber: 'CUST-002', quantity: 200, importer: 'Global Goods Inc.', exporter: 'Domestic Suppliers LLC', locations: [{name: 'Bay B', pallets: 15}], released: false, cleared: false, weight: 800, palletSpace: 15, releasedAt: undefined, emptyPalletRequired: 0, mrn: '24GB000000000000A2', clearanceDate: null },
+  { id: uuidv4(), trailerId: 'T-002', stsJob: 11223, quantity: 10, importer: 'Cross-Border Traders', exporter: 'International Exports Co.', locations: [{name: 'Bay C', pallets: 1}, {name: 'Section 2-A', pallets:1}], releaseDocumentName: 'industrial_release.docx', released: true, cleared: false, weight: 2500, palletSpace: 2, releasedAt: undefined, emptyPalletRequired: 0, clearanceDate: null },
   { id: uuidv4(), trailerId: 'T-003', stsJob: 22334, customerJobNumber: 'CUST-003', quantity: 75, importer: 'FoodStuffs Co.', exporter: 'Farm Fresh Exports', locations: [{name: 'Shelf C-2', pallets: 5}, {name: 'Cold Storage 1', pallets:5}], released: true, cleared: true, weight: 1500, palletSpace: 10, releasedAt: new Date('2024-07-23T11:00:00Z').toISOString(), emptyPalletRequired: 2, mrn: '24GB000000000000A3', clearanceDate: new Date('2024-07-23T09:00:00Z').toISOString() },
   { id: uuidv4(), trailerId: 'T-003', stsJob: 33445, quantity: 120, importer: 'Fashion Forward', exporter: 'Textile Mills Global', locations: [{name: 'Hanging Rack 5', pallets:8}], released: false, cleared: true, weight: 600, palletSpace: 8, releasedAt: undefined, emptyPalletRequired: 0, clearanceDate: new Date('2024-07-22T10:15:00Z').toISOString() },
-  { id: uuidv4(), trailerId: 'T-004', stsJob: 44556, customerJobNumber: 'CUST-004', quantity: 30, importer: 'BuildIt Supplies', exporter: 'Hardware Exports Ltd.', locations: [{name: 'Bulk Area 3', pallets:5}], released: true, cleared: false, weight: 5000, palletSpace: 5, releasedAt: undefined, emptyPalletRequired: 1, mrn: '24IE000000000000X1' },
+  { id: uuidv4(), trailerId: 'T-004', stsJob: 44556, customerJobNumber: 'CUST-004', quantity: 30, importer: 'BuildIt Supplies', exporter: 'Hardware Exports Ltd.', locations: [{name: 'Bulk Area 3', pallets:5}], released: true, cleared: false, weight: 5000, palletSpace: 5, releasedAt: undefined, emptyPalletRequired: 1, mrn: '24IE000000000000X1', clearanceDate: null },
   { id: uuidv4(), trailerId: 'T-001', stsJob: 55667, quantity: 90, importer: 'HealthCorp', exporter: 'Pharma Exports Int.', locations: [{name: 'Pharma Vault 1', pallets:3}], released: true, cleared: true, weight: 300, palletSpace: 3, releasedAt: new Date('2024-07-24T12:30:00Z').toISOString(), emptyPalletRequired: 0, clearanceDate: new Date('2024-07-24T08:00:00Z').toISOString() },
-  { id: uuidv4(), trailerId: 'T-002', stsJob: 66778, customerJobNumber: 'CUST-005', quantity: 150, importer: 'Mechanics United', exporter: 'Auto Parts Global', locations: [{name: 'Parts Aisle M-10', pallets:12}], released: false, cleared: false, weight: 1800, palletSpace: 12, releasedAt: undefined, emptyPalletRequired: 3 },
+  { id: uuidv4(), trailerId: 'T-002', stsJob: 66778, customerJobNumber: 'CUST-005', quantity: 150, importer: 'Mechanics United', exporter: 'Auto Parts Global', locations: [{name: 'Parts Aisle M-10', pallets:12}], released: false, cleared: false, weight: 1800, palletSpace: 12, releasedAt: undefined, emptyPalletRequired: 3, clearanceDate: null },
   { id: uuidv4(), trailerId: 'T-004', stsJob: 77889, quantity: 25, importer: 'Luxury Imports', exporter: 'Fine Goods Exporters', locations: [{name: 'High Value Cage 2', pallets:2}], released: true, cleared: true, weight: 400, palletSpace: 2, releasedAt: new Date('2024-07-25T15:00:00Z').toISOString(), emptyPalletRequired: 0, clearanceDate: new Date('2024-07-25T11:00:00Z').toISOString() },
-  { id: uuidv4(), trailerId: 'T-003', stsJob: 88990, quantity: 500, importer: 'Warehouse Direct', exporter: 'Bulk Exporters Co.', locations: [{name: 'Section D', pallets:10}, {name: 'Overflow Area 2', pallets:5}], released: false, cleared: false, weight: 2200, palletSpace: 15, releasedAt: undefined, emptyPalletRequired: 0, mrn: '24GB000000000000A4' },
-  { id: uuidv4(), trailerId: 'T-005', stsJob: 99001, customerJobNumber: 'CUST-006', quantity: 60, importer: 'Gourmet Foods', exporter: 'Specialty Exports Ltd.', locations: [{name: 'Pending Assignment'}], released: true, cleared: true, weight: 700, palletSpace: 5, releasedAt: undefined, emptyPalletRequired: 1, clearanceDate: new Date().toISOString() },
-  { id: uuidv4(), trailerId: 'T-006', stsJob: 10101, quantity: 200, importer: 'Constructors Choice', exporter: 'Building Material Exports', locations: [{name: 'Pending Assignment'}], released: false, cleared: false, weight: 3000, palletSpace: 20, releasedAt: undefined, emptyPalletRequired: 0 },
+  { id: uuidv4(), trailerId: 'T-003', stsJob: 88990, quantity: 500, importer: 'Warehouse Direct', exporter: 'Bulk Exporters Co.', locations: [{name: 'Section D', pallets:10}, {name: 'Overflow Area 2', pallets:5}], released: false, cleared: false, weight: 2200, palletSpace: 15, releasedAt: undefined, emptyPalletRequired: 0, mrn: '24GB000000000000A4', clearanceDate: null },
+  { id: uuidv4(), trailerId: 'T-005', stsJob: 99001, customerJobNumber: 'CUST-006', quantity: 60, importer: 'Gourmet Foods', exporter: 'Specialty Exports Ltd.', locations: [{name: 'Pending Assignment'}], released: true, cleared: true, weight: 700, palletSpace: 5, releasedAt: undefined, emptyPalletRequired: 1, clearanceDate: null }, // Changed to null
+  { id: uuidv4(), trailerId: 'T-006', stsJob: 10101, quantity: 200, importer: 'Constructors Choice', exporter: 'Building Material Exports', locations: [{name: 'Pending Assignment'}], released: false, cleared: false, weight: 3000, palletSpace: 20, releasedAt: undefined, emptyPalletRequired: 0, clearanceDate: null },
 ];
 
 
@@ -121,7 +121,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
       releasedAt: undefined, 
       emptyPalletRequired: shipmentData.emptyPalletRequired ?? 0,
       mrn: shipmentData.mrn || undefined,
-      clearanceDate: (shipmentData.cleared || shipmentData.clearanceDocumentName) ? new Date().toISOString() : undefined,
+      clearanceDate: (shipmentData.cleared || shipmentData.clearanceDocumentName) ? new Date().toISOString() : null,
     };
     setShipments((prev) => [...prev, newShipment]);
   }, [setShipments]);
@@ -139,7 +139,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
           return {
             ...s,
             cleared,
-            clearanceDate: cleared ? (s.clearanceDate || new Date().toISOString()) : undefined,
+            clearanceDate: cleared ? (s.clearanceDate || new Date().toISOString()) : null,
           };
         }
         return s;
@@ -173,22 +173,36 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
           
           updatedShipment.emptyPalletRequired = data.emptyPalletRequired ?? s.emptyPalletRequired ?? 0;
 
-          // Handle clearanceDate logic
-          // If data.clearanceDate is explicitly provided (even as null), use it.
-          if (data.clearanceDate !== undefined) {
-            updatedShipment.clearanceDate = data.clearanceDate; // This could be an ISO string or null
-          } else {
-            // Automatic logic if clearanceDate was not manually set/cleared in the form
-            const isBecomingCleared = (data.cleared === true && s.cleared === false) || (data.cleared === true && !s.clearanceDate);
-            const isGettingDoc = data.clearanceDocumentName && !s.clearanceDocumentName;
+          // Handle clearanceDate
+          let newClearanceDate = s.clearanceDate;
 
-            if (isBecomingCleared || (data.cleared && isGettingDoc)) {
-              updatedShipment.clearanceDate = s.clearanceDate || new Date().toISOString();
-            } else if (data.cleared === false || (data.clearanceDocumentName === undefined && !data.cleared)) { 
-              // If explicitly set to not cleared, or doc removed and not explicitly cleared.
-              updatedShipment.clearanceDate = undefined;
+          // If clearanceDate is explicitly passed in `data` (from EditShipmentDialog), it takes precedence.
+          // `data.clearanceDate` can be an ISO string or null.
+          if (Object.prototype.hasOwnProperty.call(data, 'clearanceDate')) {
+            newClearanceDate = data.clearanceDate;
+          } else {
+            // Automatic logic if clearanceDate was NOT explicitly set in the `data` payload
+            // (e.g., update came from toggling 'cleared' status or attaching a doc)
+            if (data.cleared === true) {
+              if (!s.clearanceDate) { // If becoming cleared and no date existed, set new date
+                newClearanceDate = new Date().toISOString();
+              }
+              // If already cleared and had a date, keep it unless explicitly changed by form
+            } else if (data.cleared === false) { // If becoming not cleared
+              newClearanceDate = null;
             }
           }
+          
+          // Further auto-logic: if cleared is true (or becoming true) AND a new clearance doc is added,
+          // and no clearanceDate is set yet (or explicitly set to null), set a new date.
+          if ((data.cleared === true || (data.cleared === undefined && updatedShipment.cleared)) && 
+              data.clearanceDocumentName && !s.clearanceDocumentName && newClearanceDate === null) {
+            newClearanceDate = new Date().toISOString();
+          }
+
+
+          updatedShipment.clearanceDate = newClearanceDate;
+          
           return updatedShipment;
         }
         return s;
@@ -249,3 +263,4 @@ export const useWarehouse = (): WarehouseContextType => {
   }
   return context;
 };
+

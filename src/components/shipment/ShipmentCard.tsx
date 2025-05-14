@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,7 +56,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
       setAttachDocumentType('clearance');
       setIsAttachDocumentOpen(true);
     } else {
-      updateShipment(shipment.id, { cleared: false, clearanceDocumentName: undefined, clearanceDate: undefined });
+      updateShipment(shipment.id, { cleared: false, clearanceDocumentName: undefined, clearanceDate: null });
       toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not cleared. Clearance document & date removed.` });
     }
   };
@@ -77,7 +77,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
   const locations = shipment.locations || [{ name: 'Pending Assignment' }];
   const isPendingAssignment = locations.length === 1 && locations[0].name === 'Pending Assignment';
 
-  const formatDate = (dateString?: string, dateFormat = 'PP') => {
+  const formatDate = (dateString?: string | null, dateFormat = 'PP') => {
     if (!dateString) return 'N/A';
     try {
       return format(parseISO(dateString), dateFormat);
@@ -318,3 +318,4 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
     </>
   );
 }
+

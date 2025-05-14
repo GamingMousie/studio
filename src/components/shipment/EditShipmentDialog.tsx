@@ -4,7 +4,7 @@ import { useForm, type SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWarehouse } from '@/contexts/WarehouseContext';
-import type { Shipment, ShipmentUpdateData } from '@/types';
+import type { Shipment, ShipmentUpdateData, ShipmentFormData } from '@/types'; // Use ShipmentFormData for form
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -23,24 +23,26 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 
+// Using ShipmentFormData as base for the form, which includes clearanceDate as Date | null
 const editShipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
   customerJobNumber: z.string().max(50, 'Customer job number too long').optional(),
   quantity: z.coerce.number().min(1, 'Quantity must be at least 1'),
   importer: z.string().min(1, 'Importer (Consignee) is required').max(50, 'Importer (Consignee) name too long'),
   exporter: z.string().min(1, 'Exporter (Consignor) is required').max(50, 'Exporter (Consignor) name too long'),
-  releaseDocument: z.any().optional(),
-  clearanceDocument: z.any().optional(),
+  releaseDocument: z.any().optional(), // Keep as any for FileList or File
+  clearanceDocument: z.any().optional(), // Keep as any for FileList or File
   released: z.boolean().optional(),
   cleared: z.boolean().optional(),
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
   palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(),
   emptyPalletRequired: z.coerce.number().int("Must be a whole number").min(0, 'Cannot be negative').optional().nullable(),
   mrn: z.string().max(50, "MRN too long").optional(),
-  clearanceDate: z.date().nullable().optional(),
+  clearanceDate: z.date().nullable().optional(), // Matching ShipmentFormData
 });
 
-type EditShipmentFormDataType = z.infer<typeof editShipmentSchema>;
+// This type is for what the form's `data` object will look like on submit
+type EditShipmentFormSubmitData = z.infer<typeof editShipmentSchema>;
 
 interface EditShipmentDialogProps {
   isOpen: boolean;
@@ -52,8 +54,25 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
   const { updateShipment } = useWarehouse();
   const { toast } = useToast();
 
-  const { register, handleSubmit, reset, control, formState: { errors, isSubmitting }, watch, setValue } = useForm<EditShipmentFormDataType>({
+  const { register, handleSubmit, reset, control, formState: { errors, isSubmitting }, watch, setValue } = useForm<EditShipmentFormSubmitData>({
     resolver: zodResolver(editShipmentSchema),
+    // Default values are critical for controlled components
+    defaultValues: {
+      stsJob: 0, // Default to 0 or a sensible number
+      customerJobNumber: '',
+      quantity: 1, // Default to 1 or a sensible number
+      importer: '',
+      exporter: '',
+      released: false,
+      cleared: false,
+      weight: null,
+      palletSpace: null,
+      releaseDocument: null,
+      clearanceDocument: null,
+      emptyPalletRequired: 0,
+      mrn: '',
+      clearanceDate: null,
+    }
   });
 
   useEffect(() => {
@@ -68,7 +87,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
         cleared: shipmentToEdit.cleared,
         weight: shipmentToEdit.weight ?? null,
         palletSpace: shipmentToEdit.palletSpace ?? null,
-        releaseDocument: null,
+        releaseDocument: null, // File inputs are not reset with previous files typically
         clearanceDocument: null,
         emptyPalletRequired: shipmentToEdit.emptyPalletRequired ?? 0,
         mrn: shipmentToEdit.mrn || '',
@@ -78,7 +97,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
   }, [shipmentToEdit, isOpen, reset]);
 
 
-  const onSubmit: SubmitHandler<EditShipmentFormDataType> = (data) => {
+  const onSubmit: SubmitHandler<EditShipmentFormSubmitData> = (data) => {
     const newReleaseDocumentFile = data.releaseDocument && data.releaseDocument.length > 0 ? data.releaseDocument[0] : null;
     const newClearanceDocumentFile = data.clearanceDocument && data.clearanceDocument.length > 0 ? data.clearanceDocument[0] : null;
 
@@ -96,7 +115,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
       palletSpace: data.palletSpace ?? undefined,
       emptyPalletRequired: data.emptyPalletRequired ?? 0,
       mrn: data.mrn || undefined,
-      clearanceDate: data.clearanceDate ? data.clearanceDate.toISOString() : (data.clearanceDate === null ? null : undefined), // Pass ISO string or null/undefined
+      clearanceDate: data.clearanceDate ? data.clearanceDate.toISOString() : null,
     };
 
     updateShipment(shipmentToEdit.id, updatedData);
@@ -206,7 +225,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
           </div>
           
           <div>
-            <Label htmlFor="clearanceDate" className="flex items-center">
+            <Label htmlFor="clearanceDateForm" className="flex items-center"> {/* Changed ID to avoid conflict */}
               <CalendarClock className="mr-2 h-4 w-4 text-muted-foreground" /> Clearance Date (Optional)
             </Label>
             <Controller
@@ -223,14 +242,14 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? format(field.value, "PPP") : <span>Pick a date (leave blank for auto)</span>}
+                      {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
                     <Calendar
                       mode="single"
-                      selected={field.value || undefined}
-                      onSelect={(date) => field.onChange(date || null)}
+                      selected={field.value || undefined} // Pass Date object or undefined
+                      onSelect={(date) => field.onChange(date || null)} // onChange expects Date | undefined, ensure null if no date
                       initialFocus
                     />
                   </PopoverContent>
@@ -238,12 +257,12 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
               )}
             />
             {errors.clearanceDate && <p className="text-sm text-destructive mt-1">{errors.clearanceDate.message}</p>}
-            <p className="text-xs text-muted-foreground mt-1">If not set, date will be auto-filled when shipment is marked Cleared or a clearance doc is added.</p>
+            <p className="text-xs text-muted-foreground mt-1">Manually set/clear date. Auto-logic applies if "Cleared" status changes elsewhere.</p>
           </div>
 
           <div>
-            <Label htmlFor="emptyPalletRequired" className="flex items-center">
-              <Archive className="mr-2 h-4 w-4 text-muted-foreground" /> Empty Pallets Required (Number)
+            <Label htmlFor="emptyPalletRequired">
+              <Archive className="mr-2 h-4 w-4 text-muted-foreground inline" /> Empty Pallets Required (Number)
             </Label>
             <Input id="emptyPalletRequired" type="number" {...register('emptyPalletRequired')} />
             {errors.emptyPalletRequired && <p className="text-sm text-destructive mt-1">{errors.emptyPalletRequired.message}</p>}
@@ -251,11 +270,23 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
 
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="flex items-center space-x-2">
-              <input type="checkbox" id="releasedEdit" {...register('released')} defaultChecked={shipmentToEdit.released} onChange={(e) => setValue('released', e.target.checked)} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary" />
+              <Controller
+                name="released"
+                control={control}
+                render={({ field }) => (
+                    <input type="checkbox" id="releasedEdit" checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary" />
+                )}
+              />
               <Label htmlFor="releasedEdit" className="font-normal">Permitted to be Released</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <input type="checkbox" id="clearedEdit" {...register('cleared')} defaultChecked={shipmentToEdit.cleared} onChange={(e) => setValue('cleared', e.target.checked)} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary" />
+               <Controller
+                name="cleared"
+                control={control}
+                render={({ field }) => (
+                    <input type="checkbox" id="clearedEdit" checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} className="h-4 w-4 rounded border-primary text-primary focus:ring-primary" />
+                )}
+              />
               <Label htmlFor="clearedEdit" className="font-normal">Mark as Cleared</Label>
             </div>
           </div>
@@ -271,3 +302,4 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     </Dialog>
   );
 }
+

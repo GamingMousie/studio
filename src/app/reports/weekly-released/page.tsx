@@ -7,7 +7,7 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Clock, PackageSearch, Printer, Info, Truck, CalendarDays, Users, Send, Hash, Briefcase, ArrowLeft, ArrowRight, Undo2 } from 'lucide-react';
+import { Clock, PackageSearch, Printer, Info, Truck, CalendarDays, Users, Send, Hash, Briefcase, ArrowLeft, ArrowRight, Undo2, CheckCircle2, CircleOff, Fingerprint, CalendarClock } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,6 +31,10 @@ interface MonthlyReleasedReportItem {
   releasedAtFormatted: string;
   importer: string;
   exporter: string;
+  cleared: boolean;
+  clearanceDate?: string | null; // ISO string or null
+  clearanceDateFormatted?: string;
+  mrn?: string;
 }
 
 export default function MonthlyReleasedReportPage() {
@@ -50,7 +54,7 @@ export default function MonthlyReleasedReportPage() {
     return endOfMonth(displayDate);
   }, [displayDate]);
 
-  const formatDateSafe = (dateString?: string, dateFormat = 'PPpp') => {
+  const formatDateSafe = (dateString?: string | null, dateFormat = 'PPpp') => {
     if (!dateString) return 'N/A';
     try {
       return format(parseISO(dateString), dateFormat);
@@ -85,6 +89,10 @@ export default function MonthlyReleasedReportPage() {
           releasedAtFormatted: formatDateSafe(shipment.releasedAt),
           importer: shipment.importer,
           exporter: shipment.exporter,
+          cleared: shipment.cleared,
+          clearanceDate: shipment.clearanceDate,
+          clearanceDateFormatted: formatDateSafe(shipment.clearanceDate, 'PP'),
+          mrn: shipment.mrn,
         };
       })
       .sort((a, b) => parseISO(b.releasedAt).getTime() - parseISO(a.releasedAt).getTime()); // Sort by most recent first
@@ -125,7 +133,10 @@ export default function MonthlyReleasedReportPage() {
           <TableHead>Customer Job No.</TableHead>
           <TableHead>Importer</TableHead>
           <TableHead>Exporter</TableHead>
-          <TableHead className="text-right">Released At</TableHead>
+          <TableHead>Released At</TableHead>
+          <TableHead>Cleared</TableHead>
+          <TableHead>Clearance Date</TableHead>
+          <TableHead>MRN</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -137,7 +148,10 @@ export default function MonthlyReleasedReportPage() {
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[120px]" /></TableCell>
-            <TableCell className="text-right"><Skeleton className="h-4 w-[150px] ml-auto" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[50px]" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
+            <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -207,7 +221,10 @@ export default function MonthlyReleasedReportPage() {
                     <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4 print:hidden"/>Cust. Job No.</TableHead>
                     <TableHead className="whitespace-nowrap"><Users className="inline-block mr-1 h-4 w-4 print:hidden"/>Importer</TableHead>
                     <TableHead className="whitespace-nowrap"><Send className="inline-block mr-1 h-4 w-4 print:hidden"/>Exporter</TableHead>
-                    <TableHead className="text-right whitespace-nowrap"><CalendarDays className="inline-block mr-1 h-4 w-4 print:hidden"/>Released At</TableHead>
+                    <TableHead className="whitespace-nowrap"><CalendarDays className="inline-block mr-1 h-4 w-4 print:hidden"/>Released At</TableHead>
+                    <TableHead className="whitespace-nowrap">Cleared</TableHead>
+                    <TableHead className="whitespace-nowrap"><CalendarClock className="inline-block mr-1 h-4 w-4 print:hidden"/>Clearance Date</TableHead>
+                    <TableHead className="whitespace-nowrap"><Fingerprint className="inline-block mr-1 h-4 w-4 print:hidden"/>MRN</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -227,7 +244,16 @@ export default function MonthlyReleasedReportPage() {
                       <TableCell>{item.customerJobNumber || 'N/A'}</TableCell>
                       <TableCell>{item.importer}</TableCell>
                       <TableCell>{item.exporter}</TableCell>
-                      <TableCell className="text-right">{item.releasedAtFormatted}</TableCell>
+                      <TableCell>{item.releasedAtFormatted}</TableCell>
+                      <TableCell>
+                        {item.cleared ? 
+                          <CheckCircle2 className="h-5 w-5 text-green-600 print:hidden" aria-label="Yes"/> : 
+                          <CircleOff className="h-5 w-5 text-muted-foreground print:hidden" aria-label="No"/>
+                        }
+                        <span className="print-only-block">{item.cleared ? 'Yes' : 'No'}</span>
+                      </TableCell>
+                      <TableCell>{item.clearanceDateFormatted}</TableCell>
+                      <TableCell>{item.mrn || 'N/A'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

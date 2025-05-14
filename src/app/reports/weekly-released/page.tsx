@@ -7,7 +7,7 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Clock, PackageSearch, Printer, Info, Truck, CalendarDays, Users, Send, Hash, Briefcase, ArrowLeft, ArrowRight, Undo2, CheckCircle2, CircleOff, Fingerprint, CalendarClock } from 'lucide-react';
+import { Clock, PackageSearch, Printer, Info, Truck, CalendarDays, Users, Send, Hash, Briefcase, ArrowLeft, ArrowRight, Undo2, Fingerprint, CalendarClock } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -245,12 +245,8 @@ export default function MonthlyReleasedReportPage() {
                       <TableCell>{item.importer}</TableCell>
                       <TableCell>{item.exporter}</TableCell>
                       <TableCell>{item.releasedAtFormatted}</TableCell>
-                      <TableCell>
-                        {item.cleared ? 
-                          <CheckCircle2 className="h-5 w-5 text-green-600 print:hidden" aria-label="Yes"/> : 
-                          <CircleOff className="h-5 w-5 text-muted-foreground print:hidden" aria-label="No"/>
-                        }
-                        <span className="print-only-block">{item.cleared ? 'Yes' : 'No'}</span>
+                      <TableCell className={item.cleared ? 'text-green-700' : 'text-muted-foreground'}>
+                        {item.cleared ? 'Yes' : 'No'}
                       </TableCell>
                       <TableCell>{item.clearanceDateFormatted}</TableCell>
                       <TableCell>{item.mrn || 'N/A'}</TableCell>

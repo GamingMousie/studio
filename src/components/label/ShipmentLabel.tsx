@@ -12,7 +12,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
   const barcodeValue = shipment.id; // Using full shipment ID for barcode value
 
   return (
-    <div className="p-3 border border-foreground rounded-md shadow-sm w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)] bg-background text-foreground print:shadow-none print:border-black print:w-[48mm] print:h-[70mm] print:p-1.5 print:text-[6pt] print:break-words label-item flex flex-col justify-between">
+    <div className="p-3 border border-foreground rounded-md shadow-sm w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)] bg-background text-foreground print:shadow-none print:border-black print:w-[108mm] print:h-[150mm] print:p-1.5 print:text-[6pt] print:break-words label-item flex flex-col justify-between">
       <div>
         <div className="flex justify-between items-center mb-1 print:mb-0.5">
             <h3 className="text-xs print:text-[7pt] font-bold text-primary print:text-black">Shipment Label</h3>

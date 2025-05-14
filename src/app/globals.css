@@ -204,7 +204,7 @@
   /* Styles for label generation */
   .label-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(48mm, 1fr)); /* Approximate label width */
+    grid-template-columns: repeat(auto-fill, minmax(108mm, 1fr)); /* Approximate label width */
     gap: 2mm; /* Space between labels */
   }
   .label-item {
@@ -218,6 +218,8 @@
   }
   .print\:w-\[48mm\] { width: 48mm !important; }
   .print\:h-\[70mm\] { height: 70mm !important; }
+  .print\:w-\[108mm\] { width: 108mm !important; }
+  .print\:h-\[150mm\] { height: 150mm !important; }
   .print\:p-1\.5 { padding: 0.375rem !important; } /* approx 1.5mm if 1rem = 16px */
   .print\:text-\[6pt\] * { font-size: 6pt !important; }
   .print\:text-\[7pt\] { font-size: 7pt !important; }

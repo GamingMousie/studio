@@ -148,7 +148,7 @@ export default function GenerateShipmentLabelsPage() {
               Print All Labels
             </Button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 printable-area label-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 printable-area label-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(108mm, 1fr))' }}>
             {shipmentsToLabel.map((shipment) => (
               <ShipmentLabel
                 key={shipment.id}

@@ -71,15 +71,17 @@ export default function GenerateShipmentLabelsPage() {
 
   const getLabelDate = (trailer: Trailer | null): string => {
     if (!isClient) return '';
+    // Format date as DD/MM/YYYY
+    const dateFormat = 'dd/MM/yyyy'; 
     if (trailer && trailer.arrivalDate) {
       try {
-        return format(parseISO(trailer.arrivalDate), 'PP');
+        return format(parseISO(trailer.arrivalDate), dateFormat);
       } catch (e) {
         console.error("Error formatting trailer arrival date:", e);
-        return format(new Date(), 'PP');
+        return format(new Date(), dateFormat);
       }
     }
-    return format(new Date(), 'PP');
+    return format(new Date(), dateFormat);
   };
   
   const labelDateForShipments = selectedTrailer ? getLabelDate(selectedTrailer) : getLabelDate(null);
@@ -191,3 +193,4 @@ export default function GenerateShipmentLabelsPage() {
     </div>
   );
 }
+

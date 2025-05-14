@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Users, MapPin, Send, Briefcase, Archive } from 'lucide-react';
+import { FileText, Weight, Box, Users, MapPin, Send, Briefcase, Archive, Fingerprint } from 'lucide-react';
 
 const shipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
@@ -33,6 +33,7 @@ const shipmentSchema = z.object({
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
   palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(),
   emptyPalletRequired: z.coerce.number().int("Must be a whole number").min(0, 'Cannot be negative').optional().nullable(),
+  mrn: z.string().max(50, "MRN too long").optional(),
 });
 
 type ShipmentFormData = z.infer<typeof shipmentSchema>;
@@ -56,7 +57,8 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       initialLocationName: '',
       initialLocationPallets: null,
       customerJobNumber: '',
-      emptyPalletRequired: 0, // Default to 0
+      emptyPalletRequired: 0, 
+      mrn: '',
     }
   });
 
@@ -80,6 +82,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
       weight: data.weight ?? undefined,
       palletSpace: data.palletSpace ?? undefined,
       emptyPalletRequired: data.emptyPalletRequired ?? 0,
+      mrn: data.mrn || undefined,
     });
     toast({
       title: "Success!",
@@ -172,6 +175,13 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             </div>
           </div>
 
+          <div>
+            <Label htmlFor="mrn" className="flex items-center">
+              <Fingerprint className="mr-2 h-4 w-4 text-muted-foreground" /> MRN (Optional)
+            </Label>
+            <Input id="mrn" {...register('mrn')} placeholder="e.g., 24GB123..." />
+            {errors.mrn && <p className="text-sm text-destructive mt-1">{errors.mrn.message}</p>}
+          </div>
 
           <div className="space-y-2">
             <Label htmlFor="releaseDocument" className="flex items-center">
@@ -188,7 +198,7 @@ export default function AddShipmentDialog({ isOpen, setIsOpen, trailerId }: AddS
             <Input id="clearanceDocument" type="file" {...register('clearanceDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
             {errors.clearanceDocument && <p className="text-sm text-destructive mt-1">{(errors.clearanceDocument as any)?.message}</p>}
           </div>
-
+          
            <div>
               <Label htmlFor="emptyPalletRequired" className="flex items-center">
                 <Archive className="mr-2 h-4 w-4 text-muted-foreground" /> Empty Pallets Required (Number, Optional)

@@ -5,7 +5,7 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send, Briefcase, Truck, Archive } from 'lucide-react';
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send, Briefcase, Truck, Archive, Fingerprint, CalendarClock } from 'lucide-react';
 import ManageLocationsDialog from './ManageLocationsDialog';
 import EditShipmentDialog from './EditShipmentDialog';
 import AttachDocumentDialog from './AttachDocumentDialog';
@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useToast } from '@/hooks/use-toast';
+import { format, parseISO } from 'date-fns';
 
 interface ShipmentCardProps {
   shipment: Shipment;
@@ -37,7 +38,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
   const [attachDocumentType, setAttachDocumentType] = useState<'release' | 'clearance' | null>(null);
   const [isShipmentDeleteDialogOpen, setIsShipmentDeleteDialogOpen] = useState(false);
 
-  const shipmentIdentifier = `STS Job: ${shipment.stsJob}`; // Used for toast messages, etc.
+  const shipmentIdentifier = `STS Job: ${shipment.stsJob}`; 
   const trailer = getTrailerById(shipment.trailerId);
 
   const handleMarkAsPermitted = () => {
@@ -55,8 +56,8 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
       setAttachDocumentType('clearance');
       setIsAttachDocumentOpen(true);
     } else {
-      updateShipment(shipment.id, { cleared: false, clearanceDocumentName: undefined });
-      toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not cleared. Clearance document removed.` });
+      updateShipment(shipment.id, { cleared: false, clearanceDocumentName: undefined, clearanceDate: undefined });
+      toast({ title: "Shipment Updated", description: `${shipmentIdentifier} marked as not cleared. Clearance document & date removed.` });
     }
   };
 
@@ -68,13 +69,22 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
     if (docType === 'release') {
       updateShipment(attachedShipmentId, { releaseDocumentName: documentName, released: true });
     } else if (docType === 'clearance') {
-      updateShipment(attachedShipmentId, { clearanceDocumentName: documentName, cleared: true });
+      updateShipment(attachedShipmentId, { clearanceDocumentName: documentName, cleared: true, clearanceDate: new Date().toISOString() });
     }
     setIsAttachDocumentOpen(false);
   };
 
   const locations = shipment.locations || [{ name: 'Pending Assignment' }];
   const isPendingAssignment = locations.length === 1 && locations[0].name === 'Pending Assignment';
+
+  const formatDate = (dateString?: string, dateFormat = 'PP') => {
+    if (!dateString) return 'N/A';
+    try {
+      return format(parseISO(dateString), dateFormat);
+    } catch (error) {
+      return "Invalid Date";
+    }
+  };
 
   const cardContent = (
     <>
@@ -151,6 +161,14 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
           <span className="ml-1.5">{shipment.importer}</span>
         </div>
 
+        {shipment.mrn && (
+          <div className="flex items-center">
+            <Fingerprint className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+            <span className="font-medium text-muted-foreground">MRN:</span>
+            <span className="ml-1.5">{shipment.mrn}</span>
+          </div>
+        )}
+
         {shipment.weight !== undefined && shipment.weight !== null && (
           <div className="flex items-center">
             <Weight className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
@@ -195,6 +213,12 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
           <span className="font-medium text-muted-foreground">Cleared:</span>
           <span className="ml-1.5 font-semibold">{shipment.cleared ? 'Yes' : 'No'}</span>
         </div>
+        {shipment.cleared && shipment.clearanceDate && (
+           <div className="flex items-center text-xs text-muted-foreground">
+            <CalendarClock className="mr-1.5 h-3 w-3" />
+            <span>Cleared Date: {formatDate(shipment.clearanceDate, 'PPp')}</span>
+          </div>
+        )}
         
          <div className="flex items-center">
           <Archive className={`mr-1.5 h-3.5 w-3.5 ${shipment.emptyPalletRequired && shipment.emptyPalletRequired > 0 ? 'text-destructive' : 'text-muted-foreground'}`} />
@@ -261,7 +285,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
         />
       )}
 
-      {isEditShipmentOpen && shipment && ( 
+      {isEditShipmentOpen && ( 
         <EditShipmentDialog
           isOpen={isEditShipmentOpen}
           setIsOpen={setIsEditShipmentOpen}
@@ -294,4 +318,3 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
     </>
   );
 }
-

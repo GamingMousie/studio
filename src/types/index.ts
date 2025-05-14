@@ -25,7 +25,7 @@ export interface Shipment {
   quantity: number;
   importer: string; // Consignee
   exporter: string; // Consignor
-  locations: LocationInfo[]; // Changed from locationNames: string[]
+  locations: LocationInfo[]; 
   releaseDocumentName?: string; // Optional: Name of the release document
   clearanceDocumentName?: string; // Optional: Name of the clearance document
   released: boolean; // Indicates if the shipment has permission to be released
@@ -33,7 +33,9 @@ export interface Shipment {
   weight?: number; // Optional: Weight of the shipment in kg
   palletSpace?: number; // Optional: Pallet spaces occupied by the shipment (overall for shipment)
   releasedAt?: string; // Optional: Timestamp for when the shipment was printed/officially released
-  emptyPalletRequired?: number; // Changed from boolean to number. 0 means no, >0 means yes and how many.
+  emptyPalletRequired?: number; 
+  mrn?: string; // Movement Reference Number
+  clearanceDate?: string; // Date when clearance document was uploaded/status set
 }
 
 // Used for the form data when creating or updating a shipment
@@ -50,8 +52,10 @@ export interface ShipmentFormData {
   released?: boolean;
   cleared?: boolean;
   weight?: number | null;
-  palletSpace?: number | null; // Overall pallet space for the shipment
-  emptyPalletRequired?: number | null; // Changed from boolean to number
+  palletSpace?: number | null; 
+  emptyPalletRequired?: number | null;
+  mrn?: string;
+  // clearanceDate is not directly in form, managed by context
 }
 
 // Specifically for updating an existing shipment via context
@@ -67,9 +71,11 @@ export interface ShipmentUpdateData {
   released?: boolean;
   cleared?: boolean;
   weight?: number;
-  palletSpace?: number; // Overall pallet space for the shipment
-  releasedAt?: string; // Allow updating releasedAt, though primarily handled by markShipmentAsPrinted
-  emptyPalletRequired?: number; // Changed from boolean to number
+  palletSpace?: number; 
+  releasedAt?: string; 
+  emptyPalletRequired?: number;
+  mrn?: string;
+  clearanceDate?: string; // Allow direct update if needed, though primarily context-managed
 }
 
 // Specifically for updating an existing trailer via context
@@ -77,9 +83,9 @@ export interface TrailerUpdateData {
   name?: string;
   company?: string;
   status?: TrailerStatus;
-  arrivalDate?: string | null; // Allow null to clear the date
-  storageExpiryDate?: string | null; // Allow null to clear the date
-  weight?: number; // Optional: Weight of the trailer in kg
+  arrivalDate?: string | null; 
+  storageExpiryDate?: string | null; 
+  weight?: number; 
   customField1?: string;
   customField2?: string;
 }
@@ -92,7 +98,7 @@ export interface TrailerFormData {
   status: TrailerStatus;
   arrivalDate?: Date | null;
   storageExpiryDate?: Date | null;
-  weight?: number | null; // Optional: Weight of the trailer in kg
+  weight?: number | null; 
   customField1?: string;
   customField2?: string;
 }

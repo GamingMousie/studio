@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Edit, Users, Send, Briefcase, Archive } from 'lucide-react';
+import { FileText, Weight, Box, Edit, Users, Send, Briefcase, Archive, Fingerprint } from 'lucide-react';
 
 const editShipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
@@ -33,6 +33,7 @@ const editShipmentSchema = z.object({
   weight: z.coerce.number().positive('Weight must be positive').optional().nullable(),
   palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(),
   emptyPalletRequired: z.coerce.number().int("Must be a whole number").min(0, 'Cannot be negative').optional().nullable(),
+  mrn: z.string().max(50, "MRN too long").optional(),
 });
 
 type EditShipmentFormDataType = z.infer<typeof editShipmentSchema>;
@@ -66,6 +67,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
         releaseDocument: null,
         clearanceDocument: null,
         emptyPalletRequired: shipmentToEdit.emptyPalletRequired ?? 0,
+        mrn: shipmentToEdit.mrn || '',
       });
     }
   }, [shipmentToEdit, isOpen, reset]);
@@ -75,7 +77,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
     const newReleaseDocumentFile = data.releaseDocument && data.releaseDocument.length > 0 ? data.releaseDocument[0] : null;
     const newClearanceDocumentFile = data.clearanceDocument && data.clearanceDocument.length > 0 ? data.clearanceDocument[0] : null;
 
-    const updatedData: Omit<ShipmentUpdateData, 'locations'> = { 
+    const updatedData: ShipmentUpdateData = { 
       stsJob: data.stsJob,
       customerJobNumber: data.customerJobNumber || undefined,
       quantity: data.quantity,
@@ -88,6 +90,8 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
       weight: data.weight ?? undefined,
       palletSpace: data.palletSpace ?? undefined,
       emptyPalletRequired: data.emptyPalletRequired ?? 0,
+      mrn: data.mrn || undefined,
+      // clearanceDate will be handled by the context's updateShipment logic
     };
 
     updateShipment(shipmentToEdit.id, updatedData);
@@ -166,11 +170,19 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
             </div>
           </div>
 
+           <div>
+            <Label htmlFor="mrn" className="flex items-center">
+              <Fingerprint className="mr-2 h-4 w-4 text-muted-foreground" /> MRN
+            </Label>
+            <Input id="mrn" {...register('mrn')} />
+            {errors.mrn && <p className="text-sm text-destructive mt-1">{errors.mrn.message}</p>}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="releaseDocument" className="flex items-center">
               <FileText className="mr-2 h-4 w-4 text-muted-foreground" /> Release Document
             </Label>
-            {shipmentToEdit.releaseDocumentName && !watch('releaseDocument') && (
+            {shipmentToEdit.releaseDocumentName && !watch('releaseDocument')?.[0] && (
                 <p className="text-xs text-muted-foreground">Current: {shipmentToEdit.releaseDocumentName} (upload new to replace)</p>
             )}
             <Input id="releaseDocument" type="file" {...register('releaseDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
@@ -181,7 +193,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
             <Label htmlFor="clearanceDocument" className="flex items-center">
               <FileText className="mr-2 h-4 w-4 text-muted-foreground" /> Clearance Document
             </Label>
-             {shipmentToEdit.clearanceDocumentName && !watch('clearanceDocument') && (
+             {shipmentToEdit.clearanceDocumentName && !watch('clearanceDocument')?.[0] && (
                 <p className="text-xs text-muted-foreground">Current: {shipmentToEdit.clearanceDocumentName} (upload new to replace)</p>
             )}
             <Input id="clearanceDocument" type="file" {...register('clearanceDocument')} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>

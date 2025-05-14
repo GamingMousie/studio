@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck, Archive, Edit3 } from 'lucide-react';
+import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck, Archive, Edit3, Fingerprint, CalendarClock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import EditShipmentDialog from '@/components/shipment/EditShipmentDialog'; // Import EditShipmentDialog
+import EditShipmentDialog from '@/components/shipment/EditShipmentDialog'; 
 
 export default function SingleShipmentPage() {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function SingleShipmentPage() {
   const [shipment, setShipment] = useState<Shipment | null | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
   const [printedDateTime, setPrintedDateTime] = useState<string | null>(null);
-  const [isEditShipmentDialogOpen, setIsEditShipmentDialogOpen] = useState(false); // State for EditShipmentDialog
+  const [isEditShipmentDialogOpen, setIsEditShipmentDialogOpen] = useState(false); 
 
   useEffect(() => {
     setIsClient(true);
@@ -45,7 +45,7 @@ export default function SingleShipmentPage() {
         setPrintedDateTime(null);
       }
     }
-  }, [isClient, shipmentId, getShipmentById, shipment?.releasedAt, shipment?.stsJob]);
+  }, [isClient, shipmentId, getShipmentById, shipment?.releasedAt, shipment?.stsJob, shipment?.mrn, shipment?.clearanceDate]);
 
 
   const trailer = shipment?.trailerId ? getTrailerById(shipment.trailerId) : null;
@@ -54,11 +54,10 @@ export default function SingleShipmentPage() {
 
   const handlePrint = () => {
     if (canPrint && shipment) {
-      if (!shipment.releasedAt) { // Only mark as printed if not already marked
+      if (!shipment.releasedAt) { 
         markShipmentAsPrinted(shipment.id); 
         setPrintedDateTime(new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
       } else {
-        // If already printed, just use existing printedDateTime
         setPrintedDateTime(new Date(shipment.releasedAt).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
       }
       
@@ -70,8 +69,6 @@ export default function SingleShipmentPage() {
 
   const handleViewDocument = (documentName?: string) => {
     if (documentName) {
-      // In a real app, this would fetch and display the document.
-      // For now, it opens a new tab with a placeholder message.
       const newWindow = window.open("", "_blank");
       if (newWindow) {
         newWindow.document.write(`
@@ -100,10 +97,10 @@ export default function SingleShipmentPage() {
     }
   };
 
-  const formatDate = (dateString?: string) => {
+  const formatDate = (dateString?: string, dateFormat = 'PPpp') => {
     if (!dateString) return 'N/A';
     try {
-      return format(parseISO(dateString), 'PPpp'); 
+      return format(parseISO(dateString), dateFormat); 
     } catch (error) {
       return "Invalid Date";
     }
@@ -123,7 +120,7 @@ export default function SingleShipmentPage() {
             <Skeleton className="h-4 w-1/2" />
           </CardHeader>
           <CardContent className="space-y-3">
-            {[...Array(8)].map((_, i) => ( 
+            {[...Array(10)].map((_, i) => ( 
               <div key={i} className="flex items-center space-x-2">
                 <Skeleton className="h-5 w-5 rounded-full" />
                 <Skeleton className="h-4 w-1/4" />
@@ -221,6 +218,13 @@ export default function SingleShipmentPage() {
             </div>
           )}
 
+          {shipment.mrn && (
+            <div className="space-y-1">
+              <h3 className="font-semibold text-muted-foreground flex items-center"><Fingerprint className="mr-2 h-4 w-4" />MRN</h3>
+              <p className="text-lg font-medium">{shipment.mrn}</p>
+            </div>
+          )}
+
 
           <div className="space-y-1">
             <h3 className="font-semibold text-muted-foreground flex items-center"><Package className="mr-2 h-4 w-4" />Quantity</h3>
@@ -256,6 +260,13 @@ export default function SingleShipmentPage() {
             <div className="space-y-1">
               <h3 className="font-semibold text-muted-foreground flex items-center"><CalendarCheck className="mr-2 h-4 w-4" />Released At</h3>
               <p className="text-base font-medium">{formatDate(shipment.releasedAt)}</p>
+            </div>
+          )}
+
+          {shipment.clearanceDate && (
+            <div className="space-y-1">
+              <h3 className="font-semibold text-muted-foreground flex items-center"><CalendarClock className="mr-2 h-4 w-4" />Clearance Date</h3>
+              <p className="text-base font-medium">{formatDate(shipment.clearanceDate)}</p>
             </div>
           )}
 
@@ -385,5 +396,3 @@ export default function SingleShipmentPage() {
     </div>
   );
 }
-
-

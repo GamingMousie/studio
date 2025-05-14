@@ -218,7 +218,7 @@ export default function SingleShipmentPage() {
           )}
 
           {shipment.mrn && (
-            <div className="space-y-1">
+            <div className="space-y-1 no-print">
               <h3 className="font-semibold text-muted-foreground flex items-center"><Fingerprint className="mr-2 h-4 w-4" />MRN</h3>
               <p className="text-lg font-medium">{shipment.mrn}</p>
             </div>

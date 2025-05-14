@@ -186,7 +186,7 @@ export default function SingleShipmentPage() {
               <Link href={`/trailers/${trailer.id}`} className="no-print-in-area">
                 <Badge variant="secondary" className="whitespace-nowrap hover:bg-primary/10">
                   <Truck className="mr-1.5 h-4 w-4"/>
-                  Trailer: {trailer.name} ({trailer.id})
+                  Trailer: {trailer.id}
                 </Badge>
               </Link>
             )}
@@ -201,7 +201,6 @@ export default function SingleShipmentPage() {
                 <Link href={`/trailers/${trailer.id}`} className="hover:underline print:text-foreground print:no-underline">
                   {trailer.id}
                 </Link>
-                 {trailer.name && <span className="text-base font-medium text-muted-foreground ml-2">({trailer.name})</span>}
               </p>
             </div>
           )}
@@ -348,7 +347,7 @@ export default function SingleShipmentPage() {
         </CardContent>
         {trailer && trailer.arrivalDate && (
           <CardFooter className="border-t pt-4 text-xs text-muted-foreground no-print">
-              <p>Associated with Trailer <Link href={`/trailers/${trailer.id}`} className="text-primary hover:underline font-semibold print:text-foreground print:no-underline">{trailer.name} (ID: {trailer.id})</Link>, arrived on {formatDate(trailer.arrivalDate)}.</p>
+              <p>Associated with Trailer <Link href={`/trailers/${trailer.id}`} className="text-primary hover:underline font-semibold print:text-foreground print:no-underline">{trailer.id}</Link>, arrived on {formatDate(trailer.arrivalDate)}.</p>
           </CardFooter>
         )}
 

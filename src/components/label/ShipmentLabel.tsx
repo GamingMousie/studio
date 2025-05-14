@@ -17,14 +17,14 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
   );
 
   return (
-    <div className="p-3 border border-foreground rounded-md shadow-sm w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)] bg-background text-foreground print:shadow-none print:border-black print:w-[108mm] print:h-[150mm] print:p-3 print:break-words label-item flex flex-col justify-between">
+    <div className="p-3 border border-foreground rounded-md shadow-sm w-full sm:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.66rem)] lg:w-[calc(25%-0.75rem)] bg-background text-foreground print:shadow-none print:border-black print:w-[108mm] print:h-[150mm] print:p-1.5 print:break-words label-item flex flex-col justify-between">
       <div>
         <div className="flex justify-between items-center mb-1 print:mb-3">
             <h3 className="text-xs print:text-[22pt] font-bold text-primary print:text-black">Shipment Label</h3>
             <Package className="h-4 w-4 text-primary print:hidden" />
         </div>
         
-        <div className="space-y-1 print:space-y-2 print:my-px text-[0.65rem] leading-normal print:leading-relaxed">
+        <div className="space-y-1 print:space-y-2 print:my-px leading-normal print:leading-relaxed">
           <p className="flex items-center print:text-[18pt] print:mb-1"><CalendarDays className="h-3 w-3 mr-1 print:hidden"/><strong>Date:</strong> <span className="ml-1">{labelDate}</span></p>
           <p className="flex items-center print:text-[28pt] print:font-semibold print:mb-2"><Briefcase className="h-3 w-3 mr-1 print:hidden"/><strong>Agent:</strong> <span className="ml-1" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span></p>
           <p className="flex items-center print:text-[28pt] print:font-semibold print:mb-2"><Users className="h-3 w-3 mr-1 print:hidden"/><strong>Importer:</strong> <span className="ml-1" title={shipment.importer}>{shipment.importer}</span></p>
@@ -64,4 +64,3 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
     </div>
   );
 }
-

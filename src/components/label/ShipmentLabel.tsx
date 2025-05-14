@@ -26,20 +26,20 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         
         <div className="space-y-1 print:space-y-1 print:my-px text-[0.65rem] print:text-[10pt] leading-normal print:leading-normal">
           <p className="flex items-center print:text-[18pt] print:mb-2"><CalendarDays className="h-3 w-3 mr-1 print:hidden"/><strong>Date:</strong> <span className="ml-1">{labelDate}</span></p>
-          <p className="flex items-center print:text-[22pt] print:font-semibold print:mb-2"><Briefcase className="h-3 w-3 mr-1 print:hidden"/><strong>Agent:</strong> <span className="ml-1 truncate" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span></p>
-          <p className="flex items-center print:text-[18pt] print:mb-2"><Users className="h-3 w-3 mr-1 print:hidden"/><strong>Importer:</strong> <span className="ml-1 truncate" title={shipment.importer}>{shipment.importer}</span></p>
+          <p className="flex items-center print:text-[22pt] print:font-semibold print:mb-2"><Briefcase className="h-3 w-3 mr-1 print:hidden"/><strong>Agent:</strong> <span className="ml-1" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span></p>
+          <p className="flex items-center print:text-[22pt] print:mb-2"><Users className="h-3 w-3 mr-1 print:hidden"/><strong>Importer:</strong> <span className="ml-1" title={shipment.importer}>{shipment.importer}</span></p>
           <p className="flex items-center print:text-[28pt] print:font-bold print:mb-3"><Tag className="h-3 w-3 mr-1 print:hidden"/><strong>Pieces:</strong> <span className="ml-1">{shipment.quantity}</span></p>
           
           <p className="flex items-center print:text-[22pt] print:font-bold print:mb-2">
             <strong>Ref:</strong> 
-            <span className="ml-1 truncate" title={`Trailer ${trailer.id} / Job ${shipment.stsJob}`}>
+            <span className="ml-1" title={`Trailer ${trailer.id} / Job ${shipment.stsJob}`}>
                 Tr: {trailer.id} / Job: {shipment.stsJob}
             </span>
           </p>
           {shipment.customerJobNumber && (
-            <p className="flex items-center print:text-[18pt] print:mb-2">
+            <p className="flex items-center print:text-[22pt] print:mb-2">
                 <strong>Cust. Job:</strong> 
-                <span className="ml-1 truncate" title={shipment.customerJobNumber}>
+                <span className="ml-1" title={shipment.customerJobNumber}>
                     {shipment.customerJobNumber}
                 </span>
             </p>

@@ -174,31 +174,21 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
           updatedShipment.emptyPalletRequired = data.emptyPalletRequired ?? s.emptyPalletRequired ?? 0;
 
           // Handle clearanceDate logic
-          const justCleared = data.cleared === true && s.cleared === false;
-          const justGotDoc = data.clearanceDocumentName && !s.clearanceDocumentName;
-          const becomingCleared = justCleared || justGotDoc;
+          // If data.clearanceDate is explicitly provided (even as null), use it.
+          if (data.clearanceDate !== undefined) {
+            updatedShipment.clearanceDate = data.clearanceDate; // This could be an ISO string or null
+          } else {
+            // Automatic logic if clearanceDate was not manually set/cleared in the form
+            const isBecomingCleared = (data.cleared === true && s.cleared === false) || (data.cleared === true && !s.clearanceDate);
+            const isGettingDoc = data.clearanceDocumentName && !s.clearanceDocumentName;
 
-          const justUnCleared = data.cleared === false && s.cleared === true;
-          const justLostDoc = data.clearanceDocumentName === undefined && s.clearanceDocumentName; // Check for explicit undefined to clear
-          const becomingUnCleared = justUnCleared || justLostDoc;
-          
-          if (data.cleared !== undefined) { // if 'cleared' is part of the update
-            if (data.cleared || data.clearanceDocumentName) {
+            if (isBecomingCleared || (data.cleared && isGettingDoc)) {
               updatedShipment.clearanceDate = s.clearanceDate || new Date().toISOString();
-            } else {
+            } else if (data.cleared === false || (data.clearanceDocumentName === undefined && !data.cleared)) { 
+              // If explicitly set to not cleared, or doc removed and not explicitly cleared.
               updatedShipment.clearanceDate = undefined;
             }
-          } else if (data.clearanceDocumentName !== undefined) { // if only doc name is changing
-             if (data.clearanceDocumentName) {
-                updatedShipment.clearanceDate = s.clearanceDate || new Date().toISOString();
-             } else { // doc name removed
-                if (!updatedShipment.cleared) { // if not cleared explicitly, remove date
-                    updatedShipment.clearanceDate = undefined;
-                }
-             }
           }
-
-
           return updatedShipment;
         }
         return s;

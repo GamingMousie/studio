@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm, type SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useWarehouse } from '@/contexts/WarehouseContext';
@@ -8,7 +8,6 @@ import type { Shipment, ShipmentUpdateData } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-// Checkbox removed
 import {
   Dialog,
   DialogContent,
@@ -18,7 +17,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Weight, Box, Edit, Users, Send, Briefcase, Archive, Fingerprint } from 'lucide-react';
+import { FileText, Weight, Box, Edit, Users, Send, Briefcase, Archive, Fingerprint, CalendarIcon, CalendarClock } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const editShipmentSchema = z.object({
   stsJob: z.coerce.number().positive('STS Job must be a positive number'),
@@ -34,6 +37,7 @@ const editShipmentSchema = z.object({
   palletSpace: z.coerce.number().int('Pallet space must be an integer').positive('Pallet space must be positive').optional().nullable(),
   emptyPalletRequired: z.coerce.number().int("Must be a whole number").min(0, 'Cannot be negative').optional().nullable(),
   mrn: z.string().max(50, "MRN too long").optional(),
+  clearanceDate: z.date().nullable().optional(),
 });
 
 type EditShipmentFormDataType = z.infer<typeof editShipmentSchema>;
@@ -68,6 +72,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
         clearanceDocument: null,
         emptyPalletRequired: shipmentToEdit.emptyPalletRequired ?? 0,
         mrn: shipmentToEdit.mrn || '',
+        clearanceDate: shipmentToEdit.clearanceDate ? parseISO(shipmentToEdit.clearanceDate) : null,
       });
     }
   }, [shipmentToEdit, isOpen, reset]);
@@ -91,7 +96,7 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
       palletSpace: data.palletSpace ?? undefined,
       emptyPalletRequired: data.emptyPalletRequired ?? 0,
       mrn: data.mrn || undefined,
-      // clearanceDate will be handled by the context's updateShipment logic
+      clearanceDate: data.clearanceDate ? data.clearanceDate.toISOString() : (data.clearanceDate === null ? null : undefined), // Pass ISO string or null/undefined
     };
 
     updateShipment(shipmentToEdit.id, updatedData);
@@ -200,6 +205,42 @@ export default function EditShipmentDialog({ isOpen, setIsOpen, shipmentToEdit }
             {errors.clearanceDocument && <p className="text-sm text-destructive mt-1">{(errors.clearanceDocument as any)?.message}</p>}
           </div>
           
+          <div>
+            <Label htmlFor="clearanceDate" className="flex items-center">
+              <CalendarClock className="mr-2 h-4 w-4 text-muted-foreground" /> Clearance Date (Optional)
+            </Label>
+            <Controller
+              name="clearanceDate"
+              control={control}
+              render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal mt-1",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value ? format(field.value, "PPP") : <span>Pick a date (leave blank for auto)</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={field.value || undefined}
+                      onSelect={(date) => field.onChange(date || null)}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              )}
+            />
+            {errors.clearanceDate && <p className="text-sm text-destructive mt-1">{errors.clearanceDate.message}</p>}
+            <p className="text-xs text-muted-foreground mt-1">If not set, date will be auto-filled when shipment is marked Cleared or a clearance doc is added.</p>
+          </div>
+
           <div>
             <Label htmlFor="emptyPalletRequired" className="flex items-center">
               <Archive className="mr-2 h-4 w-4 text-muted-foreground" /> Empty Pallets Required (Number)

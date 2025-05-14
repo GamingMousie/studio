@@ -257,14 +257,14 @@ export default function SingleShipmentPage() {
           )}
 
            {shipment.releasedAt && (
-            <div className="space-y-1">
+            <div className="space-y-1 no-print">
               <h3 className="font-semibold text-muted-foreground flex items-center"><CalendarCheck className="mr-2 h-4 w-4" />Released At</h3>
               <p className="text-base font-medium">{formatDate(shipment.releasedAt)}</p>
             </div>
           )}
 
           {shipment.clearanceDate && (
-            <div className="space-y-1">
+            <div className="space-y-1 no-print">
               <h3 className="font-semibold text-muted-foreground flex items-center"><CalendarClock className="mr-2 h-4 w-4" />Clearance Date</h3>
               <p className="text-base font-medium">{formatDate(shipment.clearanceDate)}</p>
             </div>
@@ -347,7 +347,7 @@ export default function SingleShipmentPage() {
           </div>
         </CardContent>
         {trailer && trailer.arrivalDate && (
-          <CardFooter className="border-t pt-4 text-xs text-muted-foreground">
+          <CardFooter className="border-t pt-4 text-xs text-muted-foreground no-print">
               <p>Associated with Trailer <Link href={`/trailers/${trailer.id}`} className="text-primary hover:underline font-semibold print:text-foreground print:no-underline">{trailer.name} (ID: {trailer.id})</Link>, arrived on {formatDate(trailer.arrivalDate)}.</p>
           </CardFooter>
         )}
@@ -396,3 +396,4 @@ export default function SingleShipmentPage() {
     </div>
   );
 }
+

@@ -20,7 +20,6 @@ export default function GenerateShipmentLabelsPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [readyToPrint, setReadyToPrint] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -28,12 +27,11 @@ export default function GenerateShipmentLabelsPage() {
 
   const { getTrailerById, getShipmentsByTrailerId } = useWarehouse();
 
-  const handleGenerateAndPrintLabels = () => {
+  const handleGenerateLabels = () => {
     if (!trailerIdInput.trim()) {
       setErrorMessage('Please enter a Trailer ID.');
       setSelectedTrailer(null);
       setShipmentsToLabel([]);
-      setReadyToPrint(false);
       return;
     }
 
@@ -41,7 +39,6 @@ export default function GenerateShipmentLabelsPage() {
     setErrorMessage(null);
     setSelectedTrailer(null);
     setShipmentsToLabel([]);
-    setReadyToPrint(false);
 
     const trailer = getTrailerById(trailerIdInput.trim());
 
@@ -55,7 +52,7 @@ export default function GenerateShipmentLabelsPage() {
 
     if (shipments.length === 0) {
       setErrorMessage(`No shipments found for Trailer ID "${trailer.id}".`);
-      setSelectedTrailer(trailer); // Still set trailer to show "no shipments" message
+      setSelectedTrailer(trailer); 
       setShipmentsToLabel([]);
       setIsLoading(false);
       return;
@@ -63,16 +60,14 @@ export default function GenerateShipmentLabelsPage() {
 
     setSelectedTrailer(trailer);
     setShipmentsToLabel(shipments);
-    setReadyToPrint(true); // Trigger useEffect to print
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    if (readyToPrint && shipmentsToLabel.length > 0 && selectedTrailer) {
+  const handlePrintLabels = () => {
+    if (shipmentsToLabel.length > 0 && selectedTrailer) {
       window.print();
-      setReadyToPrint(false); // Reset after print dialog is shown
     }
-  }, [readyToPrint, shipmentsToLabel, selectedTrailer]);
+  };
 
   const getLabelDate = (trailer: Trailer | null): string => {
     if (!isClient) return '';
@@ -95,10 +90,10 @@ export default function GenerateShipmentLabelsPage() {
         <CardHeader>
           <CardTitle className="flex items-center text-2xl">
             <FileText className="mr-2 h-6 w-6 text-primary" />
-            Generate & Print Shipment Labels
+            Generate Shipment Labels
           </CardTitle>
           <CardDescription>
-            Enter a Trailer ID to generate and print labels for all its shipments.
+            Enter a Trailer ID to generate labels for all its shipments.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -115,43 +110,18 @@ export default function GenerateShipmentLabelsPage() {
                   onChange={(e) => setTrailerIdInput(e.target.value)}
                   placeholder="Enter Trailer ID (e.g., T-001)"
                   className="pl-10"
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleGenerateAndPrintLabels();}}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleGenerateLabels();}}
                 />
               </div>
             </div>
-            <Button onClick={handleGenerateAndPrintLabels} disabled={isLoading || !isClient} className="w-full sm:w-auto">
-              {isLoading ? 'Generating...' : 'Generate & Print Labels'}
+            <Button onClick={handleGenerateLabels} disabled={isLoading || !isClient} className="w-full sm:w-auto">
+              {isLoading ? 'Generating...' : 'Generate Labels'}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Print-only section for labels */}
-      <div className="hidden print:block">
-        {selectedTrailer && shipmentsToLabel.length > 0 && (
-          <>
-            <div className="print-only-block mb-4 text-center">
-              <h2 className="text-2xl font-bold text-foreground">
-                Shipment Labels for Trailer: {selectedTrailer.name || 'N/A'} (ID: {selectedTrailer.id})
-              </h2>
-              <p className="text-lg text-muted-foreground">{shipmentsToLabel.length} Shipment(s)</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 printable-area label-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(108mm, 1fr))' }}>
-              {shipmentsToLabel.map((shipment) => (
-                <ShipmentLabel
-                  key={shipment.id}
-                  shipment={shipment}
-                  trailer={selectedTrailer!}
-                  labelDate={labelDateForShipments}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* On-screen messages */}
-      {isLoading && !readyToPrint && ( // Only show skeleton if not about to print
+      {isLoading && (
          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 no-print">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="p-4 border border-border rounded-lg shadow-sm bg-background h-[200px] flex flex-col justify-between">
@@ -180,6 +150,44 @@ export default function GenerateShipmentLabelsPage() {
             <p className="mt-4 text-xl text-muted-foreground">No shipments found for Trailer ID "{selectedTrailer.id}".</p>
          </div>
       )}
+
+      {/* On-screen title for generated labels */}
+      {selectedTrailer && shipmentsToLabel.length > 0 && !isLoading && (
+        <div className="no-print">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-foreground">
+              Labels for Trailer: {selectedTrailer.name || 'N/A'} (ID: {selectedTrailer.id}) - {shipmentsToLabel.length} Shipment(s)
+            </h2>
+            <Button onClick={handlePrintLabels} variant="outline">
+              <Printer className="mr-2 h-4 w-4" />
+              Print All Displayed Labels
+            </Button>
+          </div>
+        </div>
+      )}
+      
+      {/* Section for labels - visible on screen and for printing */}
+      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 printable-area label-grid ${(!isLoading && selectedTrailer && shipmentsToLabel.length > 0) ? '' : 'hidden print:hidden'}`} style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(108mm, 1fr))' }}>
+        {isClient && selectedTrailer && shipmentsToLabel.length > 0 && !isLoading &&
+          shipmentsToLabel.map((shipment) => (
+            <ShipmentLabel
+              key={shipment.id}
+              shipment={shipment}
+              trailer={selectedTrailer!}
+              labelDate={labelDateForShipments}
+            />
+          ))}
+      </div>
+
+      {/* Title that only appears on the printed page */}
+       {selectedTrailer && shipmentsToLabel.length > 0 && (
+         <div className="hidden print:block print-only-block mb-4 text-center">
+            <h2 className="text-2xl font-bold text-foreground">
+                Shipment Labels for Trailer: {selectedTrailer.name || 'N/A'} (ID: {selectedTrailer.id})
+            </h2>
+            <p className="text-lg text-muted-foreground">{shipmentsToLabel.length} Shipment(s)</p>
+         </div>
+       )}
     </div>
   );
 }

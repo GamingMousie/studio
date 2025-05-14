@@ -200,6 +200,45 @@
   .print-signature-block .space-y-1 > :not([hidden]) ~ :not([hidden]) { 
     margin-top: 0.1rem !important; /* reduce space between label and line */
   }
+
+  /* Styles for label generation */
+  .label-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(48mm, 1fr)); /* Approximate label width */
+    gap: 2mm; /* Space between labels */
+  }
+  .label-item {
+    page-break-inside: avoid !important;
+    background-color: white !important; /* Ensure white background for labels */
+    color: black !important; /* Ensure black text for labels */
+  }
+   /* Ensure all text within label-item is black for printing */
+  .label-item, .label-item * {
+    color: black !important;
+  }
+  .print\:w-\[48mm\] { width: 48mm !important; }
+  .print\:h-\[70mm\] { height: 70mm !important; }
+  .print\:p-1\.5 { padding: 0.375rem !important; } /* approx 1.5mm if 1rem = 16px */
+  .print\:text-\[6pt\] * { font-size: 6pt !important; }
+  .print\:text-\[7pt\] { font-size: 7pt !important; }
+  .print\:text-\[5\.5pt\] { font-size: 5.5pt !important; }
+  .print\:text-\[5pt\] { font-size: 5pt !important; }
+  .print\:text-\[4\.5pt\] { font-size: 4.5pt !important; }
+  .print\:mb-0\.5 { margin-bottom: 0.125rem !important; }
+  .print\:my-px { margin-top: 1px !important; margin-bottom: 1px !important; }
+  .print\:pt-0\.5 { padding-top: 0.125rem !important; }
+  .print\:h-5 { height: 1.25rem !important; } /* Adjust as needed for barcode visual */
+  .print\:bg-black { background-color: black !important; }
+
+
+  @page {
+    size: A4; /* Or your target paper size */
+    margin: 10mm; /* Adjust margins as needed */
+  }
+  body {
+    -webkit-print-color-adjust: exact !important; /* Chrome, Safari */
+    color-adjust: exact !important; /* Firefox, Edge */
+  }
 }
 
 /* Ensure this is outside @media print if it applies generally */

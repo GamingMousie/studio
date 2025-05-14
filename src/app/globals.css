@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -238,6 +239,11 @@
   .print\:text-\[5\.5pt\] { font-size: 5.5pt !important; }
   .print\:text-\[5pt\] { font-size: 5pt !important; }
   .print\:text-\[4\.5pt\] { font-size: 4.5pt !important; }
+
+  .print\:text-\[32pt\] { font-size: 32pt !important; }
+  .print\:text-\[36pt\] { font-size: 36pt !important; }
+  .print\:text-\[40pt\] { font-size: 40pt !important; }
+  .print\:text-\[48pt\] { font-size: 48pt !important; }
   
   .print\:mb-0\.5 { margin-bottom: 0.125rem !important; }
   .print\:mb-1 { margin-bottom: 0.25rem !important; }
@@ -274,3 +280,4 @@
 html {
   scroll-padding-top: 4rem; /* Adjust based on your fixed header's height */
 }
+

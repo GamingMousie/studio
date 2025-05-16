@@ -7,9 +7,10 @@ import { useWarehouse } from '@/contexts/WarehouseContext';
 import type { Trailer, Shipment } from '@/types';
 import ShipmentCard from '@/components/shipment/ShipmentCard';
 import AddShipmentDialog from '@/components/shipment/AddShipmentDialog';
+import EditTrailerDialog from '@/components/trailer/EditTrailerDialog'; // Import EditTrailerDialog
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye } from 'lucide-react'; // Added FileText, Eye
+import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye, Edit } from 'lucide-react'; // Added Edit
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 
@@ -26,6 +27,7 @@ export default function TrailerShipmentsPage() {
 
   const [trailer, setTrailer] = useState<Trailer | null>(null);
   const [isAddShipmentDialogOpen, setIsAddShipmentDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // State for EditTrailerDialog
   const [isTrailerFound, setIsTrailerFound] = useState<boolean | null>(null); 
 
 
@@ -116,17 +118,22 @@ export default function TrailerShipmentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
         <Button variant="outline" size="sm" asChild>
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
           </Link>
         </Button>
-        <Button variant="outline" size="sm" asChild>
-          <Link href={`/trailers/${trailer.id}/print`}>
-            <Printer className="mr-2 h-4 w-4" /> Print Trailer ACP Form
-          </Link>
-        </Button>
+        <div className="flex gap-2 flex-wrap justify-center sm:justify-end">
+          <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
+            <Edit className="mr-2 h-4 w-4" /> Edit Trailer Details
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`/trailers/${trailer.id}/print`}>
+              <Printer className="mr-2 h-4 w-4" /> Print Trailer ACP Form
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Card className="shadow-lg">
@@ -240,6 +247,14 @@ export default function TrailerShipmentsPage() {
         setIsOpen={setIsAddShipmentDialogOpen}
         trailerId={trailer.id}
       />
+      
+      {isEditDialogOpen && trailer && (
+        <EditTrailerDialog
+          isOpen={isEditDialogOpen}
+          setIsOpen={setIsEditDialogOpen}
+          trailerToEdit={trailer}
+        />
+      )}
     </div>
   );
 }

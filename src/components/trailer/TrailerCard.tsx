@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import EditTrailerDialog from './EditTrailerDialog'; 
+import EditTrailerDialog from './EditTrailerDialog';
 import ConfirmationDialog from '@/components/shared/ConfirmationDialog';
 import { format, parseISO } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -42,19 +42,19 @@ const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloa
 export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChange }: TrailerCardProps) {
   const { getShipmentsByTrailerId } = useWarehouse();
   const [isMounted, setIsMounted] = useState(false);
-  
+
   const [shipmentCount, setShipmentCount] = useState<number>(0);
   const [totalPieces, setTotalPieces] = useState<number>(0);
 
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
     const currentShipments = getShipmentsByTrailerId(trailer.id);
     setShipmentCount(currentShipments.length);
     setTotalPieces(currentShipments.reduce((acc, s) => acc + s.quantity, 0));
-  }, [trailer.id, getShipmentsByTrailerId]);
+  }, [trailer.id, getShipmentsByTrailerId, trailer]); // Added trailer to dependency array for potential updates
 
 
   const formatDate = (dateString?: string) => {
@@ -114,7 +114,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           <Skeleton className="h-3 w-1/2 mb-0.5" />
         )
       ) : null}
-      
+
       {trailer.company ? (
         isMounted ? (
           <div className="flex items-center text-xs text-muted-foreground">
@@ -125,7 +125,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           <Skeleton className="h-3 w-2/3" />
         )
       ) : null}
-      
+
       {trailer.storageExpiryDate ? (
         isMounted ? (
           <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />
@@ -159,7 +159,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           <Skeleton className="h-3 w-1/3 mt-1" />
         )
       )}
-      
+
       <div className="mt-4 space-y-2">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Status:</span>
@@ -201,10 +201,13 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
 
 
   const cardActions = (
-    <div className="flex items-center justify-between w-full">
-       <Link href={`/trailers/${trailer.id}`} legacyBehavior>
-        <Button variant="ghost" size="sm" className="text-primary hover:text-primary-foreground hover:bg-primary">
-          Manage Shipments <ChevronRight className="ml-1 h-4 w-4" />
+    <div className="flex items-center justify-end gap-1 w-full">
+       <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)} className="h-8">
+        <Edit className="mr-1.5 h-3.5 w-3.5" /> Edit
+      </Button>
+      <Link href={`/trailers/${trailer.id}`} legacyBehavior>
+        <Button variant="ghost" size="sm" className="text-primary hover:text-primary-foreground hover:bg-primary h-8">
+          Manage <ChevronRight className="ml-1 h-4 w-4" />
         </Button>
       </Link>
       <DropdownMenu>
@@ -214,12 +217,6 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Trailer
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDeleteDialogOpen(true)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Trailer
@@ -268,7 +265,7 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
                      <Skeleton className="h-3 w-2/3 mt-1" />
                   )
                 ) : null}
-                
+
                 {trailer.storageExpiryDate ? (
                   isMounted ? (
                     <DateDisplay label="Storage Exp" dateString={trailer.storageExpiryDate} icon={CalendarDays} />
@@ -335,10 +332,10 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
           </div>
         </Card>
         {isEditDialogOpen && (
-          <EditTrailerDialog 
-            isOpen={isEditDialogOpen} 
-            setIsOpen={setIsEditDialogOpen} 
-            trailerToEdit={trailer} 
+          <EditTrailerDialog
+            isOpen={isEditDialogOpen}
+            setIsOpen={setIsEditDialogOpen}
+            trailerToEdit={trailer}
           />
         )}
         {isDeleteDialogOpen && (
@@ -373,10 +370,10 @@ export default function TrailerCard({ trailer, viewMode, onDelete, onStatusChang
         </CardFooter>
       </Card>
       {isEditDialogOpen && (
-        <EditTrailerDialog 
-          isOpen={isEditDialogOpen} 
-          setIsOpen={setIsEditDialogOpen} 
-          trailerToEdit={trailer} 
+        <EditTrailerDialog
+          isOpen={isEditDialogOpen}
+          setIsOpen={setIsEditDialogOpen}
+          trailerToEdit={trailer}
         />
       )}
       {isDeleteDialogOpen && (

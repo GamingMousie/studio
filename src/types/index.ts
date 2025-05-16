@@ -1,3 +1,4 @@
+
 export type TrailerStatus = 'Scheduled' | 'Arrived' | 'Loading' | 'Offloading' | 'Devanned';
 
 export interface LocationInfo {
@@ -15,6 +16,7 @@ export interface Trailer {
   weight?: number; // Optional: Weight of the trailer in kg
   customField1?: string; // Represents T1.1
   customField2?: string; // Represents T1.2
+  outturnReportDocumentName?: string; // Optional: Name of the out-turn report PDF
 }
 
 export interface Shipment {
@@ -25,7 +27,7 @@ export interface Shipment {
   quantity: number;
   importer: string; // Consignee
   exporter: string; // Consignor
-  locations: LocationInfo[]; 
+  locations: LocationInfo[];
   releaseDocumentName?: string; // Optional: Name of the release document
   clearanceDocumentName?: string; // Optional: Name of the clearance document
   released: boolean; // Indicates if the shipment has permission to be released
@@ -33,7 +35,7 @@ export interface Shipment {
   weight?: number; // Optional: Weight of the shipment in kg
   palletSpace?: number; // Optional: Pallet spaces occupied by the shipment (overall for shipment)
   releasedAt?: string; // Optional: Timestamp for when the shipment was printed/officially released
-  emptyPalletRequired?: number; 
+  emptyPalletRequired?: number;
   mrn?: string; // Movement Reference Number
   clearanceDate?: string | null; // Date when clearance document was uploaded/status set
 }
@@ -45,14 +47,14 @@ export interface ShipmentFormData {
   quantity: number;
   importer: string; // Consignee
   exporter: string; // Consignor
-  initialLocationName?: string; 
+  initialLocationName?: string;
   initialLocationPallets?: number;
   releaseDocument?: FileList | File | null;
   clearanceDocument?: FileList | File | null;
   released?: boolean;
   cleared?: boolean;
   weight?: number | null;
-  palletSpace?: number | null; 
+  palletSpace?: number | null;
   emptyPalletRequired?: number | null;
   mrn?: string;
   clearanceDate?: Date | null; // Form handles Date object or null
@@ -65,14 +67,14 @@ export interface ShipmentUpdateData {
   quantity?: number;
   importer?: string; // Consignee
   exporter?: string; // Consignor
-  locations?: LocationInfo[]; 
+  locations?: LocationInfo[];
   releaseDocumentName?: string;
   clearanceDocumentName?: string;
   released?: boolean;
   cleared?: boolean;
   weight?: number;
-  palletSpace?: number; 
-  releasedAt?: string; 
+  palletSpace?: number;
+  releasedAt?: string;
   emptyPalletRequired?: number;
   mrn?: string;
   clearanceDate?: string | null; // Context handles ISO string or null
@@ -83,11 +85,12 @@ export interface TrailerUpdateData {
   name?: string;
   company?: string;
   status?: TrailerStatus;
-  arrivalDate?: string | null; 
-  storageExpiryDate?: string | null; 
-  weight?: number; 
+  arrivalDate?: string | null;
+  storageExpiryDate?: string | null;
+  weight?: number;
   customField1?: string;
   customField2?: string;
+  outturnReportDocumentName?: string | null; // Allow setting to null to clear
 }
 
 // For AddTrailerDialog form
@@ -98,8 +101,8 @@ export interface TrailerFormData {
   status: TrailerStatus;
   arrivalDate?: Date | null;
   storageExpiryDate?: Date | null;
-  weight?: number | null; 
+  weight?: number | null;
   customField1?: string;
   customField2?: string;
+  // outturnReportDocument is handled in EditTrailerDialog for simplicity of add flow
 }
-

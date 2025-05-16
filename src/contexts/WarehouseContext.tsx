@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid'; // Using uuid for unique shipment IDs
 
 interface WarehouseContextType {
   trailers: Trailer[];
-  addTrailer: (trailer: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'company' | 'customField1' | 'customField2'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number; customField1?: string; customField2?: string; }) => void;
+  addTrailer: (trailer: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'company' | 'customField1' | 'customField2' | 'outturnReportDocumentName'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number; customField1?: string; customField2?: string; }) => void;
   updateTrailerStatus: (trailerId: string, status: TrailerStatus) => void;
   updateTrailer: (trailerId: string, data: TrailerUpdateData) => void;
   deleteTrailer: (trailerId: string) => void;
@@ -23,16 +23,16 @@ interface WarehouseContextType {
   updateShipmentReleasedStatus: (shipmentId: string, released: boolean) => void; // Potentially could be merged into updateShipment
   updateShipmentClearedStatus: (shipmentId: string, cleared: boolean) => void; // Potentially could be merged into updateShipment
   updateShipment: (shipmentId: string, data: ShipmentUpdateData) => void;
-  markShipmentAsPrinted: (shipmentId: string) => void; 
+  markShipmentAsPrinted: (shipmentId: string) => void;
 }
 
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
 
 const initialTrailers: Trailer[] = [
-  { id: 'T-001', name: 'Alpha Transporter', status: 'Arrived', company: 'Logistics Inc.', arrivalDate: new Date('2024-07-20T10:00:00Z').toISOString(), storageExpiryDate: new Date('2024-08-20T10:00:00Z').toISOString(), weight: 3500, customField1: 'CF1-Alpha', customField2: 'CF2-Alpha' },
+  { id: 'T-001', name: 'Alpha Transporter', status: 'Arrived', company: 'Logistics Inc.', arrivalDate: new Date('2024-07-20T10:00:00Z').toISOString(), storageExpiryDate: new Date('2024-08-20T10:00:00Z').toISOString(), weight: 3500, customField1: 'CF1-Alpha', customField2: 'CF2-Alpha', outturnReportDocumentName: 'T-001_outturn_report.pdf' },
   { id: 'T-002', name: 'Beta Hauler', status: 'Scheduled', company: 'QuickShip Co.', arrivalDate: new Date('2024-07-22T14:30:00Z').toISOString(), weight: 3200 },
   { id: 'T-003', name: 'Gamma Carrier', status: 'Devanned', company: 'Cargo Movers', weight: 3000, customField1: 'CF1-Gamma' },
-  { id: 'T-004', name: 'Delta Freighter', status: 'Loading', company: 'Logistics Inc.', weight: 4000 },
+  { id: 'T-004', name: 'Delta Freighter', status: 'Loading', company: 'Logistics Inc.', weight: 4000, outturnReportDocumentName: 'Delta_damage_report.pdf' },
   { id: 'T-005', name: 'Epsilon Mover', status: 'Offloading', company: 'QuickShip Co.', arrivalDate: new Date('2024-07-25T09:00:00Z').toISOString(), weight: 3300},
   { id: 'T-006', name: 'Zeta Voyager', status: 'Scheduled', company: 'Cargo Movers', arrivalDate: new Date('2024-07-28T16:00:00Z').toISOString(), weight: 3700},
 ];
@@ -48,7 +48,7 @@ const initialShipments: Shipment[] = [
   { id: uuidv4(), trailerId: 'T-002', stsJob: 66778, customerJobNumber: 'CUST-005', quantity: 150, importer: 'Mechanics United', exporter: 'Auto Parts Global', locations: [{name: 'Parts Aisle M-10', pallets:12}], released: false, cleared: false, weight: 1800, palletSpace: 12, releasedAt: undefined, emptyPalletRequired: 3, clearanceDate: null },
   { id: uuidv4(), trailerId: 'T-004', stsJob: 77889, quantity: 25, importer: 'Luxury Imports', exporter: 'Fine Goods Exporters', locations: [{name: 'High Value Cage 2', pallets:2}], released: true, cleared: true, weight: 400, palletSpace: 2, releasedAt: new Date('2024-07-25T15:00:00Z').toISOString(), emptyPalletRequired: 0, clearanceDate: new Date('2024-07-25T11:00:00Z').toISOString() },
   { id: uuidv4(), trailerId: 'T-003', stsJob: 88990, quantity: 500, importer: 'Warehouse Direct', exporter: 'Bulk Exporters Co.', locations: [{name: 'Section D', pallets:10}, {name: 'Overflow Area 2', pallets:5}], released: false, cleared: false, weight: 2200, palletSpace: 15, releasedAt: undefined, emptyPalletRequired: 0, mrn: '24GB000000000000A4', clearanceDate: null },
-  { id: uuidv4(), trailerId: 'T-005', stsJob: 99001, customerJobNumber: 'CUST-006', quantity: 60, importer: 'Gourmet Foods', exporter: 'Specialty Exports Ltd.', locations: [{name: 'Pending Assignment'}], released: true, cleared: true, weight: 700, palletSpace: 5, releasedAt: undefined, emptyPalletRequired: 1, clearanceDate: null }, // Changed to null
+  { id: uuidv4(), trailerId: 'T-005', stsJob: 99001, customerJobNumber: 'CUST-006', quantity: 60, importer: 'Gourmet Foods', exporter: 'Specialty Exports Ltd.', locations: [{name: 'Pending Assignment'}], released: true, cleared: true, weight: 700, palletSpace: 5, releasedAt: undefined, emptyPalletRequired: 1, clearanceDate: null },
   { id: uuidv4(), trailerId: 'T-006', stsJob: 10101, quantity: 200, importer: 'Constructors Choice', exporter: 'Building Material Exports', locations: [{name: 'Pending Assignment'}], released: false, cleared: false, weight: 3000, palletSpace: 20, releasedAt: undefined, emptyPalletRequired: 0, clearanceDate: null },
 ];
 
@@ -57,9 +57,9 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   const [trailers, setTrailers] = useLocalStorageState<Trailer[]>('trailers', initialTrailers);
   const [shipments, setShipments] = useLocalStorageState<Shipment[]>('shipments', initialShipments);
 
-  const addTrailer = useCallback((trailerData: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'company' | 'customField1' | 'customField2'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number; customField1?: string; customField2?: string; }) => {
+  const addTrailer = useCallback((trailerData: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'company' | 'customField1' | 'customField2' | 'outturnReportDocumentName'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number; customField1?: string; customField2?: string; }) => {
     const newTrailer: Trailer = {
-      id: trailerData.id, 
+      id: trailerData.id,
       name: trailerData.name,
       status: trailerData.status || 'Scheduled',
       company: trailerData.company || undefined,
@@ -68,6 +68,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
       weight: trailerData.weight || undefined,
       customField1: trailerData.customField1 || undefined,
       customField2: trailerData.customField2 || undefined,
+      outturnReportDocumentName: undefined, // New trailers won't have one by default
     };
     setTrailers((prev) => [...prev, newTrailer]);
   }, [setTrailers]);
@@ -96,14 +97,14 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   }, [shipments]);
 
   const addShipment = useCallback((shipmentData: Omit<Shipment, 'id' | 'locations' | 'released' | 'cleared' | 'importer' | 'exporter' | 'stsJob' | 'customerJobNumber' | 'releasedAt' | 'emptyPalletRequired' | 'mrn' | 'clearanceDate'> & { stsJob: number; customerJobNumber?: string; importer: string; exporter: string; initialLocationName?: string, initialLocationPallets?: number, releaseDocumentName?: string, clearanceDocumentName?: string, released?:boolean, cleared?: boolean, weight?: number, palletSpace?: number, emptyPalletRequired?: number, mrn?: string }) => {
-    
+
     let initialLocations: LocationInfo[];
     if (shipmentData.initialLocationName) {
       initialLocations = [{ name: shipmentData.initialLocationName, pallets: shipmentData.initialLocationPallets }];
     } else {
       initialLocations = [{ name: 'Pending Assignment' }];
     }
-    
+
     const newShipment: Shipment = {
       ...shipmentData,
       id: uuidv4(),
@@ -117,8 +118,8 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
       released: shipmentData.released ?? false,
       cleared: shipmentData.cleared ?? false,
       weight: shipmentData.weight,
-      palletSpace: shipmentData.palletSpace, 
-      releasedAt: undefined, 
+      palletSpace: shipmentData.palletSpace,
+      releasedAt: undefined,
       emptyPalletRequired: shipmentData.emptyPalletRequired ?? 0,
       mrn: shipmentData.mrn || undefined,
       clearanceDate: (shipmentData.cleared || shipmentData.clearanceDocumentName) ? new Date().toISOString() : null,
@@ -152,57 +153,50 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
       prev.map(s => {
         if (s.id === shipmentId) {
           const updatedShipment = { ...s, ...data };
-          
+
           updatedShipment.customerJobNumber = data.customerJobNumber !== undefined ? data.customerJobNumber : s.customerJobNumber;
           updatedShipment.mrn = data.mrn !== undefined ? data.mrn : s.mrn;
 
 
           if (data.locations && data.locations.length > 0 && !(data.locations.length === 1 && data.locations[0].name === 'Pending Assignment')) {
             updatedShipment.locations = data.locations;
-          } else if (!data.locations) { 
-             updatedShipment.locations = s.locations && s.locations.length > 0 && !(s.locations.length ===1 && s.locations[0].name === 'Pending Assignment') 
-                                      ? s.locations 
+          } else if (!data.locations) {
+             updatedShipment.locations = s.locations && s.locations.length > 0 && !(s.locations.length ===1 && s.locations[0].name === 'Pending Assignment')
+                                      ? s.locations
                                       : [{name: 'Pending Assignment'}];
-          } else { 
+          } else {
             updatedShipment.locations = [{name: 'Pending Assignment'}];
           }
-          
+
           if (data.releasedAt !== undefined) {
             updatedShipment.releasedAt = data.releasedAt;
           }
-          
+
           updatedShipment.emptyPalletRequired = data.emptyPalletRequired ?? s.emptyPalletRequired ?? 0;
 
           // Handle clearanceDate
           let newClearanceDate = s.clearanceDate;
 
-          // If clearanceDate is explicitly passed in `data` (from EditShipmentDialog), it takes precedence.
-          // `data.clearanceDate` can be an ISO string or null.
           if (Object.prototype.hasOwnProperty.call(data, 'clearanceDate')) {
             newClearanceDate = data.clearanceDate;
           } else {
-            // Automatic logic if clearanceDate was NOT explicitly set in the `data` payload
-            // (e.g., update came from toggling 'cleared' status or attaching a doc)
             if (data.cleared === true) {
-              if (!s.clearanceDate) { // If becoming cleared and no date existed, set new date
+              if (!s.clearanceDate) {
                 newClearanceDate = new Date().toISOString();
               }
-              // If already cleared and had a date, keep it unless explicitly changed by form
-            } else if (data.cleared === false) { // If becoming not cleared
+            } else if (data.cleared === false) {
               newClearanceDate = null;
             }
           }
-          
-          // Further auto-logic: if cleared is true (or becoming true) AND a new clearance doc is added,
-          // and no clearanceDate is set yet (or explicitly set to null), set a new date.
-          if ((data.cleared === true || (data.cleared === undefined && updatedShipment.cleared)) && 
+
+          if ((data.cleared === true || (data.cleared === undefined && updatedShipment.cleared)) &&
               data.clearanceDocumentName && !s.clearanceDocumentName && newClearanceDate === null) {
             newClearanceDate = new Date().toISOString();
           }
 
 
           updatedShipment.clearanceDate = newClearanceDate;
-          
+
           return updatedShipment;
         }
         return s;
@@ -248,7 +242,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
         getShipmentById,
         updateShipmentReleasedStatus,
         updateShipmentClearedStatus,
-        markShipmentAsPrinted, 
+        markShipmentAsPrinted,
       }}
     >
       {children}
@@ -263,4 +257,3 @@ export const useWarehouse = (): WarehouseContextType => {
   }
   return context;
 };
-

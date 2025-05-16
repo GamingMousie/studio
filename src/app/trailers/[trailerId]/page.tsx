@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -8,7 +9,7 @@ import ShipmentCard from '@/components/shipment/ShipmentCard';
 import AddShipmentDialog from '@/components/shipment/AddShipmentDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye } from 'lucide-react'; // Added FileText, Eye
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 
@@ -20,33 +21,29 @@ export default function TrailerShipmentsPage() {
   const {
     getShipmentsByTrailerId,
     deleteShipment,
-    trailers: trailersFromContext, // Get the full list of trailers from context
+    trailers: trailersFromContext, 
   } = useWarehouse();
 
   const [trailer, setTrailer] = useState<Trailer | null>(null);
   const [isAddShipmentDialogOpen, setIsAddShipmentDialogOpen] = useState(false);
-  const [isTrailerFound, setIsTrailerFound] = useState<boolean | null>(null); // null: loading, true: found, false: not found
+  const [isTrailerFound, setIsTrailerFound] = useState<boolean | null>(null); 
 
 
   useEffect(() => {
-    // Ensure trailerId is a non-empty string before proceeding
     if (typeof trailerId === 'string' && trailerId.trim() !== '') {
       const currentTrailer = trailersFromContext.find(t => t.id === trailerId);
       if (currentTrailer) {
         setTrailer(currentTrailer);
         setIsTrailerFound(true);
       } else {
-        // If trailersFromContext is populated (guaranteed by initialTrailers or localStorage data)
-        // and the trailer is not found, then it's genuinely not in the current dataset.
         setIsTrailerFound(false);
         setTrailer(null);
       }
     } else {
-      // trailerId is invalid or not yet available
       setIsTrailerFound(false);
       setTrailer(null);
     }
-  }, [trailerId, trailersFromContext]); // Depend on trailerId and the raw trailers array from context
+  }, [trailerId, trailersFromContext]); 
 
   const shipmentsForCurrentTrailer = useMemo(() => {
     if (!trailerId || !isTrailerFound || !trailer) return [];
@@ -56,15 +53,45 @@ export default function TrailerShipmentsPage() {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'N/A';
     try {
-      return format(parseISO(dateString), 'PPpp'); 
+      return format(parseISO(dateString), 'PPpp');
     } catch (error) {
       console.error("Error formatting date:", dateString, error);
       return "Invalid Date";
     }
   };
 
+  const handleViewDocument = (documentName?: string) => {
+    if (documentName) {
+      const newWindow = window.open("", "_blank");
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>Viewing Document: ${documentName}</title>
+              <style>
+                body { font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f0f0f0; }
+                .container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+                h1 { color: #333; }
+                p { color: #666; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1>Viewing Document: ${documentName}</h1>
+                <p>(This is a placeholder. In a real application, the document content for "${documentName}" would be displayed here.)</p>
+              </div>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      } else {
+        alert(`Could not open new window to view document: ${documentName}. Please check your popup blocker settings.`);
+      }
+    }
+  };
 
-  if (isTrailerFound === null) { 
+
+  if (isTrailerFound === null) {
     return (
       <div className="flex justify-center items-center h-[calc(100vh-200px)]">
         <p className="text-xl text-muted-foreground">Loading trailer details...</p>
@@ -72,7 +99,7 @@ export default function TrailerShipmentsPage() {
     );
   }
 
-  if (isTrailerFound === false || !trailer) { 
+  if (isTrailerFound === false || !trailer) {
      return (
         <div className="flex flex-col justify-center items-center h-[calc(100vh-200px)] space-y-4">
           <Truck className="h-16 w-16 text-muted-foreground" />
@@ -86,7 +113,7 @@ export default function TrailerShipmentsPage() {
         </div>
      );
   }
-  
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -151,6 +178,34 @@ export default function TrailerShipmentsPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Out-turn Report Section */}
+          <div className="py-4 border-t">
+            <h3 className="text-lg font-semibold flex items-center mb-2">
+              <FileText className="mr-2 h-5 w-5 text-primary" />
+              Out-turn Report
+            </h3>
+            {trailer.outturnReportDocumentName ? (
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+                <div className="flex items-center">
+                  <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">{trailer.outturnReportDocumentName}</span>
+                </div>
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={() => handleViewDocument(trailer.outturnReportDocumentName)}
+                  aria-label={`View out-turn report ${trailer.outturnReportDocumentName}`}
+                >
+                  <Eye className="mr-1 h-4 w-4" /> View
+                </Button>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No out-turn report attached. You can add one by editing the trailer.</p>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">Edit trailer details to attach or change the out-turn report PDF.</p>
+          </div>
+
+
           <div className="flex justify-between items-center mb-6 pt-4 border-t">
             <h2 className="text-2xl font-semibold flex items-center">
               <Package className="mr-3 h-7 w-7 text-primary" />
@@ -187,3 +242,4 @@ export default function TrailerShipmentsPage() {
       />
     </div>
   );
+}

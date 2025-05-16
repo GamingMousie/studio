@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useForm, type SubmitHandler, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,7 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Edit, Weight, Tag } from "lucide-react";
+import { CalendarIcon, Edit, Weight, Tag, FileText, UploadCloud } from "lucide-react"; // Added FileText, UploadCloud
 import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
@@ -33,6 +34,7 @@ type EditTrailerFormDataInternal = {
   weight?: number | null;
   customField1?: string;
   customField2?: string;
+  outturnReportDocument?: FileList | File | null; // For new file uploads
 };
 
 const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Devanned'];
@@ -46,6 +48,7 @@ const editTrailerSchema = z.object({
   weight: z.coerce.number().positive('Weight must be a positive number').optional().nullable(),
   customField1: z.string().max(50, 'T1.1 value too long').optional(),
   customField2: z.string().max(50, 'T1.2 value too long').optional(),
+  outturnReportDocument: z.any().optional(), // For new file uploads
 }).refine(data => {
   if (data.arrivalDate && data.storageExpiryDate && data.storageExpiryDate < data.arrivalDate) {
     return false;
@@ -67,7 +70,7 @@ interface EditTrailerDialogProps {
 export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: EditTrailerDialogProps) {
   const { updateTrailer } = useWarehouse();
   const { toast } = useToast();
-  
+
   const { register, handleSubmit, reset, setValue, watch, control, formState: { errors, isSubmitting } } = useForm<EditTrailerFormDataInternal>({
     resolver: zodResolver(editTrailerSchema),
   });
@@ -83,6 +86,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
         weight: trailerToEdit.weight ?? null,
         customField1: trailerToEdit.customField1 || '',
         customField2: trailerToEdit.customField2 || '',
+        outturnReportDocument: null, // Reset file input
       });
     }
   }, [trailerToEdit, isOpen, reset]);
@@ -92,17 +96,30 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
   }, [register]);
 
   const selectedStatus = watch('status');
+  const currentOutturnReportDocumentName = trailerToEdit?.outturnReportDocumentName;
+  const newOutturnDocumentFile = watch('outturnReportDocument');
+
 
   const onSubmit: SubmitHandler<EditTrailerFormDataInternal> = (data) => {
+    let outturnDocName: string | null | undefined = trailerToEdit.outturnReportDocumentName;
+
+    if (data.outturnReportDocument && data.outturnReportDocument.length > 0) {
+      outturnDocName = data.outturnReportDocument[0].name;
+    } else if (data.outturnReportDocument === null) { // Explicitly cleared
+        outturnDocName = null;
+    }
+
+
     const updateData: TrailerUpdateData = {
       name: data.name,
-      company: data.company || undefined, 
+      company: data.company || undefined,
       status: data.status,
-      arrivalDate: data.arrivalDate ? data.arrivalDate.toISOString() : null, 
-      storageExpiryDate: data.storageExpiryDate ? data.storageExpiryDate.toISOString() : null, 
+      arrivalDate: data.arrivalDate ? data.arrivalDate.toISOString() : null,
+      storageExpiryDate: data.storageExpiryDate ? data.storageExpiryDate.toISOString() : null,
       weight: data.weight ?? undefined,
       customField1: data.customField1 || undefined,
       customField2: data.customField2 || undefined,
+      outturnReportDocumentName: outturnDocName,
     };
 
     updateTrailer(trailerToEdit.id, updateData);
@@ -125,6 +142,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
         weight: trailerToEdit.weight ?? null,
         customField1: trailerToEdit.customField1 || '',
         customField2: trailerToEdit.customField2 || '',
+        outturnReportDocument: null,
       });
     }
   }
@@ -178,8 +196,8 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
           </div>
            <div>
             <Label htmlFor="status">Status</Label>
-            <Select 
-              value={selectedStatus || trailerToEdit.status} 
+            <Select
+              value={selectedStatus || trailerToEdit.status}
               onValueChange={(value) => setValue('status', value as TrailerStatus, { shouldValidate: true })}
             >
               <SelectTrigger id="status">
@@ -263,6 +281,39 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
               {errors.storageExpiryDate && <p className="text-sm text-destructive mt-1">{errors.storageExpiryDate.message}</p>}
             </div>
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="outturnReportDocument" className="flex items-center">
+              <UploadCloud className="mr-2 h-4 w-4 text-muted-foreground" /> Out-turn Report PDF (Optional)
+            </Label>
+            {currentOutturnReportDocumentName && !newOutturnDocumentFile?.[0] && (
+                <p className="text-xs text-muted-foreground flex items-center">
+                  <FileText className="mr-1 h-3.5 w-3.5" /> Current: {currentOutturnReportDocumentName}
+                </p>
+            )}
+            <Input id="outturnReportDocument" type="file" {...register('outturnReportDocument')} accept=".pdf" className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+            {errors.outturnReportDocument && <p className="text-sm text-destructive mt-1">{(errors.outturnReportDocument as any)?.message}</p>}
+            <p className="text-xs text-muted-foreground">Upload a new PDF to replace the current one. Max 5MB.</p>
+             {currentOutturnReportDocumentName && (
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="text-xs text-destructive p-0 h-auto"
+                onClick={() => {
+                  setValue('outturnReportDocument', null); // This should signal to clear
+                  // We might need a more explicit way if null isn't enough,
+                  // e.g., a hidden field or separate state, but let's try this.
+                  // The onSubmit logic will check if data.outturnReportDocument is explicitly null
+                  // and then set trailer.outturnReportDocumentName to null.
+                  toast({ title: "Out-turn Report Cleared", description: "The out-turn report association will be removed upon saving."});
+                }}
+              >
+                Clear Current Out-turn Report
+              </Button>
+            )}
+          </div>
+
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>

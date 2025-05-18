@@ -9,10 +9,11 @@ import type { Trailer, Shipment } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Truck, FileText, Edit2 } from 'lucide-react';
+import { ArrowLeft, Printer, Truck, FileText, Edit2, Save } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
 // Helper to create a line for data or empty space
 const FormLine = ({ label, value, valueBold = false, fullWidthValue = false, minHeight = 'min-h-[1.5em]', className }: { label?: string, value?: string | number | null, valueBold?: boolean, fullWidthValue?: boolean, minHeight?: string, className?: string }) => {
@@ -20,7 +21,7 @@ const FormLine = ({ label, value, valueBold = false, fullWidthValue = false, min
   return (
     <div className={`flex ${fullWidthValue && label ? 'flex-col items-start' : 'flex-row items-end'} ${minHeight} mb-1 print:mb-0.5 ${className}`}>
       {label && <span className="text-xs print:text-[7pt] mr-1 whitespace-nowrap shrink-0">{label}:</span>}
-      <span 
+      <span
         className={`flex-grow border-b border-foreground ${valueBold ? 'font-semibold' : ''} text-xs print:text-[8pt] pb-px overflow-hidden text-ellipsis whitespace-nowrap`}
       >
         {valueDisplay}
@@ -34,20 +35,21 @@ export default function PrintTrailerTransferPage() {
   const router = useRouter();
   const params = useParams();
   const trailerId = params.trailerId as string;
+  const { toast } = useToast();
 
-  const { getTrailerById, getShipmentsByTrailerId } = useWarehouse();
+  const { getTrailerById, getShipmentsByTrailerId, updateTrailer } = useWarehouse();
 
   const [trailer, setTrailer] = useState<Trailer | null | undefined>(undefined);
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [isClient, setIsClient] = useState(false);
   const [generatedDate, setGeneratedDate] = useState<string | null>(null);
-  
+
   // State for editable fields
   const [reportingPersonName, setReportingPersonName] = useState('');
   const [mvArrived, setMvArrived] = useState('');
   const [mvDate, setMvDate] = useState('');
   const [shipDateArrivalC, setShipDateArrivalC] = useState('');
-  const [countryOfOriginC, setCountryOfOriginC] = useState(''); 
+  const [countryOfOriginC, setCountryOfOriginC] = useState('');
   const [customsSealNoC, setCustomsSealNoC] = useState('');
 
   const [showAdditionalDetailsForm, setShowAdditionalDetailsForm] = useState(false);
@@ -68,6 +70,18 @@ export default function PrintTrailerTransferPage() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleSaveACPForm = () => {
+    if (!trailer) return;
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+    const acpDocName = `ACP_Form_${trailer.id}_${timestamp}.pdf`;
+    updateTrailer(trailer.id, { acpDocumentName: acpDocName });
+    toast({
+      title: "ACP Form Saved",
+      description: `Associated '${acpDocName}' with trailer ${trailer.id}. You can manage this in 'Edit Trailer'.`,
+    });
   };
 
   const formatDateForForm = (dateString?: string) => {
@@ -120,13 +134,13 @@ export default function PrintTrailerTransferPage() {
 
   if (!trailer) return null;
 
-  const manifestRef = trailer.id; 
-  const unitContainerNumber = trailer.name; 
-  const t1_1 = trailer.customField1; 
-  const t1_2 = trailer.customField2; 
-  const arrivalDateFormatted = formatDateForForm(trailer.arrivalDate); 
-  const totalShipments = shipments.length; 
-  const clearanceAgencyCompany = trailer.company; 
+  const manifestRef = trailer.id;
+  const unitContainerNumber = trailer.name;
+  const t1_1 = trailer.customField1;
+  const t1_2 = trailer.customField2;
+  const arrivalDateFormatted = formatDateForForm(trailer.arrivalDate);
+  const totalShipments = shipments.length;
+  const clearanceAgencyCompany = trailer.company;
 
 
   return (
@@ -135,7 +149,7 @@ export default function PrintTrailerTransferPage() {
         <Button variant="outline" onClick={() => router.back()} size="sm">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        
+
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4"> {/* Grouping controls */}
           <div className="flex items-center gap-2">
             <Label htmlFor="reportingPersonName" className="whitespace-nowrap text-sm">Person Signing:</Label>
@@ -154,6 +168,9 @@ export default function PrintTrailerTransferPage() {
           >
             <Edit2 className="mr-2 h-4 w-4" />
             {showAdditionalDetailsForm ? 'Hide Details Form' : 'Edit Print Details'}
+          </Button>
+          <Button onClick={handleSaveACPForm} size="sm" variant="outline">
+            <Save className="mr-2 h-4 w-4" /> Save ACP Form
           </Button>
           <Button onClick={handlePrint} size="sm">
             <Printer className="mr-2 h-4 w-4" /> Print Document
@@ -189,7 +206,6 @@ export default function PrintTrailerTransferPage() {
               <Label htmlFor="customsSealNoC" className="text-sm font-medium">Customs Seal No. (Part C)</Label>
               <Input id="customsSealNoC" value={customsSealNoC} onChange={(e) => setCustomsSealNoC(e.target.value)} placeholder="Customs Seal" className="mt-1"/>
             </div>
-            {/* Company Seal No. C removed */}
           </CardContent>
         </Card>
       )}
@@ -212,7 +228,7 @@ export default function PrintTrailerTransferPage() {
             )}
           </div>
         </CardHeader>
-        
+
         <CardContent className="pt-3 text-xs print:text-[8pt] print:pt-1 space-y-3 print:space-y-1">
           {/* Part A */}
           <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">
@@ -231,7 +247,7 @@ export default function PrintTrailerTransferPage() {
                 <FormLine label="Manifest Ref" value={manifestRef} valueBold />
             </div>
             <FormLine label="to the Authorised Temporary Storage Facility of" value="SPRATT LOGISTICS" valueBold />
-            
+
             <div className="text-xs print:text-[7pt] mt-1 print:mt-0.5">T1 Groupage covered Under Transit MRN No(s):</div>
             <div className="border border-dashed border-muted-foreground print:border-gray-400 p-1 min-h-[2.5em] print:min-h-[1.5em]">
                 <p className="whitespace-pre-wrap text-xs print:text-[7pt]">{t1_1 || ''} {t1_1 && t1_2 && ' / '} {t1_2 || ''}</p>
@@ -243,7 +259,7 @@ export default function PrintTrailerTransferPage() {
                 <FormLine label="Date" value={arrivalDateFormatted} valueBold />
             </div>
           </div>
-          
+
           {/* Part B */}
           <div className="space-y-1 print:space-y-0.5 border border-foreground print:border-black p-2 print:p-1">
             <h3 className="font-bold text-sm print:text-[9pt] mb-1 print:mb-0.5">Part B (Official use only)</h3>
@@ -258,7 +274,6 @@ export default function PrintTrailerTransferPage() {
                 <div className="border border-foreground print:border-black flex items-center justify-center text-center min-h-[3em] print:min-h-[2.5em] p-1 text-xs print:text-[7pt]">
                   Date Stamp and Time
                 </div>
-                 {/* Empty div to push signature to bottom if needed, or remove if Date Stamp box handles height */}
               </div>
             </div>
           </div>
@@ -274,7 +289,6 @@ export default function PrintTrailerTransferPage() {
                 <FormLine label="Number of T1/Non-EU consignments" value={totalShipments} valueBold/>
                 <FormLine label="Country of Origin" value={countryOfOriginC}/>
                 <FormLine label="Customs Seal No." value={customsSealNoC}/>
-                {/* Company Seal No. C removed */}
                 <FormLine label="Clearance Agency" value={clearanceAgencyCompany} valueBold/>
                 <FormLine label="Person Reporting" value={reportingPersonName} valueBold/>
                 <FormLine label="Contact No." value="01 8527 100" valueBold/>
@@ -294,4 +308,3 @@ export default function PrintTrailerTransferPage() {
     </div>
   );
 }
-

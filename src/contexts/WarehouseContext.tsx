@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid'; // Using uuid for unique shipment IDs
 
 interface WarehouseContextType {
   trailers: Trailer[];
-  addTrailer: (trailer: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'company' | 'customField1' | 'customField2' | 'outturnReportDocumentName' | 't1SummaryDocumentName' | 'manifestDocumentName'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number; customField1?: string; customField2?: string; }) => void;
+  addTrailer: (trailer: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'company' | 'customField1' | 'customField2' | 'outturnReportDocumentName' | 't1SummaryDocumentName' | 'manifestDocumentName' | 'acpDocumentName'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number; customField1?: string; customField2?: string; }) => void;
   updateTrailerStatus: (trailerId: string, status: TrailerStatus) => void;
   updateTrailer: (trailerId: string, data: TrailerUpdateData) => void;
   deleteTrailer: (trailerId: string) => void;
@@ -29,7 +29,7 @@ interface WarehouseContextType {
 const WarehouseContext = createContext<WarehouseContextType | undefined>(undefined);
 
 const initialTrailers: Trailer[] = [
-  { id: 'T-001', name: 'Alpha Transporter', status: 'Arrived', company: 'Logistics Inc.', arrivalDate: new Date('2024-07-20T10:00:00Z').toISOString(), storageExpiryDate: new Date('2024-08-20T10:00:00Z').toISOString(), weight: 3500, customField1: 'CF1-Alpha', customField2: 'CF2-Alpha', outturnReportDocumentName: 'T-001_outturn_report.pdf', t1SummaryDocumentName: 'T-001_T1_summary.pdf', manifestDocumentName: 'T-001_manifest.pdf' },
+  { id: 'T-001', name: 'Alpha Transporter', status: 'Arrived', company: 'Logistics Inc.', arrivalDate: new Date('2024-07-20T10:00:00Z').toISOString(), storageExpiryDate: new Date('2024-08-20T10:00:00Z').toISOString(), weight: 3500, customField1: 'CF1-Alpha', customField2: 'CF2-Alpha', outturnReportDocumentName: 'T-001_outturn_report.pdf', t1SummaryDocumentName: 'T-001_T1_summary.pdf', manifestDocumentName: 'T-001_manifest.pdf', acpDocumentName: 'ACP_Form_T-001.pdf' },
   { id: 'T-002', name: 'Beta Hauler', status: 'Scheduled', company: 'QuickShip Co.', arrivalDate: new Date('2024-07-22T14:30:00Z').toISOString(), weight: 3200 },
   { id: 'T-003', name: 'Gamma Carrier', status: 'Devanned', company: 'Cargo Movers', weight: 3000, customField1: 'CF1-Gamma', t1SummaryDocumentName: 'Gamma_T1_summary.pdf' },
   { id: 'T-004', name: 'Delta Freighter', status: 'Loading', company: 'Logistics Inc.', weight: 4000, outturnReportDocumentName: 'Delta_damage_report.pdf', manifestDocumentName: 'Delta_manifest.pdf' },
@@ -57,7 +57,7 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
   const [trailers, setTrailers] = useLocalStorageState<Trailer[]>('trailers', initialTrailers);
   const [shipments, setShipments] = useLocalStorageState<Shipment[]>('shipments', initialShipments);
 
-  const addTrailer = useCallback((trailerData: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'company' | 'customField1' | 'customField2' | 'outturnReportDocumentName' | 't1SummaryDocumentName' | 'manifestDocumentName'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number; customField1?: string; customField2?: string; }) => {
+  const addTrailer = useCallback((trailerData: Omit<Trailer, 'status' | 'arrivalDate' | 'storageExpiryDate' | 'weight' | 'company' | 'customField1' | 'customField2' | 'outturnReportDocumentName' | 't1SummaryDocumentName' | 'manifestDocumentName' | 'acpDocumentName'> & { status?: TrailerStatus; company?: string; arrivalDate?: string; storageExpiryDate?: string; weight?: number; customField1?: string; customField2?: string; }) => {
     const newTrailer: Trailer = {
       id: trailerData.id,
       name: trailerData.name,
@@ -68,9 +68,10 @@ export const WarehouseProvider = ({ children }: { children: ReactNode }) => {
       weight: trailerData.weight || undefined,
       customField1: trailerData.customField1 || undefined,
       customField2: trailerData.customField2 || undefined,
-      outturnReportDocumentName: undefined, 
+      outturnReportDocumentName: undefined,
       t1SummaryDocumentName: undefined,
       manifestDocumentName: undefined,
+      acpDocumentName: undefined,
     };
     setTrailers((prev) => [...prev, newTrailer]);
   }, [setTrailers]);

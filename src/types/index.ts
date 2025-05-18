@@ -19,6 +19,7 @@ export interface Trailer {
   outturnReportDocumentName?: string; // Optional: Name of the out-turn report PDF
   t1SummaryDocumentName?: string; // Optional: Name of the T1 Summary PDF
   manifestDocumentName?: string; // Optional: Name of the Manifest PDF
+  acpDocumentName?: string; // Optional: Name of the saved ACP Form PDF
 }
 
 export interface Shipment {
@@ -95,6 +96,7 @@ export interface TrailerUpdateData {
   outturnReportDocumentName?: string | null; // Allow setting to null to clear
   t1SummaryDocumentName?: string | null;
   manifestDocumentName?: string | null;
+  acpDocumentName?: string | null; // Allow setting to null to clear
 }
 
 // For AddTrailerDialog form
@@ -108,5 +110,5 @@ export interface TrailerFormData {
   weight?: number | null;
   customField1?: string;
   customField2?: string;
-  // outturnReportDocument is handled in EditTrailerDialog for simplicity of add flow
+  // Document fields are typically handled in Edit Dialog for simplicity of add flow
 }

@@ -10,7 +10,7 @@ import AddShipmentDialog from '@/components/shipment/AddShipmentDialog';
 import EditTrailerDialog from '@/components/trailer/EditTrailerDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye, Edit, UploadCloud, BookOpen, FileBadge } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye, Edit, UploadCloud, BookOpen, FileBadge, Mail, FileSignature } from 'lucide-react'; // Added FileSignature
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 
@@ -22,13 +22,13 @@ export default function TrailerShipmentsPage() {
   const {
     getShipmentsByTrailerId,
     deleteShipment,
-    trailers: trailersFromContext, 
+    trailers: trailersFromContext,
   } = useWarehouse();
 
   const [trailer, setTrailer] = useState<Trailer | null>(null);
   const [isAddShipmentDialogOpen, setIsAddShipmentDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isTrailerFound, setIsTrailerFound] = useState<boolean | null>(null); 
+  const [isTrailerFound, setIsTrailerFound] = useState<boolean | null>(null);
 
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function TrailerShipmentsPage() {
       setIsTrailerFound(false);
       setTrailer(null);
     }
-  }, [trailerId, trailersFromContext]); 
+  }, [trailerId, trailersFromContext]);
 
   const shipmentsForCurrentTrailer = useMemo(() => {
     if (!trailerId || !isTrailerFound || !trailer) return [];
@@ -90,6 +90,30 @@ export default function TrailerShipmentsPage() {
         alert(`Could not open new window to view document: ${documentName}. Please check your popup blocker settings.`);
       }
     }
+  };
+
+  const handleEmailDocuments = () => {
+    if (!trailer) return;
+    const subject = `${trailer.id} // ${trailer.name}`;
+    const emailTo = 'klaudia@mail.com';
+    let body = "Good morning,\n\nPlease see attached:\n\n";
+    body += "- ACP Form (Please generate from 'Print Trailer ACP Form' page and attach)\n";
+    if (trailer.t1SummaryDocumentName) {
+      body += `- T1 Summary: ${trailer.t1SummaryDocumentName}\n`;
+    } else {
+      body += "- T1 Summary (not attached to trailer record)\n";
+    }
+    if (trailer.manifestDocumentName) {
+      body += `- Manifest: ${trailer.manifestDocumentName}\n`;
+    } else {
+      body += "- Manifest (not attached to trailer record)\n";
+    }
+     if (trailer.acpDocumentName) {
+      body += `- Saved ACP Form: ${trailer.acpDocumentName}\n`;
+    }
+
+    const mailtoLink = `mailto:${emailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
   };
 
 
@@ -164,6 +188,9 @@ export default function TrailerShipmentsPage() {
           <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
             <Edit className="mr-2 h-4 w-4" /> Edit Trailer Details
           </Button>
+          <Button variant="outline" size="sm" onClick={handleEmailDocuments}>
+            <Mail className="mr-2 h-4 w-4" /> Email Trailer Documents
+          </Button>
           <Button variant="outline" size="sm" asChild>
             <Link href={`/trailers/${trailer.id}/print`}>
               <Printer className="mr-2 h-4 w-4" /> Print Trailer ACP Form
@@ -221,22 +248,28 @@ export default function TrailerShipmentsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <DocumentSection 
-            title="Out-turn Report" 
-            documentName={trailer.outturnReportDocumentName} 
+          <DocumentSection
+            title="Out-turn Report"
+            documentName={trailer.outturnReportDocumentName}
             icon={FileText}
             editAction={() => setIsEditDialogOpen(true)}
           />
-          <DocumentSection 
-            title="T1 Summary" 
-            documentName={trailer.t1SummaryDocumentName} 
+          <DocumentSection
+            title="T1 Summary"
+            documentName={trailer.t1SummaryDocumentName}
             icon={FileBadge}
             editAction={() => setIsEditDialogOpen(true)}
           />
-          <DocumentSection 
-            title="Manifest" 
-            documentName={trailer.manifestDocumentName} 
+          <DocumentSection
+            title="Manifest"
+            documentName={trailer.manifestDocumentName}
             icon={BookOpen}
+            editAction={() => setIsEditDialogOpen(true)}
+          />
+          <DocumentSection
+            title="ACP Form"
+            documentName={trailer.acpDocumentName}
+            icon={FileSignature}
             editAction={() => setIsEditDialogOpen(true)}
           />
 
@@ -274,7 +307,7 @@ export default function TrailerShipmentsPage() {
         setIsOpen={setIsAddShipmentDialogOpen}
         trailerId={trailer.id}
       />
-      
+
       {isEditDialogOpen && trailer && (
         <EditTrailerDialog
           isOpen={isEditDialogOpen}

@@ -19,7 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Edit, Weight, Tag, FileText, UploadCloud, BookOpen, FileBadge } from "lucide-react";
+import { CalendarIcon, Edit, Weight, Tag, FileText, UploadCloud, BookOpen, FileBadge, FileSignature } from "lucide-react"; // Added FileSignature
 import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
@@ -37,6 +37,7 @@ type EditTrailerFormDataInternal = {
   outturnReportDocument?: FileList | File | null;
   t1SummaryDocument?: FileList | File | null;
   manifestDocument?: FileList | File | null;
+  acpDocument?: FileList | File | null; // Added ACP document
 };
 
 const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Devanned'];
@@ -53,6 +54,7 @@ const editTrailerSchema = z.object({
   outturnReportDocument: z.any().optional(),
   t1SummaryDocument: z.any().optional(),
   manifestDocument: z.any().optional(),
+  acpDocument: z.any().optional(), // Added ACP document schema
 }).refine(data => {
   if (data.arrivalDate && data.storageExpiryDate && data.storageExpiryDate < data.arrivalDate) {
     return false;
@@ -93,6 +95,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
         outturnReportDocument: null,
         t1SummaryDocument: null,
         manifestDocument: null,
+        acpDocument: null, // Reset ACP document
       });
     }
   }, [trailerToEdit, isOpen, reset]);
@@ -108,6 +111,8 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
   const newT1SummaryDocumentFile = watch('t1SummaryDocument');
   const currentManifestDocumentName = trailerToEdit?.manifestDocumentName;
   const newManifestDocumentFile = watch('manifestDocument');
+  const currentAcpDocumentName = trailerToEdit?.acpDocumentName; // For ACP Document
+  const newAcpDocumentFile = watch('acpDocument'); // For ACP Document
 
 
   const onSubmit: SubmitHandler<EditTrailerFormDataInternal> = (data) => {
@@ -132,6 +137,14 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
         manifestDocName = null;
     }
 
+    let acpDocName: string | null | undefined = trailerToEdit.acpDocumentName; // For ACP Document
+    if (data.acpDocument && data.acpDocument.length > 0) {
+      acpDocName = data.acpDocument[0].name;
+    } else if (data.acpDocument === null) {
+      acpDocName = null;
+    }
+
+
     const updateData: TrailerUpdateData = {
       name: data.name,
       company: data.company || undefined,
@@ -144,6 +157,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
       outturnReportDocumentName: outturnDocName,
       t1SummaryDocumentName: t1SummaryDocName,
       manifestDocumentName: manifestDocName,
+      acpDocumentName: acpDocName, // Include ACP document name
     };
 
     updateTrailer(trailerToEdit.id, updateData);
@@ -169,6 +183,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
         outturnReportDocument: null,
         t1SummaryDocument: null,
         manifestDocument: null,
+        acpDocument: null,
       });
     }
   }
@@ -327,7 +342,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
                 size="sm"
                 className="text-xs text-destructive p-0 h-auto"
                 onClick={() => {
-                  setValue('outturnReportDocument', null);
+                  setValue('outturnReportDocument', null); // Signal to remove/clear
                   toast({ title: "Out-turn Report Cleared", description: "The out-turn report association will be removed upon saving."});
                 }}
               >
@@ -335,7 +350,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
               </Button>
             )}
           </div>
-          
+
           <div className="space-y-2 border-t pt-4">
             <Label htmlFor="t1SummaryDocument" className="flex items-center">
               <FileBadge className="mr-2 h-4 w-4 text-muted-foreground" /> T1 Summary PDF (Optional)
@@ -388,6 +403,34 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
                 }}
               >
                 Clear Current Manifest
+              </Button>
+            )}
+          </div>
+
+          <div className="space-y-2 border-t pt-4">
+            <Label htmlFor="acpDocument" className="flex items-center">
+              <FileSignature className="mr-2 h-4 w-4 text-muted-foreground" /> ACP Form PDF (Optional)
+            </Label>
+            {currentAcpDocumentName && !newAcpDocumentFile?.[0] && (
+                <p className="text-xs text-muted-foreground flex items-center">
+                  <FileText className="mr-1 h-3.5 w-3.5" /> Current: {currentAcpDocumentName}
+                </p>
+            )}
+            <Input id="acpDocument" type="file" {...register('acpDocument')} accept=".pdf" className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+            {errors.acpDocument && <p className="text-sm text-destructive mt-1">{(errors.acpDocument as any)?.message}</p>}
+            <p className="text-xs text-muted-foreground">Upload a new PDF to replace. Max 5MB.</p>
+             {currentAcpDocumentName && (
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="text-xs text-destructive p-0 h-auto"
+                onClick={() => {
+                  setValue('acpDocument', null);
+                  toast({ title: "ACP Form Cleared", description: "The ACP Form association will be removed upon saving."});
+                }}
+              >
+                Clear Current ACP Form
               </Button>
             )}
           </div>

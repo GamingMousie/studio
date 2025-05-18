@@ -16,10 +16,10 @@ export interface Trailer {
   weight?: number; // Optional: Weight of the trailer in kg
   customField1?: string; // Represents T1.1
   customField2?: string; // Represents T1.2
-  outturnReportDocumentName?: string; // Optional: Name of the out-turn report PDF
-  t1SummaryDocumentName?: string; // Optional: Name of the T1 Summary PDF
-  manifestDocumentName?: string; // Optional: Name of the Manifest PDF
-  acpDocumentName?: string; // Optional: Name of the saved ACP Form PDF
+  outturnReportDocumentName?: string | null;
+  t1SummaryDocumentName?: string | null;
+  manifestDocumentName?: string | null;
+  acpDocumentName?: string | null;
 }
 
 export interface Shipment {
@@ -111,4 +111,28 @@ export interface TrailerFormData {
   customField1?: string;
   customField2?: string;
   // Document fields are typically handled in Edit Dialog for simplicity of add flow
+}
+
+// For Stock Check Quiz
+export interface QuizItem {
+  id: string; // Combination of shipmentId and locationName for uniqueness
+  shipmentId: string;
+  stsJob: number;
+  trailerId: string;
+  trailerCompany?: string;
+  trailerArrivalDateFormatted: string;
+  shipmentQuantity: number;
+  locationName: string;
+  locationPallets?: number;
+}
+
+export interface AnsweredQuizItem extends QuizItem {
+  userAnswer: 'yes' | 'no';
+}
+
+export interface QuizReport {
+  id: string;
+  completedAt: string; // ISO string
+  completedBy: string;
+  items: AnsweredQuizItem[];
 }

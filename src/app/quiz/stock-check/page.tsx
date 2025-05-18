@@ -3,32 +3,41 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useWarehouse } from '@/contexts/WarehouseContext';
-import type { Shipment } from '@/types';
+import type { QuizItem, AnsweredQuizItem, QuizReport as QuizReportType } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChevronLeft, ChevronRight, Check, X, PackageSearch, HelpCircle, Truck, CalendarDays, Box as BoxIcon, Briefcase, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, X, PackageSearch, HelpCircle, Truck, CalendarDays, Box as BoxIcon, Briefcase, MapPin, Save } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
-
-interface QuizItem {
-  id: string; // Combination of shipmentId and locationName for uniqueness
-  shipmentId: string;
-  stsJob: number;
-  trailerId: string;
-  trailerCompany?: string;
-  trailerArrivalDateFormatted: string;
-  shipmentQuantity: number;
-  locationName: string;
-  locationPallets?: number;
-}
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from '@/hooks/use-toast';
 
 export default function StockCheckQuizPage() {
-  const { shipments, getTrailerById } = useWarehouse();
+  const { shipments, getTrailerById, addQuizReport } = useWarehouse();
+  const { toast } = useToast();
   const [isClient, setIsClient] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<{ [itemId: string]: 'yes' | 'no' }>({});
+  const [isQuizComplete, setIsQuizComplete] = useState(false);
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [completerName, setCompleterName] = useState('');
+  
+  // Memoize quizItems once on client mount to keep the list stable for the quiz session
+  const [sessionQuizItems, setSessionQuizItems] = useState<QuizItem[]>([]);
 
   useEffect(() => {
     setIsClient(true);
@@ -42,49 +51,56 @@ export default function StockCheckQuizPage() {
       return "Invalid Date";
     }
   };
+  
+  // Calculate initial quiz items and set them to sessionQuizItems
+  // This effect runs once when isClient becomes true
+  useEffect(() => {
+    if (isClient) {
+      const initialItems: QuizItem[] = [];
+      shipments
+        .filter(shipment => !shipment.releasedAt)
+        .forEach(shipment => {
+          const trailer = getTrailerById(shipment.trailerId);
+          const shipmentLocations = shipment.locations && shipment.locations.length > 0
+            ? shipment.locations
+            : [{ name: 'Pending Assignment', pallets: undefined }];
 
-  const quizItems = useMemo((): QuizItem[] => {
-    if (!isClient) return [];
-    const items: QuizItem[] = [];
-    shipments
-      .filter(shipment => !shipment.releasedAt)
-      .forEach(shipment => {
-        const trailer = getTrailerById(shipment.trailerId);
-        const shipmentLocations = shipment.locations && shipment.locations.length > 0
-          ? shipment.locations
-          : [{ name: 'Pending Assignment', pallets: undefined }];
-
-        shipmentLocations.forEach((loc, index) => {
-          items.push({
-            id: `${shipment.id}-${loc.name}-${index}`,
-            shipmentId: shipment.id,
-            stsJob: shipment.stsJob,
-            trailerId: shipment.trailerId,
-            trailerCompany: trailer?.company,
-            trailerArrivalDateFormatted: formatDateSafe(trailer?.arrivalDate),
-            shipmentQuantity: shipment.quantity,
-            locationName: loc.name,
-            locationPallets: loc.pallets,
+          shipmentLocations.forEach((loc, index) => {
+            initialItems.push({
+              id: `${shipment.id}-${loc.name}-${index}`, // Ensure unique ID even if loc.name is same
+              shipmentId: shipment.id,
+              stsJob: shipment.stsJob,
+              trailerId: shipment.trailerId,
+              trailerCompany: trailer?.company,
+              trailerArrivalDateFormatted: formatDateSafe(trailer?.arrivalDate),
+              shipmentQuantity: shipment.quantity,
+              locationName: loc.name,
+              locationPallets: loc.pallets,
+            });
           });
         });
+
+      const sortedInitialItems = initialItems.sort((a, b) => {
+        if (a.locationName === 'Pending Assignment' && b.locationName !== 'Pending Assignment') return 1;
+        if (a.locationName !== 'Pending Assignment' && b.locationName === 'Pending Assignment') return -1;
+        if (a.locationName.toLowerCase() < b.locationName.toLowerCase()) return -1;
+        if (a.locationName.toLowerCase() > b.locationName.toLowerCase()) return 1;
+        const dateAVal = a.trailerArrivalDateFormatted;
+        const dateBVal = b.trailerArrivalDateFormatted;
+        const dateA = dateAVal !== 'N/A' && dateAVal !== 'Invalid Date' ? parseISO(formatDateSafe(dateAVal, 'yyyy-MM-dd')).getTime() : 0;
+        const dateB = dateBVal !== 'N/A' && dateBVal !== 'Invalid Date' ? parseISO(formatDateSafe(dateBVal, 'yyyy-MM-dd')).getTime() : 0;
+        if (dateB !== dateA) return dateB - dateA;
+        if (a.trailerId.toLowerCase() < b.trailerId.toLowerCase()) return -1;
+        if (a.trailerId.toLowerCase() > b.trailerId.toLowerCase()) return 1;
+        return a.stsJob - b.stsJob;
       });
+      setSessionQuizItems(sortedInitialItems);
+    }
+  }, [isClient, shipments, getTrailerById]); // Re-run if underlying data changes, but quiz session uses the frozen list
 
-    return items.sort((a, b) => {
-      if (a.locationName === 'Pending Assignment' && b.locationName !== 'Pending Assignment') return 1;
-      if (a.locationName !== 'Pending Assignment' && b.locationName === 'Pending Assignment') return -1;
-      if (a.locationName.toLowerCase() < b.locationName.toLowerCase()) return -1;
-      if (a.locationName.toLowerCase() > b.locationName.toLowerCase()) return 1;
-      const dateA = a.trailerArrivalDateFormatted !== 'N/A' && a.trailerArrivalDateFormatted !== 'Invalid Date' ? parseISO(formatDateSafe(a.trailerArrivalDateFormatted, 'yyyy-MM-dd')).getTime() : 0;
-      const dateB = b.trailerArrivalDateFormatted !== 'N/A' && b.trailerArrivalDateFormatted !== 'Invalid Date' ? parseISO(formatDateSafe(b.trailerArrivalDateFormatted, 'yyyy-MM-dd')).getTime() : 0;
-      if (dateB !== dateA) return dateB - dateA;
-      if (a.trailerId.toLowerCase() < b.trailerId.toLowerCase()) return -1;
-      if (a.trailerId.toLowerCase() > b.trailerId.toLowerCase()) return 1;
-      return a.stsJob - b.stsJob;
-    });
-  }, [shipments, getTrailerById, isClient]);
 
-  const currentItem = quizItems[currentIndex];
-  const totalItems = quizItems.length;
+  const currentItem = sessionQuizItems[currentIndex];
+  const totalItems = sessionQuizItems.length;
   const progressPercentage = totalItems > 0 ? ((currentIndex + 1) / totalItems) * 100 : 0;
 
   const handleAnswer = (answer: 'yes' | 'no') => {
@@ -93,8 +109,8 @@ export default function StockCheckQuizPage() {
     if (currentIndex < totalItems - 1) {
       setCurrentIndex(prev => prev + 1);
     } else {
-      // Quiz finished, could show summary or something
-      console.log("Quiz finished", userAnswers);
+      setIsQuizComplete(true);
+      setShowNamePrompt(true);
     }
   };
 
@@ -108,6 +124,87 @@ export default function StockCheckQuizPage() {
     if (currentIndex > 0) {
       setCurrentIndex(prev => prev - 1);
     }
+  };
+
+  const resetQuiz = () => {
+    setCurrentIndex(0);
+    setUserAnswers({});
+    setIsQuizComplete(false);
+    setShowNamePrompt(false);
+    setCompleterName('');
+    // Re-fetch and sort quiz items for a new session if underlying data might have changed
+    // This part is already handled by the useEffect that populates sessionQuizItems
+    // For a more explicit re-fetch, you could call a function here that re-runs the logic of that useEffect
+    if (isClient) { // Re-populate sessionQuizItems as it was done initially
+        const initialItems: QuizItem[] = [];
+        shipments
+            .filter(shipment => !shipment.releasedAt)
+            .forEach(shipment => {
+            const trailer = getTrailerById(shipment.trailerId);
+            const shipmentLocations = shipment.locations && shipment.locations.length > 0
+                ? shipment.locations
+                : [{ name: 'Pending Assignment', pallets: undefined }];
+
+            shipmentLocations.forEach((loc, index) => {
+                initialItems.push({
+                id: `${shipment.id}-${loc.name}-${index}`,
+                shipmentId: shipment.id,
+                stsJob: shipment.stsJob,
+                trailerId: shipment.trailerId,
+                trailerCompany: trailer?.company,
+                trailerArrivalDateFormatted: formatDateSafe(trailer?.arrivalDate),
+                shipmentQuantity: shipment.quantity,
+                locationName: loc.name,
+                locationPallets: loc.pallets,
+                });
+            });
+            });
+        const sortedInitialItems = initialItems.sort((a, b) => {
+            if (a.locationName === 'Pending Assignment' && b.locationName !== 'Pending Assignment') return 1;
+            if (a.locationName !== 'Pending Assignment' && b.locationName === 'Pending Assignment') return -1;
+            if (a.locationName.toLowerCase() < b.locationName.toLowerCase()) return -1;
+            if (a.locationName.toLowerCase() > b.locationName.toLowerCase()) return 1;
+            const dateAVal = a.trailerArrivalDateFormatted;
+            const dateBVal = b.trailerArrivalDateFormatted;
+            const dateA = dateAVal !== 'N/A' && dateAVal !== 'Invalid Date' ? parseISO(formatDateSafe(dateAVal, 'yyyy-MM-dd')).getTime() : 0;
+            const dateB = dateBVal !== 'N/A' && dateBVal !== 'Invalid Date' ? parseISO(formatDateSafe(dateBVal, 'yyyy-MM-dd')).getTime() : 0;
+            if (dateB !== dateA) return dateB - dateA;
+            if (a.trailerId.toLowerCase() < b.trailerId.toLowerCase()) return -1;
+            if (a.trailerId.toLowerCase() > b.trailerId.toLowerCase()) return 1;
+            return a.stsJob - b.stsJob;
+        });
+        setSessionQuizItems(sortedInitialItems);
+    }
+  };
+
+  const handleSaveReport = () => {
+    if (!completerName.trim()) {
+      toast({
+        title: "Name Required",
+        description: "Please enter the name of the person who completed the quiz.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const answeredItems: AnsweredQuizItem[] = sessionQuizItems.map(item => ({
+      ...item,
+      userAnswer: userAnswers[item.id] || 'no', // Default to 'no' if somehow unanswered
+    }));
+
+    const report: Omit<QuizReportType, 'id'> = {
+      completedAt: new Date().toISOString(),
+      completedBy: completerName.trim(),
+      items: answeredItems,
+    };
+
+    addQuizReport(report);
+    toast({
+      title: "Quiz Report Saved!",
+      description: `Report completed by ${completerName.trim()} has been saved.`,
+    });
+    setShowNamePrompt(false);
+    // Do not reset quiz here, wait for explicit "Restart Quiz" from user
   };
   
   const pageTitle = "Stock Check Quiz";
@@ -130,7 +227,7 @@ export default function StockCheckQuizPage() {
     );
   }
 
-  if (totalItems === 0) {
+  if (totalItems === 0 && !isQuizComplete) {
     return (
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-card rounded-lg shadow">
@@ -151,7 +248,6 @@ export default function StockCheckQuizPage() {
     );
   }
 
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-card rounded-lg shadow">
@@ -159,14 +255,18 @@ export default function StockCheckQuizPage() {
           <HelpCircle className="mr-3 h-8 w-8 text-primary" />
           {pageTitle}
         </h1>
-        <div className="text-sm text-muted-foreground font-medium">
-          Item {currentIndex + 1} of {totalItems}
-        </div>
+        {!isQuizComplete && totalItems > 0 && (
+          <div className="text-sm text-muted-foreground font-medium">
+            Item {Math.min(currentIndex + 1, totalItems)} of {totalItems}
+          </div>
+        )}
       </div>
 
-      <Progress value={progressPercentage} className="w-full h-2" />
+      {!isQuizComplete && totalItems > 0 && (
+        <Progress value={progressPercentage} className="w-full h-2" />
+      )}
       
-      {currentItem && (
+      {currentItem && !isQuizComplete && (
         <Card className="shadow-xl">
           <CardHeader>
             <CardTitle className="text-2xl text-primary">Verify Stock Item:</CardTitle>
@@ -208,14 +308,14 @@ export default function StockCheckQuizPage() {
             <Button 
               onClick={() => handleAnswer('yes')} 
               className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto text-lg px-8 py-6"
-              disabled={currentIndex >= totalItems -1 && !!userAnswers[currentItem.id]}
+              disabled={!!userAnswers[currentItem.id]}
             >
               <Check className="mr-2 h-6 w-6" /> YES
             </Button>
             <Button 
               onClick={() => handleAnswer('no')} 
               className="bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto text-lg px-8 py-6"
-              disabled={currentIndex >= totalItems -1 && !!userAnswers[currentItem.id]}
+              disabled={!!userAnswers[currentItem.id]}
             >
               <X className="mr-2 h-6 w-6" /> NO
             </Button>
@@ -223,29 +323,62 @@ export default function StockCheckQuizPage() {
         </Card>
       )}
 
-      {currentIndex === totalItems -1 && totalItems > 0 && !!userAnswers[currentItem?.id] && (
+      {isQuizComplete && !showNamePrompt && (
         <Card className="shadow-lg text-center p-8 bg-secondary">
-          <CardTitle className="text-2xl text-primary mb-4">Quiz Complete!</CardTitle>
-          <CardDescription className="text-base mb-6">You have reviewed all unreleased stock items.</CardDescription>
+          <CardTitle className="text-2xl text-primary mb-4">Quiz Complete & Report Saved!</CardTitle>
+          <CardDescription className="text-base mb-6">
+            You have reviewed all unreleased stock items. The report by {completerName || 'N/A'} has been saved.
+          </CardDescription>
           <div className="flex justify-center gap-4">
-            <Button variant="outline" onClick={() => { setCurrentIndex(0); setUserAnswers({}); }}>
-              Restart Quiz
+            <Button variant="outline" onClick={resetQuiz}>
+              Start New Quiz
             </Button>
             <Button asChild>
-              <Link href="/reports/unreleased-stock-locations">View Full Report</Link>
+              <Link href="/reports/unreleased-stock-locations">View Full Stock Report</Link>
             </Button>
+            {/* Future: <Button asChild><Link href="/quiz/reports">View Quiz Reports</Link></Button> */}
           </div>
         </Card>
       )}
 
-      <div className="flex justify-between items-center mt-6">
-        <Button onClick={handlePrevious} disabled={currentIndex === 0}>
-          <ChevronLeft className="mr-2 h-4 w-4" /> Previous Item
-        </Button>
-        <Button onClick={handleNext} disabled={currentIndex >= totalItems - 1 || (!!userAnswers[currentItem?.id] && currentIndex === totalItems - 1)}>
-          Next Item <ChevronRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
+      {!isQuizComplete && totalItems > 0 && (
+        <div className="flex justify-between items-center mt-6">
+          <Button onClick={handlePrevious} disabled={currentIndex === 0}>
+            <ChevronLeft className="mr-2 h-4 w-4" /> Previous Item
+          </Button>
+          <Button onClick={handleNext} disabled={currentIndex >= totalItems - 1 || !userAnswers[currentItem?.id]}>
+            Next Item <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+      )}
+
+      <AlertDialog open={showNamePrompt} onOpenChange={setShowNamePrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Quiz Complete!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Please enter your name to save the quiz report.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-2">
+            <Label htmlFor="completerNameInput" className="sr-only">Your Name</Label>
+            <Input
+              id="completerNameInput"
+              placeholder="Enter your name"
+              value={completerName}
+              onChange={(e) => setCompleterName(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {setShowNamePrompt(false); /* User chose not to save */}}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSaveReport} disabled={!completerName.trim()}>
+              <Save className="mr-2 h-4 w-4" /> Save Report
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
     </div>
   );
 }

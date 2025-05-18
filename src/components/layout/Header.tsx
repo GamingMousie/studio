@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { ShipShapeLogo } from '@/components/icons/ShipShapeLogo';
 import { Button } from '@/components/ui/button';
-import { Package, CalendarDays, Truck, LineChart, ClipboardList } from 'lucide-react'; // Added Truck, LineChart, ClipboardList
+import { Package, CalendarDays, Truck, LineChart, ClipboardList, HelpCircle } from 'lucide-react'; // Added HelpCircle
 
 const Header = () => {
   return (
@@ -12,7 +12,7 @@ const Header = () => {
           <ShipShapeLogo className="h-8 w-8" />
           <span>ShipShape</span>
         </Link>
-        <nav className="flex items-center gap-1 sm:gap-2">
+        <nav className="flex items-center gap-1 sm:gap-2 flex-wrap justify-end">
           <Button variant="ghost" asChild className="px-2 sm:px-3">
             <Link href="/" className="text-foreground hover:text-primary transition-colors text-xs sm:text-sm">
               <Truck className="mr-1 sm:mr-2 h-4 w-4" />
@@ -41,6 +41,12 @@ const Header = () => {
             <Link href="/labels/generate-shipment-labels" className="text-foreground hover:text-primary transition-colors text-xs sm:text-sm">
               <ClipboardList className="mr-1 sm:mr-2 h-4 w-4" />
               Shipment Labels
+            </Link>
+          </Button>
+          <Button variant="ghost" asChild className="px-2 sm:px-3">
+            <Link href="/quiz/stock-check" className="text-foreground hover:text-primary transition-colors text-xs sm:text-sm">
+              <HelpCircle className="mr-1 sm:mr-2 h-4 w-4" />
+              Stock Quiz
             </Link>
           </Button>
         </nav>

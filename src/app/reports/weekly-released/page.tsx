@@ -40,9 +40,12 @@ export default function MonthlyReleasedReportPage() {
   const { shipments, getTrailerById } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
   const [displayDate, setDisplayDate] = useState(new Date()); // Date to determine the month to display
+  const [clientGeneratedDate, setClientGeneratedDate] = useState<string | null>(null);
+
 
   useEffect(() => {
     setIsClient(true);
+    setClientGeneratedDate(new Date().toLocaleDateString());
   }, []);
   
   const currentPeriodStart = useMemo(() => {
@@ -191,7 +194,7 @@ export default function MonthlyReleasedReportPage() {
             <p className="text-sm text-muted-foreground">
               {printPeriodText}
             </p>
-             <p className="text-xs text-muted-foreground">Date Generated: {new Date().toLocaleDateString()}</p>
+             {clientGeneratedDate && <p className="text-xs text-muted-foreground">Date Generated: {clientGeneratedDate}</p>}
           </div>
 
           {!isClient ? (

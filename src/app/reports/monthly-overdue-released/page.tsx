@@ -41,9 +41,11 @@ export default function MonthlyOverdueReleasedReportPage() {
   const [isClient, setIsClient] = useState(false);
   const [displayDate, setDisplayDate] = useState(new Date());
   const [companyFilter, setCompanyFilter] = useState<string>('all');
+  const [clientGeneratedDate, setClientGeneratedDate] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
+    setClientGeneratedDate(new Date().toLocaleDateString());
   }, []);
   
   const currentMonthStart = useMemo(() => startOfMonth(displayDate), [displayDate]);
@@ -231,7 +233,7 @@ export default function MonthlyOverdueReleasedReportPage() {
               {printPeriodText}
             </p>
             {companyFilter !== 'all' && <p className="text-sm text-muted-foreground">Filtered by Company: {selectedCompanyName}</p>}
-             <p className="text-xs text-muted-foreground">Date Generated: {new Date().toLocaleDateString()}</p>
+             {clientGeneratedDate && <p className="text-xs text-muted-foreground">Date Generated: {clientGeneratedDate}</p>}
           </div>
 
           {!isClient ? (

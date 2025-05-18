@@ -47,9 +47,11 @@ export default function MonthlyCompanyTrailersReportPage() {
   const { trailers } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
   const [displayDate, setDisplayDate] = useState(new Date()); // Date to determine the month to display
+  const [clientGeneratedDate, setClientGeneratedDate] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
+    setClientGeneratedDate(new Date().toLocaleDateString());
   }, []);
 
   const currentMonthStart = useMemo(() => startOfMonth(displayDate), [displayDate]);
@@ -172,7 +174,7 @@ export default function MonthlyCompanyTrailersReportPage() {
           <div className="print-only-block mb-4">
             <h2 className="text-xl font-semibold text-foreground">{printTitleText}</h2>
             <p className="text-sm text-muted-foreground">{printPeriodText}</p>
-            <p className="text-xs text-muted-foreground">Date Generated: {new Date().toLocaleDateString()}</p>
+            {clientGeneratedDate && <p className="text-xs text-muted-foreground">Date Generated: {clientGeneratedDate}</p>}
           </div>
 
           {!isClient ? (

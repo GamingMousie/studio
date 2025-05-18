@@ -29,9 +29,11 @@ interface UnreleasedStockLocationItem {
 export default function UnreleasedStockLocationsReportPage() {
   const { shipments, getTrailerById } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
+  const [clientGeneratedDate, setClientGeneratedDate] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
+    setClientGeneratedDate(new Date().toLocaleDateString());
   }, []);
 
   const formatDateSafe = (dateString?: string, dateFormat = 'PP') => {
@@ -161,7 +163,7 @@ export default function UnreleasedStockLocationsReportPage() {
         <CardContent>
           <div className="print-only-block mb-4">
             <h2 className="text-xl font-semibold text-foreground">{printTitleText}</h2>
-            <p className="text-xs text-muted-foreground">Date Generated: {new Date().toLocaleDateString()}</p>
+            {clientGeneratedDate && <p className="text-xs text-muted-foreground">Date Generated: {clientGeneratedDate}</p>}
           </div>
 
           {!isClient ? (

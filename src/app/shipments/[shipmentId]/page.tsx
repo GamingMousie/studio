@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck, Archive, Edit3, Fingerprint, CalendarClock } from 'lucide-react';
+import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck, Archive, Edit3, Fingerprint, CalendarClock, Mail } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import EditShipmentDialog from '@/components/shipment/EditShipmentDialog'; 
 
@@ -19,7 +19,7 @@ export default function SingleShipmentPage() {
   const params = useParams();
   const shipmentId = params.shipmentId as string;
 
-  const { getShipmentById, getTrailerById, markShipmentAsPrinted } = useWarehouse();
+  const { getShipmentById, getTrailerById, markShipmentAsPrinted, updateShipment } = useWarehouse();
 
   const [shipment, setShipment] = useState<Shipment | null | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
@@ -36,7 +36,6 @@ export default function SingleShipmentPage() {
   
   useEffect(() => {
     if (isClient && shipmentId && getShipmentById) {
-      // Re-fetch shipment if context updates, e.g., after an edit
       const currentShipment = getShipmentById(shipmentId);
       setShipment(currentShipment);
       if (currentShipment?.releasedAt) {
@@ -106,6 +105,26 @@ export default function SingleShipmentPage() {
     }
   };
 
+  const handleNotifyMissingDocuments = () => {
+    if (!shipment) return;
+
+    let missingParts = [];
+    if (!shipment.cleared) {
+      missingParts.push("clearance");
+    }
+    if (!shipment.released) {
+      missingParts.push("release permission");
+    }
+
+    if (missingParts.length === 0) return; // Should not happen if button is visible
+
+    const missingSubjectPart = missingParts.join(" & ");
+    const subject = `Missing ${missingSubjectPart} for Trailer ${shipment.trailerId} / Job ${shipment.stsJob}`;
+    const body = `Good Morning,\n\nWe have a driver waiting to collect "${shipment.trailerId} / Job ${shipment.stsJob}" but we are missing files for above shipment.\n\nCan you be able to update us ASAP please?`;
+    const mailtoLink = `mailto:klaudia@mail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
+
 
   if (!isClient || shipment === undefined) {
     return (
@@ -150,6 +169,7 @@ export default function SingleShipmentPage() {
 
   const locations = shipment.locations || [{ name: 'Pending Assignment' }];
   const isPendingAssignment = locations.length === 1 && locations[0].name === 'Pending Assignment';
+  const showNotifyButton = !shipment.cleared || !shipment.released;
 
 
   return (
@@ -158,10 +178,15 @@ export default function SingleShipmentPage() {
         <Button variant="outline" onClick={() => router.back()} size="sm">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
         </Button>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-center sm:justify-end">
           <Button onClick={() => setIsEditShipmentDialogOpen(true)} variant="outline" size="sm">
             <Edit3 className="mr-2 h-4 w-4" /> Edit Shipment
           </Button>
+          {showNotifyButton && (
+            <Button onClick={handleNotifyMissingDocuments} variant="outline" size="sm" className="text-orange-600 hover:text-orange-700 border-orange-500 hover:border-orange-600">
+              <Mail className="mr-2 h-4 w-4" /> Notify Missing Docs
+            </Button>
+          )}
           <Button onClick={handlePrint} disabled={!canPrint} size="sm">
             <Printer className="mr-2 h-4 w-4" /> Print Shipment
             {!canPrint && <span className="ml-2 text-xs">(Requires Cleared & Permitted)</span>}
@@ -265,7 +290,7 @@ export default function SingleShipmentPage() {
           {shipment.clearanceDate && (
             <div className="space-y-1 no-print">
               <h3 className="font-semibold text-muted-foreground flex items-center"><CalendarClock className="mr-2 h-4 w-4" />Clearance Date</h3>
-              <p className="text-base font-medium">{formatDate(shipment.clearanceDate)}</p>
+              <p className="text-base font-medium">{formatDate(shipment.clearanceDate, 'PP')}</p>
             </div>
           )}
 
@@ -347,7 +372,7 @@ export default function SingleShipmentPage() {
         </CardContent>
         {trailer && trailer.arrivalDate && (
           <CardFooter className="border-t pt-4 text-xs text-muted-foreground no-print">
-              <p>Associated with Trailer <Link href={`/trailers/${trailer.id}`} className="text-primary hover:underline font-semibold print:text-foreground print:no-underline">{trailer.id}</Link>, arrived on {formatDate(trailer.arrivalDate)}.</p>
+              <p>Associated with Trailer <Link href={`/trailers/${trailer.id}`} className="text-primary hover:underline font-semibold print:text-foreground print:no-underline">{trailer.id}</Link>, arrived on {formatDate(trailer.arrivalDate, 'PP')}.</p>
           </CardFooter>
         )}
 

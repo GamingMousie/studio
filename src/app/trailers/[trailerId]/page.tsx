@@ -10,7 +10,7 @@ import AddShipmentDialog from '@/components/shipment/AddShipmentDialog';
 import EditTrailerDialog from '@/components/trailer/EditTrailerDialog'; // Import EditTrailerDialog
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye, Edit } from 'lucide-react'; // Added Edit
+import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye, Edit, UploadCloud } from 'lucide-react'; // Added Edit
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 
@@ -192,7 +192,7 @@ export default function TrailerShipmentsPage() {
               Out-turn Report
             </h3>
             {trailer.outturnReportDocumentName ? (
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md">
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md mb-2">
                 <div className="flex items-center">
                   <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">{trailer.outturnReportDocumentName}</span>
@@ -207,9 +207,17 @@ export default function TrailerShipmentsPage() {
                 </Button>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No out-turn report attached. You can add one by editing the trailer.</p>
+              <p className="text-sm text-muted-foreground mb-2">No out-turn report attached.</p>
             )}
-            <p className="text-xs text-muted-foreground mt-1">Edit trailer details to attach or change the out-turn report PDF.</p>
+             <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditDialogOpen(true)}
+              >
+                {trailer.outturnReportDocumentName ? <Edit className="mr-2 h-4 w-4" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+                {trailer.outturnReportDocumentName ? 'Change/Remove Report' : 'Add Out-turn Report'}
+              </Button>
+            <p className="text-xs text-muted-foreground mt-1">Edit trailer details to attach, change, or remove the out-turn report PDF.</p>
           </div>
 
 
@@ -258,3 +266,4 @@ export default function TrailerShipmentsPage() {
     </div>
   );
 }
+

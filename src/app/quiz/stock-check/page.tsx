@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChevronLeft, ChevronRight, Check, X, PackageSearch, HelpCircle, Truck, CalendarDays, Box as BoxIcon, Briefcase, MapPin, Save } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, X, PackageSearch, HelpCircle, Truck, CalendarDays, Box as BoxIcon, Briefcase, MapPin, Save, ListChecks } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
@@ -36,7 +36,6 @@ export default function StockCheckQuizPage() {
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [completerName, setCompleterName] = useState('');
   
-  // Memoize quizItems once on client mount to keep the list stable for the quiz session
   const [sessionQuizItems, setSessionQuizItems] = useState<QuizItem[]>([]);
 
   useEffect(() => {
@@ -52,8 +51,6 @@ export default function StockCheckQuizPage() {
     }
   };
   
-  // Calculate initial quiz items and set them to sessionQuizItems
-  // This effect runs once when isClient becomes true
   useEffect(() => {
     if (isClient) {
       const initialItems: QuizItem[] = [];
@@ -67,7 +64,7 @@ export default function StockCheckQuizPage() {
 
           shipmentLocations.forEach((loc, index) => {
             initialItems.push({
-              id: `${shipment.id}-${loc.name}-${index}`, // Ensure unique ID even if loc.name is same
+              id: `${shipment.id}-${loc.name}-${index}`, 
               shipmentId: shipment.id,
               stsJob: shipment.stsJob,
               trailerId: shipment.trailerId,
@@ -96,7 +93,7 @@ export default function StockCheckQuizPage() {
       });
       setSessionQuizItems(sortedInitialItems);
     }
-  }, [isClient, shipments, getTrailerById]); // Re-run if underlying data changes, but quiz session uses the frozen list
+  }, [isClient, shipments, getTrailerById]);
 
 
   const currentItem = sessionQuizItems[currentIndex];
@@ -132,10 +129,7 @@ export default function StockCheckQuizPage() {
     setIsQuizComplete(false);
     setShowNamePrompt(false);
     setCompleterName('');
-    // Re-fetch and sort quiz items for a new session if underlying data might have changed
-    // This part is already handled by the useEffect that populates sessionQuizItems
-    // For a more explicit re-fetch, you could call a function here that re-runs the logic of that useEffect
-    if (isClient) { // Re-populate sessionQuizItems as it was done initially
+    if (isClient) { 
         const initialItems: QuizItem[] = [];
         shipments
             .filter(shipment => !shipment.releasedAt)
@@ -189,7 +183,7 @@ export default function StockCheckQuizPage() {
 
     const answeredItems: AnsweredQuizItem[] = sessionQuizItems.map(item => ({
       ...item,
-      userAnswer: userAnswers[item.id] || 'no', // Default to 'no' if somehow unanswered
+      userAnswer: userAnswers[item.id] || 'no', 
     }));
 
     const report: Omit<QuizReportType, 'id'> = {
@@ -204,7 +198,6 @@ export default function StockCheckQuizPage() {
       description: `Report completed by ${completerName.trim()} has been saved.`,
     });
     setShowNamePrompt(false);
-    // Do not reset quiz here, wait for explicit "Restart Quiz" from user
   };
   
   const pageTitle = "Stock Check Quiz";
@@ -329,14 +322,18 @@ export default function StockCheckQuizPage() {
           <CardDescription className="text-base mb-6">
             You have reviewed all unreleased stock items. The report by {completerName || 'N/A'} has been saved.
           </CardDescription>
-          <div className="flex justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button variant="outline" onClick={resetQuiz}>
               Start New Quiz
             </Button>
             <Button asChild>
               <Link href="/reports/unreleased-stock-locations">View Full Stock Report</Link>
             </Button>
-            {/* Future: <Button asChild><Link href="/quiz/reports">View Quiz Reports</Link></Button> */}
+            <Button asChild>
+              <Link href="/quiz/reports" className="flex items-center">
+                <ListChecks className="mr-2 h-4 w-4" /> View Quiz Reports
+              </Link>
+            </Button>
           </div>
         </Card>
       )}

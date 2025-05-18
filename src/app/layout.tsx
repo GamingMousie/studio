@@ -28,7 +28,7 @@ export default function RootLayout({
     // Apply font variable classes directly to the <html> tag.
     // GeistSans.variable and GeistMono.variable are class names that set up
     // CSS custom properties (e.g., --font-geist-sans, --font-geist-mono).
-    <html lang="en" className={cn(GeistSans.variable, GeistMono.variable)}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       {/* 
         The 'antialiased' class remains on the body.
         The font-family is applied via CSS variables in globals.css, for example:
@@ -46,3 +46,4 @@ export default function RootLayout({
     </html>
   );
 }
+

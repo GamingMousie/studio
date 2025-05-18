@@ -17,6 +17,8 @@ export interface Trailer {
   customField1?: string; // Represents T1.1
   customField2?: string; // Represents T1.2
   outturnReportDocumentName?: string; // Optional: Name of the out-turn report PDF
+  t1SummaryDocumentName?: string; // Optional: Name of the T1 Summary PDF
+  manifestDocumentName?: string; // Optional: Name of the Manifest PDF
 }
 
 export interface Shipment {
@@ -91,6 +93,8 @@ export interface TrailerUpdateData {
   customField1?: string;
   customField2?: string;
   outturnReportDocumentName?: string | null; // Allow setting to null to clear
+  t1SummaryDocumentName?: string | null;
+  manifestDocumentName?: string | null;
 }
 
 // For AddTrailerDialog form

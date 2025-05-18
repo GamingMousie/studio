@@ -19,7 +19,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Edit, Weight, Tag, FileText, UploadCloud } from "lucide-react"; // Added FileText, UploadCloud
+import { CalendarIcon, Edit, Weight, Tag, FileText, UploadCloud, BookOpen, FileBadge } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
@@ -34,7 +34,9 @@ type EditTrailerFormDataInternal = {
   weight?: number | null;
   customField1?: string;
   customField2?: string;
-  outturnReportDocument?: FileList | File | null; // For new file uploads
+  outturnReportDocument?: FileList | File | null;
+  t1SummaryDocument?: FileList | File | null;
+  manifestDocument?: FileList | File | null;
 };
 
 const allStatuses: TrailerStatus[] = ['Scheduled', 'Arrived', 'Loading', 'Offloading', 'Devanned'];
@@ -48,7 +50,9 @@ const editTrailerSchema = z.object({
   weight: z.coerce.number().positive('Weight must be a positive number').optional().nullable(),
   customField1: z.string().max(50, 'T1.1 value too long').optional(),
   customField2: z.string().max(50, 'T1.2 value too long').optional(),
-  outturnReportDocument: z.any().optional(), // For new file uploads
+  outturnReportDocument: z.any().optional(),
+  t1SummaryDocument: z.any().optional(),
+  manifestDocument: z.any().optional(),
 }).refine(data => {
   if (data.arrivalDate && data.storageExpiryDate && data.storageExpiryDate < data.arrivalDate) {
     return false;
@@ -86,7 +90,9 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
         weight: trailerToEdit.weight ?? null,
         customField1: trailerToEdit.customField1 || '',
         customField2: trailerToEdit.customField2 || '',
-        outturnReportDocument: null, // Reset file input
+        outturnReportDocument: null,
+        t1SummaryDocument: null,
+        manifestDocument: null,
       });
     }
   }, [trailerToEdit, isOpen, reset]);
@@ -98,17 +104,33 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
   const selectedStatus = watch('status');
   const currentOutturnReportDocumentName = trailerToEdit?.outturnReportDocumentName;
   const newOutturnDocumentFile = watch('outturnReportDocument');
+  const currentT1SummaryDocumentName = trailerToEdit?.t1SummaryDocumentName;
+  const newT1SummaryDocumentFile = watch('t1SummaryDocument');
+  const currentManifestDocumentName = trailerToEdit?.manifestDocumentName;
+  const newManifestDocumentFile = watch('manifestDocument');
 
 
   const onSubmit: SubmitHandler<EditTrailerFormDataInternal> = (data) => {
     let outturnDocName: string | null | undefined = trailerToEdit.outturnReportDocumentName;
-
     if (data.outturnReportDocument && data.outturnReportDocument.length > 0) {
       outturnDocName = data.outturnReportDocument[0].name;
-    } else if (data.outturnReportDocument === null) { // Explicitly cleared
+    } else if (data.outturnReportDocument === null) {
         outturnDocName = null;
     }
 
+    let t1SummaryDocName: string | null | undefined = trailerToEdit.t1SummaryDocumentName;
+    if (data.t1SummaryDocument && data.t1SummaryDocument.length > 0) {
+      t1SummaryDocName = data.t1SummaryDocument[0].name;
+    } else if (data.t1SummaryDocument === null) {
+        t1SummaryDocName = null;
+    }
+
+    let manifestDocName: string | null | undefined = trailerToEdit.manifestDocumentName;
+    if (data.manifestDocument && data.manifestDocument.length > 0) {
+      manifestDocName = data.manifestDocument[0].name;
+    } else if (data.manifestDocument === null) {
+        manifestDocName = null;
+    }
 
     const updateData: TrailerUpdateData = {
       name: data.name,
@@ -120,6 +142,8 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
       customField1: data.customField1 || undefined,
       customField2: data.customField2 || undefined,
       outturnReportDocumentName: outturnDocName,
+      t1SummaryDocumentName: t1SummaryDocName,
+      manifestDocumentName: manifestDocName,
     };
 
     updateTrailer(trailerToEdit.id, updateData);
@@ -143,6 +167,8 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
         customField1: trailerToEdit.customField1 || '',
         customField2: trailerToEdit.customField2 || '',
         outturnReportDocument: null,
+        t1SummaryDocument: null,
+        manifestDocument: null,
       });
     }
   }
@@ -282,7 +308,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 border-t pt-4">
             <Label htmlFor="outturnReportDocument" className="flex items-center">
               <UploadCloud className="mr-2 h-4 w-4 text-muted-foreground" /> Out-turn Report PDF (Optional)
             </Label>
@@ -293,7 +319,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
             )}
             <Input id="outturnReportDocument" type="file" {...register('outturnReportDocument')} accept=".pdf" className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
             {errors.outturnReportDocument && <p className="text-sm text-destructive mt-1">{(errors.outturnReportDocument as any)?.message}</p>}
-            <p className="text-xs text-muted-foreground">Upload a new PDF to replace the current one. Max 5MB.</p>
+            <p className="text-xs text-muted-foreground">Upload a new PDF to replace. Max 5MB.</p>
              {currentOutturnReportDocumentName && (
               <Button
                 type="button"
@@ -301,11 +327,7 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
                 size="sm"
                 className="text-xs text-destructive p-0 h-auto"
                 onClick={() => {
-                  setValue('outturnReportDocument', null); // This should signal to clear
-                  // We might need a more explicit way if null isn't enough,
-                  // e.g., a hidden field or separate state, but let's try this.
-                  // The onSubmit logic will check if data.outturnReportDocument is explicitly null
-                  // and then set trailer.outturnReportDocumentName to null.
+                  setValue('outturnReportDocument', null);
                   toast({ title: "Out-turn Report Cleared", description: "The out-turn report association will be removed upon saving."});
                 }}
               >
@@ -313,9 +335,65 @@ export default function EditTrailerDialog({ isOpen, setIsOpen, trailerToEdit }: 
               </Button>
             )}
           </div>
+          
+          <div className="space-y-2 border-t pt-4">
+            <Label htmlFor="t1SummaryDocument" className="flex items-center">
+              <FileBadge className="mr-2 h-4 w-4 text-muted-foreground" /> T1 Summary PDF (Optional)
+            </Label>
+            {currentT1SummaryDocumentName && !newT1SummaryDocumentFile?.[0] && (
+                <p className="text-xs text-muted-foreground flex items-center">
+                  <FileText className="mr-1 h-3.5 w-3.5" /> Current: {currentT1SummaryDocumentName}
+                </p>
+            )}
+            <Input id="t1SummaryDocument" type="file" {...register('t1SummaryDocument')} accept=".pdf" className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+            {errors.t1SummaryDocument && <p className="text-sm text-destructive mt-1">{(errors.t1SummaryDocument as any)?.message}</p>}
+            <p className="text-xs text-muted-foreground">Upload a new PDF to replace. Max 5MB.</p>
+             {currentT1SummaryDocumentName && (
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="text-xs text-destructive p-0 h-auto"
+                onClick={() => {
+                  setValue('t1SummaryDocument', null);
+                  toast({ title: "T1 Summary Cleared", description: "The T1 Summary association will be removed upon saving."});
+                }}
+              >
+                Clear Current T1 Summary
+              </Button>
+            )}
+          </div>
+
+          <div className="space-y-2 border-t pt-4">
+            <Label htmlFor="manifestDocument" className="flex items-center">
+              <BookOpen className="mr-2 h-4 w-4 text-muted-foreground" /> Manifest PDF (Optional)
+            </Label>
+            {currentManifestDocumentName && !newManifestDocumentFile?.[0] && (
+                <p className="text-xs text-muted-foreground flex items-center">
+                  <FileText className="mr-1 h-3.5 w-3.5" /> Current: {currentManifestDocumentName}
+                </p>
+            )}
+            <Input id="manifestDocument" type="file" {...register('manifestDocument')} accept=".pdf" className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"/>
+            {errors.manifestDocument && <p className="text-sm text-destructive mt-1">{(errors.manifestDocument as any)?.message}</p>}
+            <p className="text-xs text-muted-foreground">Upload a new PDF to replace. Max 5MB.</p>
+             {currentManifestDocumentName && (
+              <Button
+                type="button"
+                variant="link"
+                size="sm"
+                className="text-xs text-destructive p-0 h-auto"
+                onClick={() => {
+                  setValue('manifestDocument', null);
+                  toast({ title: "Manifest Cleared", description: "The Manifest association will be removed upon saving."});
+                }}
+              >
+                Clear Current Manifest
+              </Button>
+            )}
+          </div>
 
 
-          <DialogFooter>
+          <DialogFooter className="pt-6">
             <Button type="button" variant="outline" onClick={handleClose}>Cancel</Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Saving...' : 'Save Changes'}

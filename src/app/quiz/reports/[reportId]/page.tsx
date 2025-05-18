@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, FileText, User, Calendar as CalendarIcon, PackageSearch, Check, X, Truck, Box as BoxIcon, MapPin, Briefcase } from 'lucide-react';
+import { ArrowLeft, FileText, User, Calendar as CalendarIcon, PackageSearch, Check, X, Truck, Box as BoxIcon, MapPin, Briefcase, Printer } from 'lucide-react';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 
@@ -20,9 +20,11 @@ export default function QuizReportDetailsPage() {
 
   const { quizReports } = useWarehouse();
   const [isClient, setIsClient] = useState(false);
+  const [clientGeneratedDate, setClientGeneratedDate] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
+    setClientGeneratedDate(new Date().toLocaleDateString());
   }, []);
 
   const report = useMemo(() => {
@@ -39,6 +41,11 @@ export default function QuizReportDetailsPage() {
   };
   
   const pageTitle = "Quiz Report Details";
+  const printTitleText = "Stock Check Quiz Report";
+
+  const handlePrintReport = () => {
+    window.print();
+  };
 
   if (!isClient || report === undefined && isClient) { // Show skeleton if loading or report becomes undefined after client mount
     return (
@@ -74,28 +81,30 @@ export default function QuizReportDetailsPage() {
     );
   }
   
-  // If report is null or undefined at this point, it implies it's not found (handled above)
-  // So, `report!` can be used below if TS complains, or we can re-check.
-  // For safety, let's check again, though the above logic should cover it.
   if (!report) return null;
 
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-card rounded-lg shadow">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 bg-card rounded-lg shadow no-print">
         <h1 className="text-3xl font-bold text-foreground flex items-center">
           <FileText className="mr-3 h-8 w-8 text-primary" />
           {pageTitle}
         </h1>
-        <Button variant="outline" asChild>
-          <Link href="/quiz/reports">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Reports List
-          </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/quiz/reports">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Reports List
+            </Link>
+          </Button>
+          <Button onClick={handlePrintReport} variant="outline">
+            <Printer className="mr-2 h-4 w-4" /> Print Report
+          </Button>
+        </div>
       </div>
 
-      <Card className="shadow-lg">
-        <CardHeader className="border-b pb-4">
+      <Card className="shadow-lg printable-area">
+        <CardHeader className="border-b pb-4 no-print">
           <CardTitle className="text-2xl text-primary">Report ID: ...{report.id.slice(-6)}</CardTitle>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm mt-2">
             <div className="flex items-center">
@@ -110,8 +119,17 @@ export default function QuizReportDetailsPage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-6">
-          <h3 className="text-lg font-semibold mb-3 text-foreground">Answered Items ({report.items.length}):</h3>
+
+        {/* Print-only Header */}
+        <div className="print-only-block mb-4 p-6 pb-0">
+          <h2 className="text-xl font-semibold text-foreground">{printTitleText}</h2>
+          <p className="text-sm text-muted-foreground">Report ID: {report.id}</p>
+          <p className="text-sm text-muted-foreground">Completed By: {report.completedBy} at {formatDate(report.completedAt)}</p>
+          {clientGeneratedDate && <p className="text-xs text-muted-foreground">Date Report Generated: {clientGeneratedDate}</p>}
+        </div>
+        
+        <CardContent className="pt-6 card-content-print">
+          <h3 className="text-lg font-semibold mb-3 text-foreground no-print">Answered Items ({report.items.length}):</h3>
           {report.items.length === 0 ? (
             <p className="text-muted-foreground">No items were recorded in this report.</p>
           ) : (
@@ -119,34 +137,40 @@ export default function QuizReportDetailsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="whitespace-nowrap"><MapPin className="inline-block mr-1 h-4 w-4"/>Location</TableHead>
-                    <TableHead className="whitespace-nowrap"><Truck className="inline-block mr-1 h-4 w-4"/>Identifier (Tr / Job)</TableHead>
-                    <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4"/>Company</TableHead>
-                    <TableHead className="whitespace-nowrap"><CalendarIcon className="inline-block mr-1 h-4 w-4"/>Trailer Arrival</TableHead>
-                    <TableHead className="text-right whitespace-nowrap"><BoxIcon className="inline-block mr-1 h-4 w-4"/>Pieces</TableHead>
+                    <TableHead className="whitespace-nowrap"><MapPin className="inline-block mr-1 h-4 w-4 print:hidden"/>Location</TableHead>
+                    <TableHead className="whitespace-nowrap"><Truck className="inline-block mr-1 h-4 w-4 print:hidden"/>Identifier (Tr / Job)</TableHead>
+                    <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4 print:hidden"/>Company</TableHead>
+                    <TableHead className="whitespace-nowrap"><CalendarIcon className="inline-block mr-1 h-4 w-4 print:hidden"/>Trailer Arrival</TableHead>
+                    <TableHead className="text-right whitespace-nowrap"><BoxIcon className="inline-block mr-1 h-4 w-4 print:hidden"/>Pieces</TableHead>
                     <TableHead className="text-center whitespace-nowrap">Answer</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {report.items.map((item) => (
-                    <TableRow key={item.id} className={item.userAnswer === 'no' ? 'bg-destructive/10 hover:bg-destructive/20' : ''}>
+                    <TableRow key={item.id} className={`${item.userAnswer === 'no' ? 'bg-destructive/10 hover:bg-destructive/20 print:bg-transparent' : 'print:bg-transparent'} print:text-foreground`}>
                       <TableCell className="font-semibold">
                         {item.locationName}
                         {item.locationPallets !== undefined ? ` (${item.locationPallets} plts)` : ''}
                       </TableCell>
                       <TableCell>
-                        <Link href={`/trailers/${item.trailerId}`} className="text-primary hover:underline">{item.trailerId}</Link>
+                        <Link href={`/trailers/${item.trailerId}`} className="text-primary hover:underline print:text-foreground print:no-underline">{item.trailerId}</Link>
                         {' / '}
-                        <Link href={`/shipments/${item.shipmentId}`} className="text-primary hover:underline">{item.stsJob}</Link>
+                        <Link href={`/shipments/${item.shipmentId}`} className="text-primary hover:underline print:text-foreground print:no-underline">{item.stsJob}</Link>
                       </TableCell>
                       <TableCell>{item.trailerCompany || 'N/A'}</TableCell>
                       <TableCell>{item.trailerArrivalDateFormatted}</TableCell>
                       <TableCell className="text-right font-semibold">{item.shipmentQuantity}</TableCell>
                       <TableCell className="text-center">
                         {item.userAnswer === 'yes' ? (
-                          <Check className="h-5 w-5 text-green-600 mx-auto" />
+                          <>
+                            <Check className="h-5 w-5 text-green-600 mx-auto print:hidden" />
+                            <span className="hidden print:inline">Yes</span>
+                          </>
                         ) : (
-                          <X className="h-5 w-5 text-red-600 mx-auto" />
+                          <>
+                            <X className="h-5 w-5 text-red-600 mx-auto print:hidden" />
+                            <span className="hidden print:inline">No</span>
+                          </>
                         )}
                       </TableCell>
                     </TableRow>

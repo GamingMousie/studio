@@ -7,7 +7,7 @@ import type { Shipment, Trailer } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer, ArrowRightCircle, Clock, AlertOctagon, BarChart3, Hash } from 'lucide-react';
+import { ClipboardList, PackageSearch, Info, Briefcase, CalendarDays, Printer, ArrowRightCircle, Clock, AlertOctagon, BarChart3, Hash, Warehouse } from 'lucide-react';
 import Link from 'next/link';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,7 @@ interface BondCheckReportItem {
   trailerId: string;
   trailerName?: string;
   company?: string;
-  arrivalDate?: string; 
+  arrivalDate?: string;
   stsJob: number;
   shipmentId: string;
   customerJobNumber?: string;
@@ -32,7 +32,7 @@ export default function ReportsPage() {
   useEffect(() => {
     setIsClient(true);
   }, []);
-  
+
   const formatDateSafe = (dateString?: string) => {
     if (!dateString) return 'N/A';
     try {
@@ -46,31 +46,31 @@ export default function ReportsPage() {
     if (!isClient) return [];
 
     return shipments
-      .filter(shipment => !shipment.releasedAt) 
+      .filter(shipment => !shipment.releasedAt)
       .map(shipment => {
         const trailer = getTrailerById(shipment.trailerId);
         const locations = shipment.locations || [{ name: 'Pending Assignment' }];
         const isPendingAssignment = locations.length === 1 && locations[0].name === 'Pending Assignment';
-        
+
         let locationsDisplay = 'Pending Assignment';
         if (!isPendingAssignment) {
-            locationsDisplay = locations.map(loc => 
+            locationsDisplay = locations.map(loc =>
                 `${loc.name}${loc.pallets !== undefined ? ` (${loc.pallets} plts)` : ''}`
             ).join(', ');
         }
-        
+
         return {
           trailerId: shipment.trailerId,
           trailerName: trailer?.name,
           company: trailer?.company,
-          arrivalDate: trailer?.arrivalDate, 
+          arrivalDate: trailer?.arrivalDate,
           stsJob: shipment.stsJob,
           shipmentId: shipment.id,
           customerJobNumber: shipment.customerJobNumber,
           locationsDisplay: locationsDisplay,
         };
       })
-      .sort((a, b) => { 
+      .sort((a, b) => {
         // Primary sort by company, then trailerId, then stsJob
         if (a.company && b.company) {
           if (a.company.toLowerCase() < b.company.toLowerCase()) return -1;
@@ -104,7 +104,7 @@ export default function ReportsPage() {
     if (companyFilter === 'all') {
       return rawBondCheckReportData;
     }
-    return rawBondCheckReportData.filter(item => 
+    return rawBondCheckReportData.filter(item =>
       item.company?.toLowerCase() === companyFilter.toLowerCase()
     );
   }, [rawBondCheckReportData, companyFilter]);
@@ -161,7 +161,7 @@ export default function ReportsPage() {
               Bond Check Report
             </CardTitle>
             <CardDescription>
-              View current unreleased stock in the warehouse.
+              View current unreleased stock in the warehouse. Detailed below.
             </CardDescription>
           </CardHeader>
           <CardFooter>
@@ -179,7 +179,7 @@ export default function ReportsPage() {
                 Monthly Released Shipments
               </CardTitle>
               <CardDescription>
-                View all shipments that were marked as released this week or month.
+                View all shipments that were marked as released this month.
               </CardDescription>
             </CardHeader>
             <CardFooter>
@@ -228,8 +228,27 @@ export default function ReportsPage() {
           </Card>
         </Link>
 
+        <Link href="/reports/unreleased-stock-locations" passHref>
+          <Card className="shadow-lg hover:shadow-xl transition-shadow h-full flex flex-col justify-between cursor-pointer">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl text-primary">
+                <Warehouse className="mr-2 h-6 w-6" />
+                Unreleased Stock by Location
+              </CardTitle>
+              <CardDescription>
+                View unreleased stock, their locations, pieces, and arrival dates.
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Button variant="link" className="p-0 h-auto text-primary">
+                View Report <ArrowRightCircle className="ml-2 h-4 w-4" />
+              </Button>
+            </CardFooter>
+          </Card>
+        </Link>
+
       </div>
-      
+
       {/* Bond Check Report (Existing Report) */}
       <Card className="shadow-lg printable-area">
         <CardHeader className="no-print">
@@ -339,8 +358,3 @@ export default function ReportsPage() {
     </div>
   );
 }
-
-
-
-
-

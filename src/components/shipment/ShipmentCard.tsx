@@ -5,7 +5,7 @@ import type { Shipment } from '@/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send, Briefcase, Truck, Archive, Fingerprint, CalendarClock } from 'lucide-react';
+import { Package, MapPin, Edit3, Trash2, MoreVertical, FileText, CheckCircle2, CircleOff, Weight, Box, Pencil, FileUp, Users, Hash, Send, Briefcase, Truck, Archive, Fingerprint, CalendarClock, Mail } from 'lucide-react';
 import ManageLocationsDialog from './ManageLocationsDialog';
 import EditShipmentDialog from './EditShipmentDialog';
 import AttachDocumentDialog from './AttachDocumentDialog';
@@ -74,6 +74,23 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
     setIsAttachDocumentOpen(false);
   };
 
+  const handleNotifyMissingDocuments = () => {
+    let missingParts = [];
+    if (!shipment.cleared) {
+      missingParts.push("clearance");
+    }
+    if (!shipment.released) {
+      missingParts.push("release permission");
+    }
+
+    const missingSubjectPart = missingParts.join(" & ");
+    const subject = `Missing ${missingSubjectPart} for Trailer ${shipment.trailerId} / Job ${shipment.stsJob}`;
+    const body = `Good Morning,\n\nWe have a driver waiting to collect "${shipment.trailerId} / Job ${shipment.stsJob}" but we are missing files for above shipment.\n\nCan you be able to update us ASAP please?`;
+    const mailtoLink = `mailto:klaudia@mail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoLink;
+  };
+
+
   const locations = shipment.locations || [{ name: 'Pending Assignment' }];
   const isPendingAssignment = locations.length === 1 && locations[0].name === 'Pending Assignment';
 
@@ -93,7 +110,7 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
           <CardTitle className={viewMode === 'list' ? "text-base font-semibold" : "text-lg"}>
             <Link href={`/shipments/${shipment.id}`} className="hover:underline text-primary flex items-center group">
               <Package className="mr-2 h-5 w-5 text-primary group-hover:animate-pulse" />
-              Trailer {trailer ? trailer.id : shipment.trailerId} Job: {shipment.stsJob}
+              Trailer {shipment.trailerId} Job: {shipment.stsJob}
             </Link>
           </CardTitle>
           <CardDescription className="text-xs mt-0.5">
@@ -130,6 +147,15 @@ export default function ShipmentCard({ shipment, onDelete, viewMode = 'grid' }: 
                {shipment.cleared ? <CircleOff className="mr-2 h-4 w-4" /> : <FileUp className="mr-2 h-4 w-4 text-green-600" />}
               {shipment.cleared ? 'Mark as Not Cleared' : 'Clear (Attach Doc)'}
             </DropdownMenuItem>
+            {(!shipment.released || !shipment.cleared) && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleNotifyMissingDocuments}>
+                  <Mail className="mr-2 h-4 w-4 text-orange-500" />
+                  Notify Missing Docs
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setIsShipmentDeleteDialogOpen(true)} className="text-destructive focus:text-destructive focus:bg-destructive/10">
               <Trash2 className="mr-2 h-4 w-4" />

@@ -4,15 +4,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useWarehouse } from '@/contexts/WarehouseContext';
-import type { Trailer, Shipment } from '@/types';
+import type { Trailer, Shipment, TrailerUpdateData } from '@/types';
 import ShipmentCard from '@/components/shipment/ShipmentCard';
 import AddShipmentDialog from '@/components/shipment/AddShipmentDialog';
 import EditTrailerDialog from '@/components/trailer/EditTrailerDialog';
+import AttachTrailerDocumentDialog from '@/components/trailer/AttachTrailerDocumentDialog'; // New Import
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye, Edit, UploadCloud, BookOpen, FileBadge, Mail, FileSignature } from 'lucide-react'; // Added FileSignature
+import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye, Edit, UploadCloud, BookOpen, FileBadge, Mail, FileSignature } from 'lucide-react';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
+
+// Define a type for the document fields we can manage
+type TrailerDocumentField = 'outturnReportDocumentName' | 't1SummaryDocumentName' | 'manifestDocumentName' | 'acpDocumentName';
+
 
 export default function TrailerShipmentsPage() {
   const router = useRouter();
@@ -23,12 +28,21 @@ export default function TrailerShipmentsPage() {
     getShipmentsByTrailerId,
     deleteShipment,
     trailers: trailersFromContext,
+    updateTrailer, // Added for document updates
   } = useWarehouse();
 
   const [trailer, setTrailer] = useState<Trailer | null>(null);
   const [isAddShipmentDialogOpen, setIsAddShipmentDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isTrailerFound, setIsTrailerFound] = useState<boolean | null>(null);
+
+  // State for the new AttachTrailerDocumentDialog
+  const [isAttachTrailerDocDialogOpen, setIsAttachTrailerDocDialogOpen] = useState(false);
+  const [documentToManageInfo, setDocumentToManageInfo] = useState<{
+    field: TrailerDocumentField;
+    currentName?: string | null;
+    friendlyName: string;
+  } | null>(null);
 
 
   useEffect(() => {
@@ -97,7 +111,7 @@ export default function TrailerShipmentsPage() {
     const subject = `${trailer.id} // ${trailer.name}`;
     const emailTo = 'klaudia@mail.com';
     let body = "Good morning,\n\nPlease see attached:\n\n";
-    body += "- ACP Form (Please generate from 'Print Trailer ACP Form' page and attach)\n";
+    body += "- ACP Form (Please generate from 'Print Trailer ACP Form' page and attach or ensure it's associated below)\n";
     if (trailer.t1SummaryDocumentName) {
       body += `- T1 Summary: ${trailer.t1SummaryDocumentName}\n`;
     } else {
@@ -114,6 +128,24 @@ export default function TrailerShipmentsPage() {
 
     const mailtoLink = `mailto:${emailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoLink;
+  };
+
+  const handleOpenAttachDialog = (field: TrailerDocumentField, friendlyName: string, currentName?: string | null) => {
+    setDocumentToManageInfo({ field, currentName, friendlyName });
+    setIsAttachTrailerDocDialogOpen(true);
+  };
+
+  const handleTrailerDocumentAction = (
+    affectedTrailerId: string,
+    docField: keyof TrailerUpdateData,
+    newDocumentName: string | null
+  ) => {
+    if (affectedTrailerId === trailer?.id) {
+        const updatePayload: TrailerUpdateData = {};
+        // TypeScript needs a little help here to understand docField is a valid key
+        (updatePayload as any)[docField] = newDocumentName;
+        updateTrailer(affectedTrailerId, updatePayload);
+    }
   };
 
 
@@ -140,7 +172,17 @@ export default function TrailerShipmentsPage() {
      );
   }
 
-  const DocumentSection = ({ title, documentName, icon: Icon, editAction }: { title: string, documentName?: string, icon: React.ElementType, editAction: () => void }) => (
+  const DocumentSection = ({ 
+    title, 
+    documentName, 
+    icon: Icon, 
+    documentField 
+  }: { 
+    title: string, 
+    documentName?: string | null, 
+    icon: React.ElementType, 
+    documentField: TrailerDocumentField 
+  }) => (
     <div className="py-4 border-t">
       <h3 className="text-lg font-semibold flex items-center mb-2">
         <Icon className="mr-2 h-5 w-5 text-primary" />
@@ -167,12 +209,12 @@ export default function TrailerShipmentsPage() {
       <Button
         variant="outline"
         size="sm"
-        onClick={editAction}
+        onClick={() => handleOpenAttachDialog(documentField, title, documentName)}
       >
         {documentName ? <Edit className="mr-2 h-4 w-4" /> : <UploadCloud className="mr-2 h-4 w-4" />}
         {documentName ? `Change/Remove ${title}` : `Add ${title}`}
       </Button>
-      <p className="text-xs text-muted-foreground mt-1">Edit trailer details to attach, change, or remove the {title.toLowerCase()} PDF.</p>
+      <p className="text-xs text-muted-foreground mt-1">Manage the {title.toLowerCase()} PDF.</p>
     </div>
   );
 
@@ -252,25 +294,25 @@ export default function TrailerShipmentsPage() {
             title="Out-turn Report"
             documentName={trailer.outturnReportDocumentName}
             icon={FileText}
-            editAction={() => setIsEditDialogOpen(true)}
+            documentField="outturnReportDocumentName"
           />
           <DocumentSection
             title="T1 Summary"
             documentName={trailer.t1SummaryDocumentName}
             icon={FileBadge}
-            editAction={() => setIsEditDialogOpen(true)}
+            documentField="t1SummaryDocumentName"
           />
           <DocumentSection
             title="Manifest"
             documentName={trailer.manifestDocumentName}
             icon={BookOpen}
-            editAction={() => setIsEditDialogOpen(true)}
+            documentField="manifestDocumentName"
           />
           <DocumentSection
             title="ACP Form"
             documentName={trailer.acpDocumentName}
             icon={FileSignature}
-            editAction={() => setIsEditDialogOpen(true)}
+            documentField="acpDocumentName"
           />
 
           <div className="flex justify-between items-center mb-6 pt-4 border-t mt-4">
@@ -313,6 +355,19 @@ export default function TrailerShipmentsPage() {
           isOpen={isEditDialogOpen}
           setIsOpen={setIsEditDialogOpen}
           trailerToEdit={trailer}
+        />
+      )}
+
+      {isAttachTrailerDocDialogOpen && documentToManageInfo && trailer && (
+        <AttachTrailerDocumentDialog
+          isOpen={isAttachTrailerDocDialogOpen}
+          setIsOpen={setIsAttachTrailerDocDialogOpen}
+          trailerId={trailer.id}
+          trailerIdentifier={`${trailer.name} (ID: ${trailer.id})`}
+          documentTypeField={documentToManageInfo.field}
+          documentFriendlyName={documentToManageInfo.friendlyName}
+          currentDocumentName={documentToManageInfo.currentName}
+          onDocumentAction={handleTrailerDocumentAction}
         />
       )}
     </div>

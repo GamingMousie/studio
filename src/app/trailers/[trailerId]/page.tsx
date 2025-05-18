@@ -8,10 +8,10 @@ import type { Trailer, Shipment, TrailerUpdateData } from '@/types';
 import ShipmentCard from '@/components/shipment/ShipmentCard';
 import AddShipmentDialog from '@/components/shipment/AddShipmentDialog';
 import EditTrailerDialog from '@/components/trailer/EditTrailerDialog';
-import AttachTrailerDocumentDialog from '@/components/trailer/AttachTrailerDocumentDialog'; // New Import
+import AttachTrailerDocumentDialog from '@/components/trailer/AttachTrailerDocumentDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye, Edit, UploadCloud, BookOpen, FileBadge, Mail, FileSignature } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Package, Truck, Briefcase, CalendarDays, Weight, Tag, Printer, FileText, Eye, Edit, UploadCloud, BookOpen, FileBadge, Mail, FileSignature, Download } from 'lucide-react';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 
@@ -28,7 +28,7 @@ export default function TrailerShipmentsPage() {
     getShipmentsByTrailerId,
     deleteShipment,
     trailers: trailersFromContext,
-    updateTrailer, // Added for document updates
+    updateTrailer,
   } = useWarehouse();
 
   const [trailer, setTrailer] = useState<Trailer | null>(null);
@@ -36,7 +36,6 @@ export default function TrailerShipmentsPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isTrailerFound, setIsTrailerFound] = useState<boolean | null>(null);
 
-  // State for the new AttachTrailerDocumentDialog
   const [isAttachTrailerDocDialogOpen, setIsAttachTrailerDocDialogOpen] = useState(false);
   const [documentToManageInfo, setDocumentToManageInfo] = useState<{
     field: TrailerDocumentField;
@@ -105,6 +104,37 @@ export default function TrailerShipmentsPage() {
       }
     }
   };
+  
+  const handleDownloadDocument = (documentName?: string) => {
+    if (documentName) {
+      const newWindow = window.open("", "_blank");
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <title>Downloading Document: ${documentName}</title>
+              <style>
+                body { font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #f0f0f0; }
+                .container { background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+                h1 { color: #333; }
+                p { color: #666; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h1>Simulating Download: ${documentName}</h1>
+                <p>(This is a placeholder. In a real application, the file "${documentName}" would start downloading.)</p>
+                <p>Current system only stores document names, not the files themselves.</p>
+              </div>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      } else {
+        alert(`Could not open new window to simulate download for: ${documentName}. Please check your popup blocker settings.`);
+      }
+    }
+  };
 
   const handleEmailDocuments = () => {
     if (!trailer) return;
@@ -142,7 +172,6 @@ export default function TrailerShipmentsPage() {
   ) => {
     if (affectedTrailerId === trailer?.id) {
         const updatePayload: TrailerUpdateData = {};
-        // TypeScript needs a little help here to understand docField is a valid key
         (updatePayload as any)[docField] = newDocumentName;
         updateTrailer(affectedTrailerId, updatePayload);
     }
@@ -189,19 +218,31 @@ export default function TrailerShipmentsPage() {
         {title}
       </h3>
       {documentName ? (
-        <div className="flex items-center justify-between p-3 bg-muted/50 rounded-md mb-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-muted/50 rounded-md mb-2 gap-2">
           <div className="flex items-center">
             <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{documentName}</span>
+            <span className="text-sm font-medium break-all">{documentName}</span>
           </div>
-          <Button
-            variant="link"
-            size="sm"
-            onClick={() => handleViewDocument(documentName)}
-            aria-label={`View ${title.toLowerCase()} ${documentName}`}
-          >
-            <Eye className="mr-1 h-4 w-4" /> View
-          </Button>
+          <div className="flex gap-2 flex-shrink-0">
+            <Button
+              variant="link"
+              size="sm"
+              onClick={() => handleViewDocument(documentName)}
+              aria-label={`View ${title.toLowerCase()} ${documentName}`}
+              className="p-0 h-auto"
+            >
+              <Eye className="mr-1 h-4 w-4" /> View
+            </Button>
+            <Button
+              variant="link"
+              size="sm"
+              onClick={() => handleDownloadDocument(documentName)}
+              aria-label={`Download ${title.toLowerCase()} ${documentName}`}
+              className="p-0 h-auto text-primary"
+            >
+              <Download className="mr-1 h-4 w-4" /> Download
+            </Button>
+          </div>
         </div>
       ) : (
         <p className="text-sm text-muted-foreground mb-2">No {title.toLowerCase()} attached.</p>
@@ -373,3 +414,4 @@ export default function TrailerShipmentsPage() {
     </div>
   );
 }
+

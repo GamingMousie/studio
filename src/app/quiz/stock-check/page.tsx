@@ -60,33 +60,34 @@ export default function StockCheckQuizPage() {
           const trailer = getTrailerById(shipment.trailerId);
           const shipmentLocations = shipment.locations && shipment.locations.length > 0
             ? shipment.locations
-            : [{ name: 'Pending Assignment', pallets: undefined }];
+            : []; // If no locations, it's effectively pending, treat as empty for quiz item generation
 
           shipmentLocations.forEach((loc, index) => {
-            initialItems.push({
-              id: `${shipment.id}-${loc.name}-${index}`, 
-              shipmentId: shipment.id,
-              stsJob: shipment.stsJob,
-              trailerId: shipment.trailerId,
-              trailerCompany: trailer?.company,
-              trailerArrivalDateFormatted: formatDateSafe(trailer?.arrivalDate),
-              shipmentQuantity: shipment.quantity,
-              locationName: loc.name,
-              locationPallets: loc.pallets,
-            });
+            if (loc.name !== 'Pending Assignment') { // Only include items with specific locations
+              initialItems.push({
+                id: `${shipment.id}-${loc.name}-${index}`, 
+                shipmentId: shipment.id,
+                stsJob: shipment.stsJob,
+                trailerId: shipment.trailerId,
+                trailerCompany: trailer?.company,
+                trailerArrivalDateFormatted: formatDateSafe(trailer?.arrivalDate),
+                shipmentQuantity: shipment.quantity,
+                locationName: loc.name,
+                locationPallets: loc.pallets,
+              });
+            }
           });
         });
 
       const sortedInitialItems = initialItems.sort((a, b) => {
-        if (a.locationName === 'Pending Assignment' && b.locationName !== 'Pending Assignment') return 1;
-        if (a.locationName !== 'Pending Assignment' && b.locationName === 'Pending Assignment') return -1;
+        // "Pending Assignment" items are already filtered out, so no need for specific sorting for them.
         if (a.locationName.toLowerCase() < b.locationName.toLowerCase()) return -1;
         if (a.locationName.toLowerCase() > b.locationName.toLowerCase()) return 1;
         const dateAVal = a.trailerArrivalDateFormatted;
         const dateBVal = b.trailerArrivalDateFormatted;
         const dateA = dateAVal !== 'N/A' && dateAVal !== 'Invalid Date' ? parseISO(formatDateSafe(dateAVal, 'yyyy-MM-dd')).getTime() : 0;
         const dateB = dateBVal !== 'N/A' && dateBVal !== 'Invalid Date' ? parseISO(formatDateSafe(dateBVal, 'yyyy-MM-dd')).getTime() : 0;
-        if (dateB !== dateA) return dateB - dateA;
+        if (dateB !== dateA) return dateB - dateA; // Sort by date descending (newest first)
         if (a.trailerId.toLowerCase() < b.trailerId.toLowerCase()) return -1;
         if (a.trailerId.toLowerCase() > b.trailerId.toLowerCase()) return 1;
         return a.stsJob - b.stsJob;
@@ -137,32 +138,32 @@ export default function StockCheckQuizPage() {
             const trailer = getTrailerById(shipment.trailerId);
             const shipmentLocations = shipment.locations && shipment.locations.length > 0
                 ? shipment.locations
-                : [{ name: 'Pending Assignment', pallets: undefined }];
+                : [];
 
             shipmentLocations.forEach((loc, index) => {
-                initialItems.push({
-                id: `${shipment.id}-${loc.name}-${index}`,
-                shipmentId: shipment.id,
-                stsJob: shipment.stsJob,
-                trailerId: shipment.trailerId,
-                trailerCompany: trailer?.company,
-                trailerArrivalDateFormatted: formatDateSafe(trailer?.arrivalDate),
-                shipmentQuantity: shipment.quantity,
-                locationName: loc.name,
-                locationPallets: loc.pallets,
-                });
+                if (loc.name !== 'Pending Assignment') { // Only include items with specific locations
+                    initialItems.push({
+                    id: `${shipment.id}-${loc.name}-${index}`,
+                    shipmentId: shipment.id,
+                    stsJob: shipment.stsJob,
+                    trailerId: shipment.trailerId,
+                    trailerCompany: trailer?.company,
+                    trailerArrivalDateFormatted: formatDateSafe(trailer?.arrivalDate),
+                    shipmentQuantity: shipment.quantity,
+                    locationName: loc.name,
+                    locationPallets: loc.pallets,
+                    });
+                }
             });
             });
         const sortedInitialItems = initialItems.sort((a, b) => {
-            if (a.locationName === 'Pending Assignment' && b.locationName !== 'Pending Assignment') return 1;
-            if (a.locationName !== 'Pending Assignment' && b.locationName === 'Pending Assignment') return -1;
             if (a.locationName.toLowerCase() < b.locationName.toLowerCase()) return -1;
             if (a.locationName.toLowerCase() > b.locationName.toLowerCase()) return 1;
             const dateAVal = a.trailerArrivalDateFormatted;
             const dateBVal = b.trailerArrivalDateFormatted;
             const dateA = dateAVal !== 'N/A' && dateAVal !== 'Invalid Date' ? parseISO(formatDateSafe(dateAVal, 'yyyy-MM-dd')).getTime() : 0;
             const dateB = dateBVal !== 'N/A' && dateBVal !== 'Invalid Date' ? parseISO(formatDateSafe(dateBVal, 'yyyy-MM-dd')).getTime() : 0;
-            if (dateB !== dateA) return dateB - dateA;
+            if (dateB !== dateA) return dateB - dateA; // Sort by date descending (newest first)
             if (a.trailerId.toLowerCase() < b.trailerId.toLowerCase()) return -1;
             if (a.trailerId.toLowerCase() > b.trailerId.toLowerCase()) return 1;
             return a.stsJob - b.stsJob;
@@ -231,8 +232,8 @@ export default function StockCheckQuizPage() {
         </div>
         <div className="min-h-[400px] flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-md p-8 bg-card shadow">
           <PackageSearch className="h-16 w-16 text-muted-foreground mb-4" />
-          <p className="text-xl text-muted-foreground">No unreleased stock items found to quiz.</p>
-          <p className="text-sm text-muted-foreground mt-2">Perhaps all stock is released, or there are no items in the warehouse.</p>
+          <p className="text-xl text-muted-foreground">No unreleased stock items with specific locations found to quiz.</p>
+          <p className="text-sm text-muted-foreground mt-2">All stock might be released, pending assignment, or no items in the warehouse.</p>
            <Button asChild variant="outline" className="mt-6">
             <Link href="/reports/unreleased-stock-locations">View Unreleased Stock Report</Link>
           </Button>
@@ -379,3 +380,4 @@ export default function StockCheckQuizPage() {
     </div>
   );
 }
+

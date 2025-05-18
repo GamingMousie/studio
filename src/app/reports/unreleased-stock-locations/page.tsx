@@ -19,7 +19,8 @@ interface UnreleasedStockLocationItem {
   trailerId: string;
   trailerName?: string;
   trailerCompany?: string;
-  trailerArrivalDate: string; // Formatted
+  trailerArrivalDateRaw?: string; // Store raw date for sorting
+  trailerArrivalDateFormatted: string; // Formatted for display
   shipmentQuantity: number;
   locationName: string;
   locationPallets?: number;
@@ -63,7 +64,8 @@ export default function UnreleasedStockLocationsReportPage() {
             trailerId: shipment.trailerId,
             trailerName: trailer?.name,
             trailerCompany: trailer?.company,
-            trailerArrivalDate: formatDateSafe(trailer?.arrivalDate),
+            trailerArrivalDateRaw: trailer?.arrivalDate, // Store raw date
+            trailerArrivalDateFormatted: formatDateSafe(trailer?.arrivalDate),
             shipmentQuantity: shipment.quantity,
             locationName: loc.name,
             locationPallets: loc.pallets,
@@ -72,16 +74,25 @@ export default function UnreleasedStockLocationsReportPage() {
       });
 
     return expandedReportItems.sort((a, b) => {
-      const dateA = a.trailerArrivalDate === 'N/A' || a.trailerArrivalDate === 'Invalid Date' ? 0 : parseISO(getTrailerById(a.trailerId)?.arrivalDate || '').getTime();
-      const dateB = b.trailerArrivalDate === 'N/A' || b.trailerArrivalDate === 'Invalid Date' ? 0 : parseISO(getTrailerById(b.trailerId)?.arrivalDate || '').getTime();
-      if (dateB !== dateA) return dateB - dateA; // Most recent arrival first
-      if (a.trailerId < b.trailerId) return -1;
-      if (a.trailerId > b.trailerId) return 1;
-      if (a.stsJob < b.stsJob) return -1;
-      if (a.stsJob > b.stsJob) return 1;
-      if (a.locationName < b.locationName) return -1;
-      if (a.locationName > b.locationName) return 1;
-      return 0;
+      // Sort "Pending Assignment" to the end
+      if (a.locationName === 'Pending Assignment' && b.locationName !== 'Pending Assignment') return 1;
+      if (a.locationName !== 'Pending Assignment' && b.locationName === 'Pending Assignment') return -1;
+      
+      // Primary sort by locationName (A-Z)
+      if (a.locationName.toLowerCase() < b.locationName.toLowerCase()) return -1;
+      if (a.locationName.toLowerCase() > b.locationName.toLowerCase()) return 1;
+      
+      // Secondary sort by trailerArrivalDateRaw (newest first)
+      const dateA = a.trailerArrivalDateRaw ? parseISO(a.trailerArrivalDateRaw).getTime() : 0;
+      const dateB = b.trailerArrivalDateRaw ? parseISO(b.trailerArrivalDateRaw).getTime() : 0;
+      if (dateB !== dateA) return dateB - dateA;
+
+      // Tertiary sort by trailerId (A-Z)
+      if (a.trailerId.toLowerCase() < b.trailerId.toLowerCase()) return -1;
+      if (a.trailerId.toLowerCase() > b.trailerId.toLowerCase()) return 1;
+
+      // Quaternary sort by stsJob (ascending)
+      return a.stsJob - b.stsJob;
     });
   }, [shipments, getTrailerById, isClient]);
 
@@ -90,32 +101,32 @@ export default function UnreleasedStockLocationsReportPage() {
   };
 
   const pageTitle = 'Unreleased Warehouse Stock by Location';
-  const cardDescriptionText = 'Detailed view of all unreleased shipments, their current locations, quantities, and associated trailer arrival dates. Each location is listed separately.';
+  const cardDescriptionText = 'Detailed view of all unreleased shipments, their current locations, quantities, and associated trailer arrival dates. Each location is listed separately and sorted by location name.';
   const printTitleText = 'Unreleased Warehouse Stock by Location Report';
 
   const ReportSkeleton = () => (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead>Location</TableHead>
           <TableHead>Trailer ID</TableHead>
           <TableHead>STS Job</TableHead>
           <TableHead>Trailer Company</TableHead>
           <TableHead>Trailer Arrival</TableHead>
           <TableHead>Cust. Job No.</TableHead>
           <TableHead className="text-right">Pieces</TableHead>
-          <TableHead>Location</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {[...Array(7)].map((_, i) => (
           <TableRow key={i}>
+            <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[80px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[60px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell><Skeleton className="h-4 w-[100px]" /></TableCell>
             <TableCell className="text-right"><Skeleton className="h-4 w-[50px] ml-auto" /></TableCell>
-            <TableCell><Skeleton className="h-4 w-[150px]" /></TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -170,18 +181,22 @@ export default function UnreleasedStockLocationsReportPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="whitespace-nowrap"><MapPin className="inline-block mr-1 h-4 w-4 print:hidden"/>Location</TableHead>
                     <TableHead className="whitespace-nowrap"><Truck className="inline-block mr-1 h-4 w-4 print:hidden"/>Trailer ID</TableHead>
                     <TableHead className="whitespace-nowrap"><Hash className="inline-block mr-1 h-4 w-4 print:hidden"/>STS Job</TableHead>
                     <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4 print:hidden"/>Trailer Company</TableHead>
                     <TableHead className="whitespace-nowrap"><CalendarDays className="inline-block mr-1 h-4 w-4 print:hidden"/>Trailer Arrival</TableHead>
                     <TableHead className="whitespace-nowrap"><Briefcase className="inline-block mr-1 h-4 w-4 print:hidden"/>Cust. Job No.</TableHead>
                     <TableHead className="text-right whitespace-nowrap"><BoxIcon className="inline-block mr-1 h-4 w-4 print:hidden"/>Pieces</TableHead>
-                    <TableHead className="whitespace-nowrap"><MapPin className="inline-block mr-1 h-4 w-4 print:hidden"/>Location</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reportData.map((item, index) => ( // Added index for unique key
+                  {reportData.map((item, index) => ( 
                     <TableRow key={`${item.shipmentId}-${item.locationName}-${index}`}>
+                      <TableCell className="font-semibold">
+                        {item.locationName}
+                        {item.locationPallets !== undefined ? ` (${item.locationPallets} plts)` : ''}
+                      </TableCell>
                       <TableCell>
                         <Link href={`/trailers/${item.trailerId}`} className="text-primary hover:underline print:text-foreground print:no-underline">
                           {item.trailerId}
@@ -193,13 +208,9 @@ export default function UnreleasedStockLocationsReportPage() {
                         </Link>
                       </TableCell>
                       <TableCell>{item.trailerCompany || 'N/A'}</TableCell>
-                      <TableCell>{item.trailerArrivalDate}</TableCell>
+                      <TableCell>{item.trailerArrivalDateFormatted}</TableCell>
                       <TableCell>{item.customerJobNumber || 'N/A'}</TableCell>
                       <TableCell className="text-right font-semibold">{item.shipmentQuantity}</TableCell>
-                      <TableCell>
-                        {item.locationName}
-                        {item.locationPallets !== undefined ? ` (${item.locationPallets} plts)` : ''}
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

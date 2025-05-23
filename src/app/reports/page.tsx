@@ -125,7 +125,12 @@ export default function ReportsPage() {
           <TableHead>STS Job</TableHead>
           <TableHead>Trailer Name</TableHead>
           <TableHead>Customer Job No.</TableHead>
-          <TableHead>Arrival Date</TableHead>
+          <TableHead>
+            <div className="flex items-center">
+              <CalendarDays className="mr-1.5 h-4 w-4 print:hidden" />
+              Arrival Date
+            </div>
+          </TableHead>
           <TableHead>Locations</TableHead>
           <TableHead className="text-right">Shipment ID</TableHead>
         </TableRow>
@@ -290,7 +295,7 @@ export default function ReportsPage() {
           <div className="print-only-block mb-4">
             <h2 className="text-xl font-semibold text-foreground">Bond Check Report - Current Warehouse Stock (Unreleased)</h2>
             {companyFilter !== 'all' && <p className="text-sm text-muted-foreground">Filtered by Company: {uniqueCompanies.find(c => c.toLowerCase() === companyFilter) || companyFilter}</p>}
-             {clientGeneratedDate && <p className="text-xs text-muted-foreground">Date Generated: {clientGeneratedDate}</p>}
+            {clientGeneratedDate && <p className="text-xs text-muted-foreground">Date Generated: {clientGeneratedDate}</p>}
           </div>
 
           {!isClient ? (
@@ -361,3 +366,4 @@ export default function ReportsPage() {
     </div>
   );
 }
+

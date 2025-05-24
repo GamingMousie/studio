@@ -5,33 +5,33 @@
 
 @layer base {
   :root {
-    --background: 120 25% 25%; /* Darker, earthy green */
-    --foreground: 60 30% 95%; /* Off-white/light cream */
+    --background: 0 0% 100%; /* white */
+    --foreground: 222.2 84% 4.9%; /* dark blue/black */
 
-    --card: 120 25% 28%; /* Slightly darker than background for depth */
-    --card-foreground: 60 30% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 120 25% 22%; /* Darker for popovers */
-    --popover-foreground: 60 30% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 30 55% 55%; /* Desaturated orange/amber */
-    --primary-foreground: 60 40% 5%; /* Darker text for primary buttons */
+    --primary: 222.2 47.4% 11.2%; /* dark blue */
+    --primary-foreground: 210 40% 98%; /* light text for primary */
 
-    --secondary: 120 15% 40%; /* Muted green */
-    --secondary-foreground: 60 30% 90%;
+    --secondary: 210 40% 96.1%; /* very light blue/gray */
+    --secondary-foreground: 222.2 47.4% 11.2%; /* dark blue for text on secondary */
 
-    --muted: 120 10% 30%; /* Even more muted green/grey */
-    --muted-foreground: 60 20% 65%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%; /* grayish blue */
 
-    --accent: 30 55% 55%; /* Same as primary */
-    --accent-foreground: 60 40% 5%;
+    --accent: 210 40% 96.1%; /* same as secondary */
+    --accent-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: 0 60% 50%; /* A contrasting red for destructive actions */
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%; /* red */
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 120 10% 40%; /* Earthy border */
-    --input: 120 10% 35%; /* Darker input background */
-    --ring: 30 60% 60%; /* Brighter ring for focus, related to primary */
+    --border: 214.3 31.8% 91.4%; /* light gray */
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%; /* dark blue/black for focus ring */
 
     --radius: 0.5rem;
 
@@ -54,33 +54,33 @@
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 222.2 84% 4.9%; /* dark blue/black */
+    --foreground: 210 40% 98%; /* light gray/white */
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary: 210 40% 98%; /* light gray/white for primary buttons */
+    --primary-foreground: 222.2 47.4% 11.2%; /* dark blue for text on primary */
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 217.2 32.6% 17.5%; /* dark muted blue */
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%; /* lighter grayish blue */
 
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%; /* darker red */
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 210 40% 98%; /* light gray/white for focus ring */
 
     /* Chart colors for dark mode */
     --chart-1: 210 70% 80%;
@@ -289,3 +289,5 @@ html {
   scroll-padding-top: 4rem; /* Adjust based on your fixed header's height */
 }
 
+
+    

@@ -25,16 +25,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // Apply font variable classes directly to the <html> tag using cn.
-    // GeistSans.variable and GeistMono.variable are class names that set up
-    // CSS custom properties (e.g., --font-geist-sans, --font-geist-mono).
-    <html lang="en" className={cn(GeistSans.variable, GeistMono.variable)}>
+    // Remove font variable classes from here
+    <html lang="en">
       {/* 
-        The 'antialiased' class remains on the body.
+        Apply font variable classes directly to the <body> tag using cn,
+        along with the existing 'antialiased' class.
+        GeistSans.variable and GeistMono.variable are class names that set up
+        CSS custom properties (e.g., --font-geist-sans, --font-geist-mono).
         The font-family is applied via CSS variables in globals.css, for example:
         body { font-family: var(--font-geist-sans); }
       */}
-      <body className="antialiased">
+      <body className={cn(GeistSans.variable, GeistMono.variable, "antialiased")}>
         <WarehouseProvider>
           <Header />
           <main className="container mx-auto px-4 py-8">

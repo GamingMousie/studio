@@ -6,7 +6,7 @@ import { Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { QRCodeCanvas } from 'qrcode.react';
+import Barcode from 'react-barcode'; // Changed from qrcode.react
 
 interface ShipmentLabelProps {
   shipment: Shipment;
@@ -160,6 +160,22 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
                     applyStylesToChildren(origChild, clonedDirectChildren[index]); 
                 }
             });
+
+            // Ensure barcode/QR code svg elements are also styled for capture
+            const barcodeCanvas = clonedLabelRoot.querySelector('canvas'); // If react-barcode uses canvas
+            const barcodeSvg = clonedLabelRoot.querySelector('svg'); // If react-barcode uses svg
+            if (barcodeCanvas) {
+                barcodeCanvas.style.backgroundColor = "white";
+            }
+            if (barcodeSvg) {
+                const paths = barcodeSvg.querySelectorAll('rect, path');
+                 paths.forEach((path) => {
+                    (path as HTMLElement).style.fill = "black";
+                 });
+                 barcodeSvg.style.backgroundColor = "white";
+            }
+
+
           }
         },
       });
@@ -216,10 +232,18 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
           </div>
         </div>
 
-        {/* QR Code Section - Bottom part of the label */}
+        {/* Barcode Section - Bottom part of the label */}
         <div className="mt-auto pt-1 border-t border-dashed border-muted-foreground print:border-black print:mt-0.5 print:pt-0.5 print:mb-0"> 
-          <div className="flex justify-center items-center mt-0.5 print:mt-0 print:mb-0.5 print:p-0.5 bg-white"> {/* Ensure bg-white for QR code canvas */}
-            <QRCodeCanvas value={barcodeValue} size={128} bgColor={"#ffffff"} fgColor={"#000000"} level={"L"} />
+          <div className="flex justify-center items-center mt-0.5 print:mt-0 print:mb-0.5 print:p-0.5 bg-white">
+            <Barcode 
+              value={barcodeValue} 
+              width={1.5} 
+              height={40} 
+              displayValue={false}
+              background="transparent"
+              lineColor="black"
+              margin={0} // Adjusted for less surrounding space
+            />
           </div>
         </div>
       </div>
@@ -236,5 +260,6 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
     </div>
   );
 }
+    
 
     

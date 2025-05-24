@@ -108,8 +108,8 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
   const handleDownloadImage = async () => {
     if (!labelRef.current) return;
     
-    const targetWidthPx = Math.round((15 / 2.54) * 150); // approx 886px (for 15cm)
-    const targetHeightPx = Math.round((10.8 / 2.54) * 150);  // approx 638px (for 10.8cm)
+    const targetWidthPx = Math.round((15 / 2.54) * 150); // approx 886px for 15cm width
+    const targetHeightPx = Math.round((10.8 / 2.54) * 150);  // approx 638px for 10.8cm height
 
     try {
       const canvas = await html2canvas(labelRef.current, {
@@ -172,7 +172,6 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
     }
   };
   
-
   return (
     <div className="flex flex-col items-center group">
       <div 
@@ -180,48 +179,55 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         id={`shipment-label-${shipment.id}`}
         className="border border-foreground rounded-md shadow-sm w-full bg-background text-foreground print:shadow-none print:border-black print:w-[150mm] print:h-[108mm] print:p-1.5 print:break-words label-item flex flex-col justify-between print:leading-normal print-page-break-after-always"
       >
-        <div className="flex-grow flex flex-col justify-between print:leading-normal">
-          <div className="space-y-1 print:space-y-0 print:leading-normal">
-            <p className="flex justify-between print:mb-1">
-              <span className="text-sm print:text-[18pt] print:font-semibold">Date:</span>
-              <span className="text-sm print:text-[18pt] print:font-semibold">{labelDate}</span>
-            </p>
-            <p className="flex justify-between print:mb-1">
-              <span className="text-sm print:text-[18pt] print:font-semibold">Agent:</span>
-              <span className="text-sm print:text-[36pt] print:font-semibold text-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span>
-            </p>
-            <p className="flex justify-between print:mb-1">
-              <span className="text-sm print:text-[18pt] print:font-semibold">Importer:</span>
-              <span className="text-sm print:text-[28pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</span>
-            </p>
-            <p className="flex justify-between print:mb-2">
-              <span className="text-sm print:text-[18pt] print:font-semibold">Pieces:</span>
-              <span className="text-lg print:text-[36pt] print:font-bold text-right">{shipment.quantity}</span>
-            </p>
+        {/* Main content section */}
+        <div className="flex-grow flex flex-col justify-between print:leading-normal space-y-1 print:space-y-0">
+          {/* Date row */}
+          <div className="flex justify-between items-baseline print:mb-1">
+            <span className="text-sm print:text-[22pt] print:font-semibold">Date:</span>
+            <span className="text-sm print:text-[22pt] print:font-semibold text-right">{labelDate}</span>
           </div>
 
-          <div className="text-center print:mb-1">
-            <p className="text-lg print:text-[40pt] print:font-bold" title={`Tr: ${trailer.id} / Job: ${shipment.stsJob}`}>
+          {/* Agent row */}
+          <div className="flex justify-between items-baseline print:mb-1">
+            <span className="text-sm print:text-[22pt] print:font-semibold">Agent:</span>
+            <span className="text-sm print:text-[40pt] print:font-semibold text-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span>
+          </div>
+
+          {/* Importer row */}
+          <div className="flex justify-between items-baseline print:mb-1">
+            <span className="text-sm print:text-[18pt] print:font-semibold">Importer:</span>
+            <span className="text-sm print:text-[40pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</span>
+          </div>
+          
+          {/* Pieces row */}
+          <div className="flex justify-between items-baseline print:mb-2">
+            <span className="text-sm print:text-[18pt] print:font-semibold">Pieces:</span>
+            <span className="text-lg print:text-[52pt] print:font-bold text-right">{shipment.quantity}</span>
+          </div>
+
+          {/* Ref and Job row - centered */}
+          <div className="text-center print:my-1">
+            <p className="text-lg print:text-[44pt] print:font-bold" title={`Tr: ${trailer.id} / Job: ${shipment.stsJob}`}>
               Ref: {trailer.id} / Job: {shipment.stsJob}
             </p>
           </div>
         </div>
 
         {/* Barcode Section - Bottom part of the label */}
-        <div className="mt-auto pt-1 border-t border-dashed border-muted-foreground print:border-black print:mt-1 print:pt-1 print:mb-0"> 
-          <p className="text-xs print:text-[16pt] print:font-semibold print:mb-0.5 text-center">BARCODE</p>
-          <div className="flex justify-center items-center mt-0.5 print:mt-0.5 print:mb-0.5 print:h-[50px] bg-background print:bg-white border-transparent print:border-transparent print:p-0.5 max-h-12">
+        <div className="mt-auto pt-1 border-t border-dashed border-muted-foreground print:border-black print:mt-1 print:pt-0.5 print:mb-0"> 
+          <p className="text-xs print:text-[20pt] print:font-semibold print:mb-0.5 text-center">BARCODE</p>
+          <div className="flex justify-center items-center mt-0.5 print:mt-0 print:mb-0.5 print:h-[50px] bg-background print:bg-white border-transparent print:border-transparent print:p-0.5 max-h-12">
              <Barcode 
                 value={barcodeValue} 
                 format="CODE128" 
                 width={1.5} 
                 height={40} 
                 displayValue={false} 
-                background="transparent" // For html2canvas compatibility
+                background="transparent"
                 lineColor="black"
              />
           </div>
-          <p className="text-center font-mono text-xs print:text-[22pt] print:font-bold break-all mt-0.5 print:mt-0.5 leading-tight tracking-tighter" title={barcodeValue}>
+          <p className="text-center font-mono text-xs print:text-[28pt] print:font-bold break-all mt-0.5 print:mt-0.5 leading-tight tracking-tighter" title={barcodeValue}>
             {barcodeValue}
           </p>
         </div>

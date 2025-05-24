@@ -5,33 +5,33 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --background: 120 25% 25%; /* Darker, earthy green */
+    --foreground: 60 30% 95%; /* Off-white/light cream */
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card: 120 25% 28%; /* Slightly darker than background for depth */
+    --card-foreground: 60 30% 95%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover: 120 25% 22%; /* Darker for popovers */
+    --popover-foreground: 60 30% 95%;
 
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 30 55% 55%; /* Desaturated orange/amber */
+    --primary-foreground: 60 40% 5%; /* Darker text for primary buttons */
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 120 15% 40%; /* Muted green */
+    --secondary-foreground: 60 30% 90%;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 120 10% 30%; /* Even more muted green/grey */
+    --muted-foreground: 60 20% 65%;
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 30 55% 55%; /* Same as primary */
+    --accent-foreground: 60 40% 5%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 60% 50%; /* A contrasting red for destructive actions */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%; /* Adjusted for neutral theme, often same as primary or darker */
+    --border: 120 10% 40%; /* Earthy border */
+    --input: 120 10% 35%; /* Darker input background */
+    --ring: 30 60% 60%; /* Brighter ring for focus, related to primary */
 
     --radius: 0.5rem;
 
@@ -232,6 +232,7 @@
   
   .print\:text-\[28pt\] { font-size: 28pt !important; }
   .print\:text-\[22pt\] { font-size: 22pt !important; }
+  .print\:text-\[20pt\] { font-size: 20pt !important; }
   .print\:text-\[18pt\] { font-size: 18pt !important; }
   .print\:text-\[16pt\] { font-size: 16pt !important; }
   .print\:text-\[14pt\] { font-size: 14pt !important; }
@@ -248,7 +249,9 @@
   .print\:text-\[32pt\] { font-size: 32pt !important; }
   .print\:text-\[36pt\] { font-size: 36pt !important; }
   .print\:text-\[40pt\] { font-size: 40pt !important; }
+  .print\:text-\[44pt\] { font-size: 44pt !important; }
   .print\:text-\[48pt\] { font-size: 48pt !important; }
+  .print\:text-\[52pt\] { font-size: 52pt !important; }
   
   .print\:mb-0\.5 { margin-bottom: 0.125rem !important; }
   .print\:mb-1 { margin-bottom: 0.25rem !important; }

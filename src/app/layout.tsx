@@ -5,14 +5,13 @@ import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import './globals.css';
-import { cn } from '@/lib/utils'; // Import cn
+import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/layout/Header';
 import { WarehouseProvider } from '@/contexts/WarehouseContext';
 
 // The imported GeistSans and GeistMono are already font objects.
 // Their .variable property provides the class name to apply the font and CSS variables.
-// No need to call them as functions like GeistSans(...)
 
 export const metadata: Metadata = {
   title: 'ShipShape - Warehouse Management',
@@ -25,17 +24,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // Remove font variable classes from here
-    <html lang="en">
+    <html lang="en" className={cn(GeistSans.variable, GeistMono.variable)}>
       {/* 
-        Apply font variable classes directly to the <body> tag using cn,
-        along with the existing 'antialiased' class.
-        GeistSans.variable and GeistMono.variable are class names that set up
-        CSS custom properties (e.g., --font-geist-sans, --font-geist-mono).
-        The font-family is applied via CSS variables in globals.css, for example:
-        body { font-family: var(--font-geist-sans); }
+        Font variable classes are applied to <html>.
+        The 'antialiased' class is applied to <body>.
+        The font-family is applied via CSS variables in globals.css.
       */}
-      <body className={cn(GeistSans.variable, GeistMono.variable, "antialiased")}>
+      <body className="antialiased">
         <WarehouseProvider>
           <Header />
           <main className="container mx-auto px-4 py-8">

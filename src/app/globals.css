@@ -106,14 +106,13 @@
     @apply border-border;
   }
   html {
+    @apply antialiased;
     font-family: var(--font-geist-sans);
     font-feature-settings: "rlig" 1, "calt" 1;
     scroll-padding-top: 4rem; /* Adjust based on your fixed header's height */
   }
   body {
     @apply bg-background text-foreground;
-    /* font-family is now on html */
-    /* antialiased class is applied in layout.tsx to the body tag */
   }
   pre, code, kbd, samp {
     font-family: var(--font-geist-mono);
@@ -230,7 +229,7 @@
   .print\:w-\[108mm\] { width: 108mm !important; }
   .print\:h-\[108mm\] { height: 108mm !important; }
   .print\:w-\[150mm\] { width: 150mm !important; }
-  .print\:h-\[150mm\] { height: 150mm !important; }
+  .print\:h-\[150mm\] { height: 150mm !important; } /* Was 108mm, now 150mm for height */
   .print\:p-1\.5 { padding: 0.375rem !important; } /* approx 1.5mm if 1rem = 16px */
   .print\:p-2 { padding: 0.5rem !important; }
   .print\:p-3 { padding: 0.75rem !important; }

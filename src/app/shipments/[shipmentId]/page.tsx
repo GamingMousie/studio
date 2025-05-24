@@ -203,7 +203,7 @@ export default function SingleShipmentPage() {
                 Shipment Details
               </CardTitle>
               <CardDescription className="mt-1">
-                STS Job: <span className="font-semibold text-foreground">{shipment.stsJob}</span> | Shipment ID: <span className="font-semibold text-foreground">{shipment.id.substring(0,8)}...</span>
+                STS Job: <span className="font-semibold text-foreground">{shipment.stsJob}</span> | Shipment ID: <span className="font-semibold text-foreground break-all">{shipment.id}</span>
                 {shipment.customerJobNumber && ` | Cust. Job: ${shipment.customerJobNumber}`}
               </CardDescription>
             </div>

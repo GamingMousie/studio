@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -21,13 +20,13 @@ export default function GenerateShipmentLabelsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
+  const { getTrailerById, getShipmentsByTrailerId } = useWarehouse();
+
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const { getTrailerById, getShipmentsByTrailerId } = useWarehouse();
-
-  const handleGenerateLabels = () => {
+  const handleGenerateLabels = async () => {
     if (!trailerIdInput.trim()) {
       setErrorMessage('Please enter a Trailer ID.');
       setSelectedTrailer(null);
@@ -40,27 +39,27 @@ export default function GenerateShipmentLabelsPage() {
     setSelectedTrailer(null);
     setShipmentsToLabel([]);
 
-    const trailer = getTrailerById(trailerIdInput.trim());
+    try {
+      const trailer = await getTrailerById(trailerIdInput.trim());
+      if (!trailer) {
+        setErrorMessage(`Trailer with ID "${trailerIdInput.trim()}" not found.`);
+        setIsLoading(false);
+        return;
+      }
 
-    if (!trailer) {
-      setErrorMessage(`Trailer with ID "${trailerIdInput.trim()}" not found.`);
+      const shipments = await getShipmentsByTrailerId(trailer.id);
+      setSelectedTrailer(trailer);
+      setShipmentsToLabel(shipments);
+
+      if (shipments.length === 0) {
+        setErrorMessage(`No shipments found for Trailer ID "${trailer.id}".`);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('An error occurred while fetching trailer or shipments.');
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    const shipments = getShipmentsByTrailerId(trailer.id);
-
-    if (shipments.length === 0) {
-      setErrorMessage(`No shipments found for Trailer ID "${trailer.id}".`);
-      setSelectedTrailer(trailer); 
-      setShipmentsToLabel([]);
-      setIsLoading(false);
-      return;
-    }
-
-    setSelectedTrailer(trailer);
-    setShipmentsToLabel(shipments);
-    setIsLoading(false);
   };
 
   const handlePrintLabels = () => {
@@ -71,20 +70,18 @@ export default function GenerateShipmentLabelsPage() {
 
   const getLabelDate = (trailer: Trailer | null): string => {
     if (!isClient) return '';
-    // Format date as DD/MM/YYYY
-    const dateFormat = 'dd/MM/yyyy'; 
+    const dateFormat = 'dd/MM/yyyy';
     if (trailer && trailer.arrivalDate) {
       try {
         return format(parseISO(trailer.arrivalDate), dateFormat);
-      } catch (e) {
-        console.error("Error formatting trailer arrival date:", e);
+      } catch {
         return format(new Date(), dateFormat);
       }
     }
     return format(new Date(), dateFormat);
   };
-  
-  const labelDateForShipments = selectedTrailer ? getLabelDate(selectedTrailer) : getLabelDate(null);
+
+  const labelDateForShipments = getLabelDate(selectedTrailer);
 
   return (
     <div className="space-y-6">
@@ -112,7 +109,7 @@ export default function GenerateShipmentLabelsPage() {
                   onChange={(e) => setTrailerIdInput(e.target.value)}
                   placeholder="Enter Trailer ID (e.g., T-001)"
                   className="pl-10"
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleGenerateLabels();}}
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleGenerateLabels(); }}
                 />
               </div>
             </div>
@@ -124,7 +121,7 @@ export default function GenerateShipmentLabelsPage() {
       </Card>
 
       {isLoading && (
-         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 no-print">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 no-print">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="p-4 border border-border rounded-lg shadow-sm bg-background h-[200px] flex flex-col justify-between">
               <Skeleton className="h-4 w-3/4" />
@@ -145,15 +142,16 @@ export default function GenerateShipmentLabelsPage() {
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
-      
-      {selectedTrailer && shipmentsToLabel.length === 0 && !errorMessage && !isLoading && (
-         <div className="text-center py-10 bg-card rounded-lg shadow no-print">
-            <PackageSearch className="mx-auto h-12 w-12 text-muted-foreground" />
-            <p className="mt-4 text-xl text-muted-foreground">No shipments found for Trailer ID "{selectedTrailer.id}".</p>
-         </div>
+
+      {selectedTrailer && shipmentsToLabel.length === 0 && !isLoading && (
+        <div className="text-center py-10 bg-card rounded-lg shadow no-print">
+          <PackageSearch className="mx-auto h-12 w-12 text-muted-foreground" />
+          <p className="mt-4 text-xl text-muted-foreground">
+            No shipments found for Trailer ID "{selectedTrailer.id}".
+          </p>
+        </div>
       )}
 
-      {/* On-screen title for generated labels */}
       {selectedTrailer && shipmentsToLabel.length > 0 && !isLoading && (
         <div className="no-print">
           <div className="flex justify-between items-center mb-4">
@@ -167,30 +165,27 @@ export default function GenerateShipmentLabelsPage() {
           </div>
         </div>
       )}
-      
-      {/* Section for labels - visible on screen and for printing */}
+
       <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 printable-area label-grid ${(!isLoading && selectedTrailer && shipmentsToLabel.length > 0) ? '' : 'hidden print:hidden'}`} style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150mm, 1fr))' }}>
         {isClient && selectedTrailer && shipmentsToLabel.length > 0 && !isLoading &&
           shipmentsToLabel.map((shipment) => (
             <ShipmentLabel
               key={shipment.id}
               shipment={shipment}
-              trailer={selectedTrailer!}
+              trailer={selectedTrailer}
               labelDate={labelDateForShipments}
             />
           ))}
       </div>
 
-      {/* Title that only appears on the printed page */}
-       {selectedTrailer && shipmentsToLabel.length > 0 && (
-         <div className="hidden print:block print-only-block mb-4 text-center">
-            <h2 className="text-2xl font-bold text-foreground">
-                Shipment Labels for Trailer: {selectedTrailer.name || 'N/A'} (ID: {selectedTrailer.id})
-            </h2>
-            <p className="text-lg text-muted-foreground">{shipmentsToLabel.length} Shipment(s)</p>
-         </div>
-       )}
+      {selectedTrailer && shipmentsToLabel.length > 0 && (
+        <div className="hidden print:block print-only-block mb-4 text-center">
+          <h2 className="text-2xl font-bold text-foreground">
+            Shipment Labels for Trailer: {selectedTrailer.name || 'N/A'} (ID: {selectedTrailer.id})
+          </h2>
+          <p className="text-lg text-muted-foreground">{shipmentsToLabel.length} Shipment(s)</p>
+        </div>
+      )}
     </div>
   );
 }
-

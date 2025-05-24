@@ -108,23 +108,25 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
   const handleDownloadImage = async () => {
     if (!labelRef.current) return;
     
+    // Dimensions for 15cm width x 10.8cm height at 150 DPI
     const targetWidthPx = Math.round((15 / 2.54) * 150); // approx 886px for 15cm width
     const targetHeightPx = Math.round((10.8 / 2.54) * 150);  // approx 638px for 10.8cm height
 
     try {
       const canvas = await html2canvas(labelRef.current, {
         useCORS: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#ffffff', // Explicitly set background for capture
         width: targetWidthPx, 
         height: targetHeightPx,
-        scale: 2, 
+        scale: 2, // Render at higher resolution for better quality
         logging: false, 
         onclone: (documentClone) => {
           const clonedLabelRoot = documentClone.getElementById(labelRef.current?.id || '');
           if (clonedLabelRoot && labelRef.current) {
+            // Apply base styles to the cloned root for html2canvas
             clonedLabelRoot.style.width = `${targetWidthPx}px`;
             clonedLabelRoot.style.height = `${targetHeightPx}px`;
-            clonedLabelRoot.style.padding = `${0.375 * 16}px`; 
+            clonedLabelRoot.style.padding = `${0.375 * 16}px`; // Corresponds to print:p-1.5 (0.375rem * 16px/rem for base)
             clonedLabelRoot.style.border = '1px solid black';
             clonedLabelRoot.style.display = 'flex';
             clonedLabelRoot.style.flexDirection = 'column';
@@ -132,29 +134,31 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
             clonedLabelRoot.style.backgroundColor = '#ffffff'; 
             clonedLabelRoot.style.color = '#000000'; 
             clonedLabelRoot.style.boxSizing = 'border-box';
-            clonedLabelRoot.style.lineHeight = 'normal';
+            clonedLabelRoot.style.lineHeight = 'normal'; // Ensure base line height
 
+            // Recursively apply print styles as inline styles to children
             const applyStylesToChildren = (originalNode: HTMLElement, clonedNode: HTMLElement) => {
               const originalChildren = Array.from(originalNode.children) as HTMLElement[];
               const clonedChildren = Array.from(clonedNode.children) as HTMLElement[];
 
               originalChildren.forEach((origChild, index) => {
                 if (clonedChildren[index]) {
-                  applyCaptureStyles(clonedChildren[index], origChild);
+                  applyCaptureStyles(clonedChildren[index], origChild); // Apply styles to direct child
                   if (origChild.children.length > 0) {
-                    applyStylesToChildren(origChild, clonedChildren[index]);
+                    applyStylesToChildren(origChild, clonedChildren[index]); // Recurse for grandchildren
                   }
                 }
               });
             };
             
+            // Apply styles to the direct children of the label root
             const originalDirectChildren = Array.from(labelRef.current.children) as HTMLElement[];
             const clonedDirectChildren = Array.from(clonedLabelRoot.children) as HTMLElement[];
 
             originalDirectChildren.forEach((origChild, index) => {
                 if(clonedDirectChildren[index]) {
-                    applyCaptureStyles(clonedDirectChildren[index], origChild); 
-                    applyStylesToChildren(origChild, clonedDirectChildren[index]); 
+                    applyCaptureStyles(clonedDirectChildren[index], origChild); // Apply styles to child
+                    applyStylesToChildren(origChild, clonedDirectChildren[index]); // Recurse for child's children
                 }
             });
           }
@@ -180,7 +184,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         className="border border-foreground rounded-md shadow-sm w-full bg-background text-foreground print:shadow-none print:border-black print:w-[150mm] print:h-[108mm] print:p-1.5 print:break-words label-item flex flex-col justify-between print:leading-normal print-page-break-after-always"
       >
         {/* Main content section */}
-        <div className="flex-grow flex flex-col justify-between space-y-1 print:space-y-0 print:leading-normal">
+        <div className="flex-grow flex flex-col justify-between print:space-y-0 print:leading-normal">
           {/* Date row */}
           <div className="flex justify-between items-baseline print:mb-0.5">
             <span className="text-sm print:text-[22pt] print:font-semibold">Date:</span>
@@ -215,7 +219,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
 
         {/* Barcode Section - Bottom part of the label */}
         <div className="mt-auto pt-1 border-t border-dashed border-muted-foreground print:border-black print:mt-0.5 print:pt-0.5 print:mb-0"> 
-          <p className="text-xs print:text-[20pt] print:font-semibold print:mb-0.5 text-center">BARCODE</p>
+          <p className="text-center text-xs print:text-[20pt] print:font-semibold print:mb-0.5">BARCODE</p>
           <div className="flex justify-center items-center mt-0.5 print:mt-0 print:mb-0.5 print:h-[50px] bg-background print:bg-white border-transparent print:border-transparent print:p-0.5 max-h-12">
              <Barcode 
                 value={barcodeValue} 
@@ -227,9 +231,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
                 lineColor="black"
              />
           </div>
-          <p className="text-center font-mono text-xs print:text-[28pt] print:font-bold break-all mt-0.5 print:mt-0.5 leading-tight tracking-tighter" title={barcodeValue}>
-            {barcodeValue === '5372ae1e-9f0c-4b39-a467-d4c61a9fda97' ? '[ID HIDDEN]' : barcodeValue}
-          </p>
+          {/* Removed the textual display of barcodeValue below the barcode image */}
         </div>
       </div>
       <Button

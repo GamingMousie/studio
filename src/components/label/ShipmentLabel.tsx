@@ -6,7 +6,7 @@ import { Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import Barcode from 'react-barcode';
+import { QRCodeCanvas } from 'qrcode.react';
 
 interface ShipmentLabelProps {
   shipment: Shipment;
@@ -114,17 +114,18 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
     try {
       const canvas = await html2canvas(labelRef.current, {
         useCORS: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#ffffff', // Ensure a solid background
         width: targetWidthPx, 
         height: targetHeightPx,
-        scale: 2, 
+        scale: 2, // Render at higher resolution
         logging: false, 
         onclone: (documentClone) => {
           const clonedLabelRoot = documentClone.getElementById(labelRef.current?.id || '');
           if (clonedLabelRoot && labelRef.current) {
+            // Apply explicit dimensions to the cloned root for html2canvas
             clonedLabelRoot.style.width = `${targetWidthPx}px`;
             clonedLabelRoot.style.height = `${targetHeightPx}px`;
-            clonedLabelRoot.style.padding = `${0.375 * 16}px`; 
+            clonedLabelRoot.style.padding = `${0.375 * 16}px`; // Approx print:p-1.5
             clonedLabelRoot.style.border = '1px solid black';
             clonedLabelRoot.style.display = 'flex';
             clonedLabelRoot.style.flexDirection = 'column';
@@ -132,8 +133,9 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
             clonedLabelRoot.style.backgroundColor = '#ffffff'; 
             clonedLabelRoot.style.color = '#000000'; 
             clonedLabelRoot.style.boxSizing = 'border-box';
-            clonedLabelRoot.style.lineHeight = 'normal';
+            clonedLabelRoot.style.lineHeight = 'normal'; // From print:leading-normal
 
+            // Helper to recursively apply print styles as inline styles to children
             const applyStylesToChildren = (originalNode: HTMLElement, clonedNode: HTMLElement) => {
               const originalChildren = Array.from(originalNode.children) as HTMLElement[];
               const clonedChildren = Array.from(clonedNode.children) as HTMLElement[];
@@ -148,6 +150,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
               });
             };
             
+            // Apply styles to direct children and their descendants
             const originalDirectChildren = Array.from(labelRef.current.children) as HTMLElement[];
             const clonedDirectChildren = Array.from(clonedLabelRoot.children) as HTMLElement[];
 
@@ -163,7 +166,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
       const image = canvas.toDataURL('image/png', 1.0);
       const link = document.createElement('a');
       link.href = image;
-      link.download = `label-${shipment.trailerId}-${shipment.stsJob}.png`;
+      link.download = `label-${trailer?.id || 'unknown_trailer'}-${shipment.stsJob}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -190,7 +193,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
           {/* Agent row */}
           <div className="flex justify-between items-baseline print:mb-0.5">
             <span className="text-sm print:text-[22pt] print:font-semibold">Agent:</span>
-            <span className="text-sm print:text-[40pt] print:font-semibold text-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span>
+            <span className="text-sm print:text-[40pt] print:font-semibold text-right" title={trailer?.company || 'N/A'}>{trailer?.company || 'N/A'}</span>
           </div>
 
           {/* Importer row */}
@@ -207,25 +210,16 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
 
           {/* Ref and Job row - centered */}
           <div className="text-center print:my-0.5">
-            <p className="text-lg print:text-[44pt] print:font-bold" title={`Tr: ${trailer.id} / Job: ${shipment.stsJob}`}>
-              Ref: {trailer.id} / Job: {shipment.stsJob}
+            <p className="text-lg print:text-[44pt] print:font-bold" title={`Tr: ${trailer?.id || 'N/A'} / Job: ${shipment.stsJob}`}>
+              Ref: {trailer?.id || 'N/A'} / Job: {shipment.stsJob}
             </p>
           </div>
         </div>
 
-        {/* Barcode Section - Bottom part of the label */}
+        {/* QR Code Section - Bottom part of the label */}
         <div className="mt-auto pt-1 border-t border-dashed border-muted-foreground print:border-black print:mt-0.5 print:pt-0.5 print:mb-0"> 
-          {/* Removed the <p>BARCODE</p> line */}
-          <div className="flex justify-center items-center mt-0.5 print:mt-0 print:mb-0.5 print:h-[50px] bg-background print:bg-white border-transparent print:border-transparent print:p-0.5 max-h-12">
-             <Barcode 
-                value={barcodeValue} 
-                format="CODE128" 
-                width={1.5} 
-                height={40} 
-                displayValue={false} 
-                background="transparent"
-                lineColor="black"
-             />
+          <div className="flex justify-center items-center mt-0.5 print:mt-0 print:mb-0.5 print:p-0.5 bg-white"> {/* Ensure bg-white for QR code canvas */}
+            <QRCodeCanvas value={barcodeValue} size={128} bgColor={"#ffffff"} fgColor={"#000000"} level={"L"} />
           </div>
         </div>
       </div>
@@ -233,7 +227,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         onClick={handleDownloadImage}
         variant="outline"
         size="sm"
-        className="mt-2 no-print transition-opacity duration-150"
+        className="mt-2 no-print"
         aria-label={`Download label for shipment ${shipment.stsJob} as image`}
       >
         <Download className="mr-2 h-4 w-4" />
@@ -242,3 +236,5 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
     </div>
   );
 }
+
+    

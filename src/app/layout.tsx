@@ -24,13 +24,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
       {/*
-        Font variable classes are applied to <html>.
-        The 'antialiased' class is applied to <body>.
+        Font variable classes and antialiasing are applied to <html>.
         The font-family is applied via CSS variables in globals.css.
       */}
-      <body className="antialiased">
+      <body>
         <WarehouseProvider>
           <Header />
           <main className="container mx-auto px-4 py-8">

@@ -180,33 +180,33 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         className="border border-foreground rounded-md shadow-sm w-full bg-background text-foreground print:shadow-none print:border-black print:w-[150mm] print:h-[108mm] print:p-1.5 print:break-words label-item flex flex-col justify-between print:leading-normal print-page-break-after-always"
       >
         {/* Main content section */}
-        <div className="flex-grow flex flex-col justify-between print:leading-normal space-y-1 print:space-y-0">
+        <div className="flex-grow flex flex-col justify-between space-y-1 print:space-y-0 print:leading-normal">
           {/* Date row */}
-          <div className="flex justify-between items-baseline print:mb-1">
+          <div className="flex justify-between items-baseline print:mb-0.5">
             <span className="text-sm print:text-[22pt] print:font-semibold">Date:</span>
             <span className="text-sm print:text-[22pt] print:font-semibold text-right">{labelDate}</span>
           </div>
 
           {/* Agent row */}
-          <div className="flex justify-between items-baseline print:mb-1">
+          <div className="flex justify-between items-baseline print:mb-0.5">
             <span className="text-sm print:text-[22pt] print:font-semibold">Agent:</span>
             <span className="text-sm print:text-[40pt] print:font-semibold text-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span>
           </div>
 
           {/* Importer row */}
-          <div className="flex justify-between items-baseline print:mb-1">
+          <div className="flex justify-between items-baseline print:mb-0.5">
             <span className="text-sm print:text-[18pt] print:font-semibold">Importer:</span>
-            <span className="text-sm print:text-[40pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</span>
+            <span className="text-sm print:text-[28pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</span>
           </div>
           
           {/* Pieces row */}
-          <div className="flex justify-between items-baseline print:mb-2">
+          <div className="flex justify-between items-baseline print:mb-1">
             <span className="text-sm print:text-[18pt] print:font-semibold">Pieces:</span>
-            <span className="text-lg print:text-[52pt] print:font-bold text-right">{shipment.quantity}</span>
+            <span className="text-lg print:text-[36pt] print:font-bold text-right">{shipment.quantity}</span>
           </div>
 
           {/* Ref and Job row - centered */}
-          <div className="text-center print:my-1">
+          <div className="text-center print:my-0.5">
             <p className="text-lg print:text-[44pt] print:font-bold" title={`Tr: ${trailer.id} / Job: ${shipment.stsJob}`}>
               Ref: {trailer.id} / Job: {shipment.stsJob}
             </p>
@@ -214,7 +214,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         </div>
 
         {/* Barcode Section - Bottom part of the label */}
-        <div className="mt-auto pt-1 border-t border-dashed border-muted-foreground print:border-black print:mt-1 print:pt-0.5 print:mb-0"> 
+        <div className="mt-auto pt-1 border-t border-dashed border-muted-foreground print:border-black print:mt-0.5 print:pt-0.5 print:mb-0"> 
           <p className="text-xs print:text-[20pt] print:font-semibold print:mb-0.5 text-center">BARCODE</p>
           <div className="flex justify-center items-center mt-0.5 print:mt-0 print:mb-0.5 print:h-[50px] bg-background print:bg-white border-transparent print:border-transparent print:p-0.5 max-h-12">
              <Barcode 
@@ -228,7 +228,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
              />
           </div>
           <p className="text-center font-mono text-xs print:text-[28pt] print:font-bold break-all mt-0.5 print:mt-0.5 leading-tight tracking-tighter" title={barcodeValue}>
-            {barcodeValue}
+            {barcodeValue === '5372ae1e-9f0c-4b39-a467-d4c61a9fda97' ? '[ID HIDDEN]' : barcodeValue}
           </p>
         </div>
       </div>

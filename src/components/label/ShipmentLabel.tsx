@@ -20,6 +20,8 @@ const applyCaptureStyles = (clonedElement: HTMLElement, originalElement: HTMLEle
   const screenTextSizeClasses = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl', 'text-5xl', 'text-6xl'];
   screenTextSizeClasses.forEach(cls => clonedElement.classList.remove(cls));
 
+  clonedElement.style.color = 'black'; // Ensure text is black for capture
+
   printClasses.forEach(pClass => {
     if (pClass.startsWith('print:text-[')) {
       const sizeMatch = pClass.match(/print:text-\[(.*?)]/);
@@ -45,16 +47,40 @@ const applyCaptureStyles = (clonedElement: HTMLElement, originalElement: HTMLEle
         if (pMatch && pMatch[1]) {
             clonedElement.style.padding = `${parseFloat(pMatch[1]) * 4}px`;
         }
+    }  else if (pClass.startsWith('print:pt-')) {
+        const ptMatch = pClass.match(/print:pt-(\d+(\.\d+)?)/);
+        if (ptMatch && ptMatch[1]) {
+            clonedElement.style.paddingTop = `${parseFloat(ptMatch[1]) * 4}px`;
+        }
+    } else if (pClass.startsWith('print:pb-')) {
+        const pbMatch = pClass.match(/print:pb-(\d+(\.\d+)?)/);
+        if (pbMatch && pbMatch[1]) {
+            clonedElement.style.paddingBottom = `${parseFloat(pbMatch[1]) * 4}px`;
+        }
+    } else if (pClass.startsWith('print:px-')) {
+        const pxMatch = pClass.match(/print:px-(\d+(\.\d+)?)/);
+        if (pxMatch && pxMatch[1]) {
+            const paddingValue = `${parseFloat(pxMatch[1]) * 4}px`;
+            clonedElement.style.paddingLeft = paddingValue;
+            clonedElement.style.paddingRight = paddingValue;
+        }
+    } else if (pClass.startsWith('print:py-')) {
+        const pyMatch = pClass.match(/print:py-(\d+(\.\d+)?)/);
+        if (pyMatch && pyMatch[1]) {
+            const paddingValue = `${parseFloat(pyMatch[1]) * 4}px`;
+            clonedElement.style.paddingTop = paddingValue;
+            clonedElement.style.paddingBottom = paddingValue;
+        }
     } else if (pClass === 'print:leading-normal') {
       clonedElement.style.lineHeight = 'normal';
     } else if (pClass === 'print:leading-relaxed') {
-        clonedElement.style.lineHeight = '1.625';
+        clonedElement.style.lineHeight = '1.625'; // Tailwind's relaxed
     } else if (pClass.startsWith('print:w-')) {
-        const wMatch = pClass.match(/print:w-\[(.*?)\]/); // Match for arbitrary values in brackets
+        const wMatch = pClass.match(/print:w-\[(.*?)\]/);
         if (wMatch && wMatch[1]) {
             clonedElement.style.width = wMatch[1];
         } else {
-           const wNumMatch = pClass.match(/print:w-(\d+)/); // Match for numeric tailwind units
+           const wNumMatch = pClass.match(/print:w-(\d+)/);
            if (wNumMatch && wNumMatch[1]) {
              clonedElement.style.width = `${parseFloat(wNumMatch[1]) * 0.25}rem`;
            }
@@ -76,7 +102,6 @@ const applyCaptureStyles = (clonedElement: HTMLElement, originalElement: HTMLEle
 
 export default function ShipmentLabel({ shipment, trailer, labelDate }: ShipmentLabelProps) {
   const barcodeValue = shipment.id; 
-
   const labelRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadImage = async () => {
@@ -89,9 +114,10 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
     try {
       const canvas = await html2canvas(labelRef.current, {
         useCORS: true,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#ffffff', // Explicitly set white background
         width: targetWidthPx, 
         height: targetHeightPx,
+        scale: 2, // Render at 2x resolution
         logging: false, 
         onclone: (documentClone) => {
           const clonedLabelRoot = documentClone.getElementById(labelRef.current?.id || '');
@@ -107,7 +133,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
             clonedLabelRoot.style.backgroundColor = '#ffffff'; 
             clonedLabelRoot.style.color = '#000000'; 
             clonedLabelRoot.style.boxSizing = 'border-box';
-            clonedLabelRoot.style.lineHeight = 'normal'; // Base line height
+            clonedLabelRoot.style.lineHeight = 'normal';
 
             const applyStylesToChildren = (originalNode: HTMLElement, clonedNode: HTMLElement) => {
               const originalChildren = Array.from(originalNode.children) as HTMLElement[];
@@ -154,6 +180,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
     { width: '10%', height: '100%' }
   ];
 
+
   return (
     <div className="flex flex-col items-center group">
       <div 
@@ -162,20 +189,34 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         className="border border-foreground rounded-md shadow-sm w-full bg-background text-foreground print:shadow-none print:border-black print:w-[150mm] print:h-[108mm] print:p-1.5 print:break-words label-item flex flex-col justify-between print:leading-normal print-page-break-after-always"
       >
         {/* Top part of the label - text content */}
-        <div className="flex-grow space-y-0 print:space-y-0 print:leading-normal">
-          <p className="text-sm print:text-[18pt] print:font-semibold print:mb-1">Date: <span className="float-right">{labelDate}</span></p>
-          <p className="text-sm print:text-[36pt] print:font-semibold print:mb-1">Agent: <span className="float-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span></p>
-          <p className="text-xs print:text-[28pt] print:font-semibold print:mb-1">Importer: <span className="float-right" title={shipment.importer}>{shipment.importer}</span></p>
-          <p className="text-sm print:text-[36pt] print:font-bold print:mb-2">Pieces: <span className="float-right">{shipment.quantity}</span></p>
-          <p className="text-base print:text-[40pt] print:font-bold print:mb-1 text-center" title={`Trailer ${trailer.id} / Job ${shipment.stsJob}`}>
-            Ref: {trailer.id} / Job: {shipment.stsJob}
-          </p>
+        <div className="flex-grow flex flex-col justify-between print:leading-normal">
+          <div>
+            <p className="text-sm print:text-[18pt] print:font-semibold print:mb-0.5">Date: <span className="float-right">{labelDate}</span></p>
+            
+            <p className="text-base print:text-[36pt] print:font-semibold print:mb-0.5">
+              Agent: <span className="float-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span>
+            </p>
+            
+            <p className="text-base print:text-[36pt] print:font-semibold print:mb-0.5">
+              Importer: <span className="float-right" title={shipment.importer}>{shipment.importer}</span>
+            </p>
+          </div>
+
+          <div>
+            <p className="text-xl print:text-[48pt] print:font-bold text-center print:mb-1">
+              Pieces: {shipment.quantity}
+            </p>
+            <p className="text-lg print:text-[40pt] print:font-bold text-center print:mb-1" title={`Trailer ${trailer.id} / Job ${shipment.stsJob}`}>
+              Ref: {trailer.id} / Job: {shipment.stsJob}
+            </p>
+          </div>
         </div>
+
 
         {/* Barcode Section - Bottom part of the label */}
         <div className="mt-auto pt-1 border-t border-dashed border-muted-foreground print:border-black print:mt-1 print:pt-1 print:mb-0"> 
           <p className="text-xs print:text-[16pt] print:font-semibold print:mb-0.5 text-center">BARCODE</p>
-          <div className="flex justify-center items-center mt-0.5 print:mt-0.5 print:mb-0.5 h-12 print:h-[40px] bg-background print:bg-white border border-foreground print:border-black p-0.5" aria-label="Barcode Placeholder">
+          <div className="flex justify-center items-center mt-0.5 print:mt-0.5 print:mb-0.5 print:h-[40px] bg-background print:bg-white border border-foreground print:border-black print:p-0.5 max-h-10" aria-label="Barcode Placeholder">
             <div className="flex w-full h-full items-stretch">
               {barcodeBars.map((bar, i) => (
                 <div key={i} className="bg-foreground print:bg-black" style={{ width: bar.width, height: bar.height, marginRight: i < barcodeBars.length -1 ? '1px' : '0' }}></div>

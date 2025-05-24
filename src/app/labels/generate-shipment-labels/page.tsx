@@ -61,18 +61,23 @@ export default function GenerateShipmentLabelsPage() {
       const trailer = await getTrailerById(trailerIdInput.trim());
 
       if (!trailer) {
-        setErrorMessage(`Trailer "${trailerIdInput}" not found.`);
+        setErrorMessage(`Trailer "${trailerIdInput.trim()}" not found.`);
+        setIsLoading(false);
         return;
       }
 
       const shipments = await getShipmentsByTrailerId(trailer.id);
 
+      if (shipments.length === 0) {
+        setSelectedTrailer(trailer);
+        setShipmentsToLabel([]);
+        setErrorMessage(`No shipments found for Trailer ID "${trailer.id}".`);
+        setIsLoading(false);
+        return;
+      }
+
       setSelectedTrailer(trailer);
       setShipmentsToLabel(shipments);
-
-      if (shipments.length === 0) {
-        setErrorMessage(`No shipments found for Trailer ID "${trailer.id}".`);
-      }
     } catch (err) {
       console.error(err);
       setErrorMessage('Error loading trailer or shipments.');
@@ -151,7 +156,10 @@ export default function GenerateShipmentLabelsPage() {
       {isLoading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 no-print">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="p-4 border border-border rounded-lg shadow-sm bg-background h-[200px] flex flex-col justify-between">
+            <div
+              key={i}
+              className="p-4 border border-border rounded-lg shadow-sm bg-background h-[200px] flex flex-col justify-between"
+            >
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
               <Skeleton className="h-3 w-2/3" />
@@ -195,7 +203,7 @@ export default function GenerateShipmentLabelsPage() {
         </>
       )}
 
-      {/* No labels found */}
+      {/* No labels found (redundant, but kept for clarity) */}
       {selectedTrailer && shipmentsToLabel.length === 0 && !isLoading && !errorMessage && (
         <Alert className="no-print">
           <PackageSearch className="h-5 w-5" />

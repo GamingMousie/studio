@@ -28,13 +28,13 @@ export default function AllShipmentsPage() {
     return shipments.filter(shipment => {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
-        shipment.id.toLowerCase().includes(searchLower) || 
-        shipment.trailerId.toLowerCase().includes(searchLower) || 
-        shipment.stsJob.toString().toLowerCase().includes(searchLower) ||
-        (shipment.customerJobNumber && shipment.customerJobNumber.toLowerCase().includes(searchLower)) ||
-        shipment.importer.toLowerCase().includes(searchLower) ||
-        shipment.exporter.toLowerCase().includes(searchLower) || 
-        (shipment.locations && shipment.locations.some(loc => loc.name.toLowerCase().includes(searchLower)));
+        (shipment.id?.toLowerCase().includes(searchLower) ?? false) ||
+        (shipment.trailerId?.toLowerCase().includes(searchLower) ?? false) ||
+        (shipment.stsJob?.toString().toLowerCase().includes(searchLower) ?? false) ||
+        (shipment.customerJobNumber?.toLowerCase().includes(searchLower) ?? false) ||
+        (shipment.importer?.toLowerCase().includes(searchLower) ?? false) ||
+        (shipment.exporter?.toLowerCase().includes(searchLower) ?? false) ||
+        (shipment.locations && shipment.locations.some(loc => loc.name?.toLowerCase().includes(searchLower) ?? false));
 
       const matchesTrailerId = trailerIdFilter === 'all' || shipment.trailerId === trailerIdFilter;
 

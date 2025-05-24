@@ -37,9 +37,26 @@ export default function GenerateShipmentLabelsPage() {
 
   const { getTrailerById, getShipmentsByTrailerId } = useWarehouse();
 
+  // State to hold label date string to avoid hydration mismatch
+  const [labelDateForShipments, setLabelDateForShipments] = useState<string>('');
+
   useEffect(() => {
     document.getElementById('trailerId')?.focus();
   }, []);
+
+  // Update label date client-side when selectedTrailer changes
+  useEffect(() => {
+    if (!selectedTrailer) {
+      setLabelDateForShipments('');
+      return;
+    }
+    try {
+      const date = selectedTrailer.arrivalDate ? new Date(selectedTrailer.arrivalDate) : new Date();
+      setLabelDateForShipments(format(date, 'dd/MM/yyyy'));
+    } catch {
+      setLabelDateForShipments(format(new Date(), 'dd/MM/yyyy'));
+    }
+  }, [selectedTrailer]);
 
   const resetState = () => {
     setErrorMessage(null);
@@ -62,21 +79,19 @@ export default function GenerateShipmentLabelsPage() {
 
       if (!trailer) {
         setErrorMessage(`Trailer "${trailerIdInput.trim()}" not found.`);
-        setIsLoading(false);
         return;
       }
 
       const shipments = await getShipmentsByTrailerId(trailer.id);
 
+      setSelectedTrailer(trailer);
+
       if (shipments.length === 0) {
-        setSelectedTrailer(trailer);
         setShipmentsToLabel([]);
         setErrorMessage(`No shipments found for Trailer ID "${trailer.id}".`);
-        setIsLoading(false);
         return;
       }
 
-      setSelectedTrailer(trailer);
       setShipmentsToLabel(shipments);
     } catch (err) {
       console.error(err);
@@ -87,25 +102,14 @@ export default function GenerateShipmentLabelsPage() {
   };
 
   const handlePrintLabels = () => {
-    try {
-      if (shipmentsToLabel.length > 0 && selectedTrailer) {
+    if (shipmentsToLabel.length > 0 && selectedTrailer) {
+      try {
         window.print();
+      } catch (err) {
+        console.error('Print failed:', err);
       }
-    } catch (err) {
-      console.error('Print failed:', err);
     }
   };
-
-  const getLabelDate = (trailer: Trailer | null): string => {
-    try {
-      const date = trailer?.arrivalDate ? new Date(trailer.arrivalDate) : new Date();
-      return format(date, 'dd/MM/yyyy');
-    } catch {
-      return format(new Date(), 'dd/MM/yyyy');
-    }
-  };
-
-  const labelDateForShipments = getLabelDate(selectedTrailer);
 
   return (
     <div className="space-y-6">
@@ -123,7 +127,10 @@ export default function GenerateShipmentLabelsPage() {
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-2 items-end">
             <div className="flex-grow">
-              <label htmlFor="trailerId" className="block text-sm font-medium text-muted-foreground mb-1">
+              <label
+                htmlFor="trailerId"
+                className="block text-sm font-medium text-muted-foreground mb-1"
+              >
                 Trailer ID
               </label>
               <div className="relative">
@@ -138,21 +145,18 @@ export default function GenerateShipmentLabelsPage() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleGenerateLabels();
                   }}
+                  autoComplete="off"
                 />
               </div>
             </div>
-            <Button
-              onClick={handleGenerateLabels}
-              disabled={isLoading}
-              className="w-full sm:w-auto"
-            >
+            <Button onClick={handleGenerateLabels} disabled={isLoading} className="w-full sm:w-auto">
               {isLoading ? 'Generating...' : 'Generate Labels'}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Loading State */}
+      {/* Loading Skeleton */}
       {isLoading && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 no-print">
           {[...Array(3)].map((_, i) => (
@@ -171,7 +175,7 @@ export default function GenerateShipmentLabelsPage() {
         </div>
       )}
 
-      {/* Error Message */}
+      {/* Error Alert */}
       {errorMessage && (
         <Alert variant="destructive" className="no-print">
           <AlertTriangle className="h-5 w-5" />
@@ -203,14 +207,12 @@ export default function GenerateShipmentLabelsPage() {
         </>
       )}
 
-      {/* No labels found (redundant, but kept for clarity) */}
+      {/* No shipments alert */}
       {selectedTrailer && shipmentsToLabel.length === 0 && !isLoading && !errorMessage && (
         <Alert className="no-print">
           <PackageSearch className="h-5 w-5" />
           <AlertTitle>No Shipments Found</AlertTitle>
-          <AlertDescription>
-            This trailer has no shipments for labeling.
-          </AlertDescription>
+          <AlertDescription>This trailer has no shipments for labeling.</AlertDescription>
         </Alert>
       )}
     </div>

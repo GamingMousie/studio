@@ -10,21 +10,24 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck, Archive, Edit3, Fingerprint, CalendarClock, Mail } from 'lucide-react';
+import { ArrowLeft, Printer, Package, MapPin, CheckCircle2, CircleOff, FileText, Users, Weight, Box, Truck, Hash, Eye, Send, Briefcase, CalendarCheck, Archive, Edit3, Fingerprint, CalendarClock, Mail, Copy, Check } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import EditShipmentDialog from '@/components/shipment/EditShipmentDialog'; 
+import EditShipmentDialog from '@/components/shipment/EditShipmentDialog';
+import { useToast } from '@/hooks/use-toast'; // Import useToast
 
 export default function SingleShipmentPage() {
   const router = useRouter();
   const params = useParams();
   const shipmentId = params.shipmentId as string;
+  const { toast } = useToast(); // Initialize toast
 
   const { getShipmentById, getTrailerById, markShipmentAsPrinted, updateShipment } = useWarehouse();
 
   const [shipment, setShipment] = useState<Shipment | null | undefined>(undefined);
   const [isClient, setIsClient] = useState(false);
   const [printedDateTime, setPrintedDateTime] = useState<string | null>(null);
-  const [isEditShipmentDialogOpen, setIsEditShipmentDialogOpen] = useState(false); 
+  const [isEditShipmentDialogOpen, setIsEditShipmentDialogOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -33,7 +36,7 @@ export default function SingleShipmentPage() {
       setShipment(currentShipment);
     }
   }, [shipmentId, getShipmentById]);
-  
+
   useEffect(() => {
     if (isClient && shipmentId && getShipmentById) {
       const currentShipment = getShipmentById(shipmentId);
@@ -53,13 +56,13 @@ export default function SingleShipmentPage() {
 
   const handlePrint = () => {
     if (canPrint && shipment) {
-      if (!shipment.releasedAt) { 
-        markShipmentAsPrinted(shipment.id); 
+      if (!shipment.releasedAt) {
+        markShipmentAsPrinted(shipment.id);
         setPrintedDateTime(new Date().toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
       } else {
         setPrintedDateTime(new Date(shipment.releasedAt).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
       }
-      
+
       setTimeout(() => {
         window.print();
       }, 0);
@@ -99,7 +102,7 @@ export default function SingleShipmentPage() {
   const formatDate = (dateString?: string, dateFormat = 'PPpp') => {
     if (!dateString) return 'N/A';
     try {
-      return format(parseISO(dateString), dateFormat); 
+      return format(parseISO(dateString), dateFormat);
     } catch (error) {
       return "Invalid Date";
     }
@@ -116,13 +119,25 @@ export default function SingleShipmentPage() {
       missingParts.push("release permission");
     }
 
-    if (missingParts.length === 0) return; // Should not happen if button is visible
+    if (missingParts.length === 0) return;
 
     const missingSubjectPart = missingParts.join(" & ");
     const subject = `Missing ${missingSubjectPart} for Trailer ${shipment.trailerId} / Job ${shipment.stsJob}`;
     const body = `Good Morning,\n\nWe have a driver waiting to collect "${shipment.trailerId} / Job ${shipment.stsJob}" but we are missing files for above shipment.\n\nCan you be able to update us ASAP please?`;
     const mailtoLink = `mailto:klaudia@mail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoLink;
+  };
+
+  const handleCopyShipmentId = () => {
+    if (!shipment) return;
+    navigator.clipboard.writeText(shipment.id).then(() => {
+      setCopied(true);
+      toast({ title: "Copied!", description: "Shipment ID copied to clipboard." });
+      setTimeout(() => setCopied(false), 2000); // Reset icon after 2 seconds
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      toast({ variant: "destructive", title: "Error", description: "Failed to copy Shipment ID." });
+    });
   };
 
 
@@ -139,7 +154,7 @@ export default function SingleShipmentPage() {
             <Skeleton className="h-4 w-1/2" />
           </CardHeader>
           <CardContent className="space-y-3">
-            {[...Array(10)].map((_, i) => ( 
+            {[...Array(10)].map((_, i) => (
               <div key={i} className="flex items-center space-x-2">
                 <Skeleton className="h-5 w-5 rounded-full" />
                 <Skeleton className="h-4 w-1/4" />
@@ -202,10 +217,19 @@ export default function SingleShipmentPage() {
                 <Package className="mr-3 h-8 w-8" />
                 Shipment Details
               </CardTitle>
-              <CardDescription className="mt-1">
-                STS Job: <span className="font-semibold text-foreground">{shipment.stsJob}</span> | Shipment ID: <span className="font-semibold text-foreground break-all">{shipment.id}</span>
-                {shipment.customerJobNumber && ` | Cust. Job: ${shipment.customerJobNumber}`}
-              </CardDescription>
+              <div className="mt-1 flex items-center gap-2">
+                <CardDescription className="flex-shrink-0">
+                  STS Job: <span className="font-semibold text-foreground">{shipment.stsJob}</span> |
+                  {shipment.customerJobNumber && ` Cust. Job: ${shipment.customerJobNumber} |`}
+                </CardDescription>
+                <div className="flex items-center flex-grow min-w-0">
+                  <CardDescription className="flex-shrink-0">Shipment ID:&nbsp;</CardDescription>
+                  <span className="font-semibold text-foreground break-all text-sm">{shipment.id}</span>
+                  <Button variant="ghost" size="icon" onClick={handleCopyShipmentId} className="ml-1.5 h-6 w-6 flex-shrink-0 no-print">
+                    {copied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
             </div>
              {trailer && (
               <Link href={`/trailers/${trailer.id}`} className="no-print-in-area">
@@ -234,7 +258,7 @@ export default function SingleShipmentPage() {
             <h3 className="font-semibold text-muted-foreground flex items-center"><Hash className="mr-2 h-4 w-4" />STS Job Number</h3>
             <p className="text-2xl font-bold text-foreground">{shipment.stsJob}</p>
           </div>
-          
+
           {shipment.customerJobNumber && (
             <div className="space-y-1">
               <h3 className="font-semibold text-muted-foreground flex items-center"><Briefcase className="mr-2 h-4 w-4" />Customer Job Number</h3>
@@ -266,7 +290,7 @@ export default function SingleShipmentPage() {
             <h3 className="font-semibold text-muted-foreground flex items-center"><Send className="mr-2 h-4 w-4" />Exporter (Consignor)</h3>
             <p>{shipment.exporter}</p>
           </div>
-          
+
           <div className="space-y-1">
             <h3 className="font-semibold text-muted-foreground flex items-center"><Users className="mr-2 h-4 w-4" />Importer (Consignee)</h3>
             <p>{shipment.importer}</p>
@@ -398,7 +422,7 @@ export default function SingleShipmentPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Released (printed) on Date - Print Only */}
         {printedDateTime && (
           <div className="print-only-block mt-4 pt-4 text-center border-t border-border px-6 pb-6">
@@ -410,7 +434,7 @@ export default function SingleShipmentPage() {
 
       </Card>
 
-      {isEditShipmentDialogOpen && shipment && ( 
+      {isEditShipmentDialogOpen && shipment && (
         <EditShipmentDialog
           isOpen={isEditShipmentDialogOpen}
           setIsOpen={setIsEditShipmentDialogOpen}

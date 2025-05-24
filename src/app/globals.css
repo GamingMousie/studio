@@ -106,15 +106,14 @@
     @apply border-border;
   }
   html {
-    /* Antialiasing is applied in layout.tsx to the body tag */
     font-family: var(--font-geist-sans);
     font-feature-settings: "rlig" 1, "calt" 1;
     scroll-padding-top: 4rem; /* Adjust based on your fixed header's height */
   }
   body {
     @apply bg-background text-foreground;
-    /* font-family: var(--font-geist-sans); /* This is now on html */
-    /* font-feature-settings: "rlig" 1, "calt" 1; /* This is now on html */
+    /* font-family is now on html */
+    /* antialiased class is applied in layout.tsx to the body tag */
   }
   pre, code, kbd, samp {
     font-family: var(--font-geist-mono);

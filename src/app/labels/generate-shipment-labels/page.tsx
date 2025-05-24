@@ -6,10 +6,26 @@ import type { Trailer, Shipment } from '@/types';
 import ShipmentLabel from '@/components/label/ShipmentLabel';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { FileText, Search, Printer, AlertTriangle, PackageSearch } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@/components/ui/alert';
+import {
+  FileText,
+  Search,
+  Printer,
+  AlertTriangle,
+  PackageSearch,
+} from 'lucide-react';
+import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function GenerateShipmentLabelsPage() {
@@ -18,36 +34,39 @@ export default function GenerateShipmentLabelsPage() {
   const [shipmentsToLabel, setShipmentsToLabel] = useState<Shipment[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isClient, setIsClient] = useState(false);
 
   const { getTrailerById, getShipmentsByTrailerId } = useWarehouse();
 
   useEffect(() => {
-    setIsClient(true);
+    document.getElementById('trailerId')?.focus();
   }, []);
 
+  const resetState = () => {
+    setErrorMessage(null);
+    setSelectedTrailer(null);
+    setShipmentsToLabel([]);
+  };
+
   const handleGenerateLabels = async () => {
+    resetState();
+
     if (!trailerIdInput.trim()) {
       setErrorMessage('Please enter a Trailer ID.');
-      setSelectedTrailer(null);
-      setShipmentsToLabel([]);
       return;
     }
 
     setIsLoading(true);
-    setErrorMessage(null);
-    setSelectedTrailer(null);
-    setShipmentsToLabel([]);
 
     try {
       const trailer = await getTrailerById(trailerIdInput.trim());
+
       if (!trailer) {
-        setErrorMessage(`Trailer with ID "${trailerIdInput.trim()}" not found.`);
-        setIsLoading(false);
+        setErrorMessage(`Trailer "${trailerIdInput}" not found.`);
         return;
       }
 
       const shipments = await getShipmentsByTrailerId(trailer.id);
+
       setSelectedTrailer(trailer);
       setShipmentsToLabel(shipments);
 
@@ -56,35 +75,36 @@ export default function GenerateShipmentLabelsPage() {
       }
     } catch (err) {
       console.error(err);
-      setErrorMessage('An error occurred while fetching trailer or shipments.');
+      setErrorMessage('Error loading trailer or shipments.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handlePrintLabels = () => {
-    if (shipmentsToLabel.length > 0 && selectedTrailer) {
-      window.print();
+    try {
+      if (shipmentsToLabel.length > 0 && selectedTrailer) {
+        window.print();
+      }
+    } catch (err) {
+      console.error('Print failed:', err);
     }
   };
 
   const getLabelDate = (trailer: Trailer | null): string => {
-    if (!isClient) return '';
-    const dateFormat = 'dd/MM/yyyy';
-    if (trailer && trailer.arrivalDate) {
-      try {
-        return format(parseISO(trailer.arrivalDate), dateFormat);
-      } catch {
-        return format(new Date(), dateFormat);
-      }
+    try {
+      const date = trailer?.arrivalDate ? new Date(trailer.arrivalDate) : new Date();
+      return format(date, 'dd/MM/yyyy');
+    } catch {
+      return format(new Date(), 'dd/MM/yyyy');
     }
-    return format(new Date(), dateFormat);
   };
 
   const labelDateForShipments = getLabelDate(selectedTrailer);
 
   return (
     <div className="space-y-6">
+      {/* Input Card */}
       <Card className="no-print">
         <CardHeader>
           <CardTitle className="flex items-center text-2xl">
@@ -105,23 +125,31 @@ export default function GenerateShipmentLabelsPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="trailerId"
+                  aria-label="Trailer ID"
                   value={trailerIdInput}
                   onChange={(e) => setTrailerIdInput(e.target.value)}
                   placeholder="Enter Trailer ID (e.g., T-001)"
                   className="pl-10"
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleGenerateLabels(); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleGenerateLabels();
+                  }}
                 />
               </div>
             </div>
-            <Button onClick={handleGenerateLabels} disabled={isLoading || !isClient} className="w-full sm:w-auto">
+            <Button
+              onClick={handleGenerateLabels}
+              disabled={isLoading}
+              className="w-full sm:w-auto"
+            >
               {isLoading ? 'Generating...' : 'Generate Labels'}
             </Button>
           </div>
         </CardContent>
       </Card>
 
+      {/* Loading State */}
       {isLoading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 no-print">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 no-print">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="p-4 border border-border rounded-lg shadow-sm bg-background h-[200px] flex flex-col justify-between">
               <Skeleton className="h-4 w-3/4" />
@@ -135,56 +163,47 @@ export default function GenerateShipmentLabelsPage() {
         </div>
       )}
 
-      {errorMessage && !isLoading && (
+      {/* Error Message */}
+      {errorMessage && (
         <Alert variant="destructive" className="no-print">
-          <AlertTriangle className="h-4 w-4" />
+          <AlertTriangle className="h-5 w-5" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
-      {selectedTrailer && shipmentsToLabel.length === 0 && !isLoading && (
-        <div className="text-center py-10 bg-card rounded-lg shadow no-print">
-          <PackageSearch className="mx-auto h-12 w-12 text-muted-foreground" />
-          <p className="mt-4 text-xl text-muted-foreground">
-            No shipments found for Trailer ID "{selectedTrailer.id}".
-          </p>
-        </div>
-      )}
-
-      {selectedTrailer && shipmentsToLabel.length > 0 && !isLoading && (
-        <div className="no-print">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-foreground">
-              Labels for Trailer: {selectedTrailer.name || 'N/A'} (ID: {selectedTrailer.id}) - {shipmentsToLabel.length} Shipment(s)
-            </h2>
-            <Button onClick={handlePrintLabels} variant="outline">
-              <Printer className="mr-2 h-4 w-4" />
-              Print All Displayed Labels
+      {/* Shipment Labels */}
+      {selectedTrailer && shipmentsToLabel.length > 0 && (
+        <>
+          <div className="no-print flex justify-end">
+            <Button onClick={handlePrintLabels} variant="outline" className="mb-4">
+              <Printer className="h-4 w-4 mr-2" />
+              Print Labels
             </Button>
           </div>
-        </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {shipmentsToLabel.map((shipment) => (
+              <ShipmentLabel
+                key={shipment.id}
+                shipment={shipment}
+                trailerId={selectedTrailer.id}
+                date={labelDateForShipments}
+              />
+            ))}
+          </div>
+        </>
       )}
 
-      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 printable-area label-grid ${(!isLoading && selectedTrailer && shipmentsToLabel.length > 0) ? '' : 'hidden print:hidden'}`} style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(150mm, 1fr))' }}>
-        {isClient && selectedTrailer && shipmentsToLabel.length > 0 && !isLoading &&
-          shipmentsToLabel.map((shipment) => (
-            <ShipmentLabel
-              key={shipment.id}
-              shipment={shipment}
-              trailer={selectedTrailer}
-              labelDate={labelDateForShipments}
-            />
-          ))}
-      </div>
-
-      {selectedTrailer && shipmentsToLabel.length > 0 && (
-        <div className="hidden print:block print-only-block mb-4 text-center">
-          <h2 className="text-2xl font-bold text-foreground">
-            Shipment Labels for Trailer: {selectedTrailer.name || 'N/A'} (ID: {selectedTrailer.id})
-          </h2>
-          <p className="text-lg text-muted-foreground">{shipmentsToLabel.length} Shipment(s)</p>
-        </div>
+      {/* No labels found */}
+      {selectedTrailer && shipmentsToLabel.length === 0 && !isLoading && !errorMessage && (
+        <Alert className="no-print">
+          <PackageSearch className="h-5 w-5" />
+          <AlertTitle>No Shipments Found</AlertTitle>
+          <AlertDescription>
+            This trailer has no shipments for labeling.
+          </AlertDescription>
+        </Alert>
       )}
     </div>
   );

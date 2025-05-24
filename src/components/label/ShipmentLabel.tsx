@@ -6,6 +6,7 @@ import { Download } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import Barcode from 'react-barcode';
 
 interface ShipmentLabelProps {
   shipment: Shipment;
@@ -107,25 +108,23 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
   const handleDownloadImage = async () => {
     if (!labelRef.current) return;
     
-    // Target dimensions for 15cm width x 10.8cm height at 150 DPI
-    const targetWidthPx = Math.round((15 / 2.54) * 150); // approx 886px
-    const targetHeightPx = Math.round((10.8 / 2.54) * 150);  // approx 638px
+    const targetWidthPx = Math.round((15 / 2.54) * 150); // approx 886px (for 15cm)
+    const targetHeightPx = Math.round((10.8 / 2.54) * 150);  // approx 638px (for 10.8cm)
 
     try {
       const canvas = await html2canvas(labelRef.current, {
         useCORS: true,
-        backgroundColor: '#ffffff', // Explicitly set white background
+        backgroundColor: '#ffffff',
         width: targetWidthPx, 
         height: targetHeightPx,
-        scale: 2, // Render at 2x resolution
+        scale: 2, 
         logging: false, 
         onclone: (documentClone) => {
           const clonedLabelRoot = documentClone.getElementById(labelRef.current?.id || '');
           if (clonedLabelRoot && labelRef.current) {
-            // Explicitly set dimensions and base layout styles on the cloned root
             clonedLabelRoot.style.width = `${targetWidthPx}px`;
             clonedLabelRoot.style.height = `${targetHeightPx}px`;
-            clonedLabelRoot.style.padding = `${0.375 * 16}px`; // Equivalent to print:p-1.5 (0.375rem * 16px/rem)
+            clonedLabelRoot.style.padding = `${0.375 * 16}px`; 
             clonedLabelRoot.style.border = '1px solid black';
             clonedLabelRoot.style.display = 'flex';
             clonedLabelRoot.style.flexDirection = 'column';
@@ -173,13 +172,6 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
     }
   };
   
-  const barcodeBars = [
-    { width: '10%', height: '100%' }, { width: '5%', height: '100%' }, { width: '15%', height: '100%' },
-    { width: '8%', height: '100%' }, { width: '12%', height: '100%' }, { width: '5%', height: '100%' },
-    { width: '10%', height: '100%' }, { width: '15%', height: '100%' }, { width: '10%', height: '100%' },
-    { width: '10%', height: '100%' }
-  ];
-
 
   return (
     <div className="flex flex-col items-center group">
@@ -188,40 +180,46 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         id={`shipment-label-${shipment.id}`}
         className="border border-foreground rounded-md shadow-sm w-full bg-background text-foreground print:shadow-none print:border-black print:w-[150mm] print:h-[108mm] print:p-1.5 print:break-words label-item flex flex-col justify-between print:leading-normal print-page-break-after-always"
       >
-        {/* Top part of the label - text content */}
         <div className="flex-grow flex flex-col justify-between print:leading-normal">
-          <div>
-            <p className="text-sm print:text-[18pt] print:font-semibold print:mb-0.5">Date: <span className="float-right">{labelDate}</span></p>
-            
-            <p className="text-base print:text-[36pt] print:font-semibold print:mb-0.5">
-              Agent: <span className="float-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span>
+          <div className="space-y-1 print:space-y-0 print:leading-normal">
+            <p className="flex justify-between print:mb-1">
+              <span className="text-sm print:text-[18pt] print:font-semibold">Date:</span>
+              <span className="text-sm print:text-[18pt] print:font-semibold">{labelDate}</span>
             </p>
-            
-            <p className="text-base print:text-[36pt] print:font-semibold print:mb-0.5">
-              Importer: <span className="float-right" title={shipment.importer}>{shipment.importer}</span>
+            <p className="flex justify-between print:mb-1">
+              <span className="text-sm print:text-[18pt] print:font-semibold">Agent:</span>
+              <span className="text-sm print:text-[36pt] print:font-semibold text-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span>
+            </p>
+            <p className="flex justify-between print:mb-1">
+              <span className="text-sm print:text-[18pt] print:font-semibold">Importer:</span>
+              <span className="text-sm print:text-[28pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</span>
+            </p>
+            <p className="flex justify-between print:mb-2">
+              <span className="text-sm print:text-[18pt] print:font-semibold">Pieces:</span>
+              <span className="text-lg print:text-[36pt] print:font-bold text-right">{shipment.quantity}</span>
             </p>
           </div>
 
-          <div>
-            <p className="text-xl print:text-[48pt] print:font-bold text-center print:mb-1">
-              Pieces: {shipment.quantity}
-            </p>
-            <p className="text-lg print:text-[40pt] print:font-bold text-center print:mb-1" title={`Trailer ${trailer.id} / Job ${shipment.stsJob}`}>
+          <div className="text-center print:mb-1">
+            <p className="text-lg print:text-[40pt] print:font-bold" title={`Tr: ${trailer.id} / Job: ${shipment.stsJob}`}>
               Ref: {trailer.id} / Job: {shipment.stsJob}
             </p>
           </div>
         </div>
 
-
         {/* Barcode Section - Bottom part of the label */}
         <div className="mt-auto pt-1 border-t border-dashed border-muted-foreground print:border-black print:mt-1 print:pt-1 print:mb-0"> 
           <p className="text-xs print:text-[16pt] print:font-semibold print:mb-0.5 text-center">BARCODE</p>
-          <div className="flex justify-center items-center mt-0.5 print:mt-0.5 print:mb-0.5 print:h-[40px] bg-background print:bg-white border border-foreground print:border-black print:p-0.5 max-h-10" aria-label="Barcode Placeholder">
-            <div className="flex w-full h-full items-stretch">
-              {barcodeBars.map((bar, i) => (
-                <div key={i} className="bg-foreground print:bg-black" style={{ width: bar.width, height: bar.height, marginRight: i < barcodeBars.length -1 ? '1px' : '0' }}></div>
-              ))}
-            </div>
+          <div className="flex justify-center items-center mt-0.5 print:mt-0.5 print:mb-0.5 print:h-[50px] bg-background print:bg-white border-transparent print:border-transparent print:p-0.5 max-h-12">
+             <Barcode 
+                value={barcodeValue} 
+                format="CODE128" 
+                width={1.5} 
+                height={40} 
+                displayValue={false} 
+                background="transparent" // For html2canvas compatibility
+                lineColor="black"
+             />
           </div>
           <p className="text-center font-mono text-xs print:text-[22pt] print:font-bold break-all mt-0.5 print:mt-0.5 leading-tight tracking-tighter" title={barcodeValue}>
             {barcodeValue}

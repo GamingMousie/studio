@@ -157,7 +157,7 @@ export default function GenerateShipmentLabelsPage() {
       {selectedTrailer && shipmentsToLabel.length > 0 && !isLoading && (
         <div className="no-print">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-xl font-bold text-foreground">
               Labels for Trailer: {selectedTrailer.name || 'N/A'} (ID: {selectedTrailer.id}) - {shipmentsToLabel.length} Shipment(s)
             </h2>
             <Button onClick={handlePrintLabels} variant="outline">

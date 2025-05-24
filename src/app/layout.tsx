@@ -1,9 +1,8 @@
 
 import type { Metadata } from 'next';
 // Import Geist fonts using named import syntax
-// These imports provide font objects directly, not loader functions.
 import { GeistSans } from 'geist/font/sans';
-// import { GeistMono } from 'geist/font/mono'; // Temporarily commented out for debugging
+import { GeistMono } from 'geist/font/mono'; // Re-import GeistMono
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/layout/Header';
@@ -24,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
       {/*
         Font variable classes are applied to <html>.
         The 'antialiased' class is applied to <body>.

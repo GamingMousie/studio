@@ -82,8 +82,9 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
   const handleDownloadImage = async () => {
     if (!labelRef.current) return;
     
-    const targetWidthPx = Math.round((15 / 2.54) * 150); // 15cm at 150 DPI
-    const targetHeightPx = Math.round((10.8 / 2.54) * 150);  // 10.8cm at 150 DPI
+    // Target dimensions for 15cm width x 10.8cm height at 150 DPI
+    const targetWidthPx = Math.round((15 / 2.54) * 150); // approx 886px
+    const targetHeightPx = Math.round((10.8 / 2.54) * 150);  // approx 638px
 
     try {
       const canvas = await html2canvas(labelRef.current, {
@@ -95,6 +96,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         onclone: (documentClone) => {
           const clonedLabelRoot = documentClone.getElementById(labelRef.current?.id || '');
           if (clonedLabelRoot && labelRef.current) {
+            // Explicitly set dimensions and base layout styles on the cloned root
             clonedLabelRoot.style.width = `${targetWidthPx}px`;
             clonedLabelRoot.style.height = `${targetHeightPx}px`;
             clonedLabelRoot.style.padding = `${0.375 * 16}px`; // Equivalent to print:p-1.5 (0.375rem * 16px/rem)
@@ -105,8 +107,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
             clonedLabelRoot.style.backgroundColor = '#ffffff'; 
             clonedLabelRoot.style.color = '#000000'; 
             clonedLabelRoot.style.boxSizing = 'border-box';
-            clonedLabelRoot.style.lineHeight = 'normal';
-
+            clonedLabelRoot.style.lineHeight = 'normal'; // Base line height
 
             const applyStylesToChildren = (originalNode: HTMLElement, clonedNode: HTMLElement) => {
               const originalChildren = Array.from(originalNode.children) as HTMLElement[];
@@ -145,7 +146,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
       console.error('Error generating image:', error);
     }
   };
-
+  
   const barcodeBars = [
     { width: '10%', height: '100%' }, { width: '5%', height: '100%' }, { width: '15%', height: '100%' },
     { width: '8%', height: '100%' }, { width: '12%', height: '100%' }, { width: '5%', height: '100%' },
@@ -160,33 +161,12 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         id={`shipment-label-${shipment.id}`}
         className="border border-foreground rounded-md shadow-sm w-full bg-background text-foreground print:shadow-none print:border-black print:w-[150mm] print:h-[108mm] print:p-1.5 print:break-words label-item flex flex-col justify-between print:leading-normal print-page-break-after-always"
       >
-        {/* Top part of the label */}
-        <div className="flex-grow space-y-1 print:space-y-0 print:leading-normal">
-          {/* Date Row */}
-          <div className="flex justify-between items-baseline print:mb-1">
-            <p className="text-sm print:text-[18pt] print:font-semibold">Date:</p>
-            <p className="text-sm print:text-[18pt] print:font-semibold">{labelDate}</p>
-          </div>
-          
-          {/* Agent Row */}
-          <div className="flex justify-between items-baseline print:mb-1">
-            <p className="text-sm print:text-[28pt] print:font-semibold">Agent:</p>
-            <p className="text-sm print:text-[36pt] print:font-semibold text-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</p>
-          </div>
-
-          {/* Importer Row */}
-          <div className="flex justify-between items-baseline print:mb-1">
-            <p className="text-xs print:text-[18pt] print:font-semibold">Importer:</p>
-            <p className="text-xs print:text-[28pt] print:font-semibold text-right" title={shipment.importer}>{shipment.importer}</p>
-          </div>
-          
-          {/* Pieces Row */}
-          <div className="flex justify-between items-baseline print:mb-2">
-            <p className="text-xs print:text-[18pt]">Pieces:</p>
-            <p className="text-sm print:text-[36pt] print:font-bold">{shipment.quantity}</p>
-          </div>
-
-          {/* Ref & Job Row */}
+        {/* Top part of the label - text content */}
+        <div className="flex-grow space-y-0 print:space-y-0 print:leading-normal">
+          <p className="text-sm print:text-[18pt] print:font-semibold print:mb-1">Date: <span className="float-right">{labelDate}</span></p>
+          <p className="text-sm print:text-[36pt] print:font-semibold print:mb-1">Agent: <span className="float-right" title={trailer.company || 'N/A'}>{trailer.company || 'N/A'}</span></p>
+          <p className="text-xs print:text-[28pt] print:font-semibold print:mb-1">Importer: <span className="float-right" title={shipment.importer}>{shipment.importer}</span></p>
+          <p className="text-sm print:text-[36pt] print:font-bold print:mb-2">Pieces: <span className="float-right">{shipment.quantity}</span></p>
           <p className="text-base print:text-[40pt] print:font-bold print:mb-1 text-center" title={`Trailer ${trailer.id} / Job ${shipment.stsJob}`}>
             Ref: {trailer.id} / Job: {shipment.stsJob}
           </p>
@@ -211,7 +191,7 @@ export default function ShipmentLabel({ shipment, trailer, labelDate }: Shipment
         onClick={handleDownloadImage}
         variant="outline"
         size="sm"
-        className="mt-2 no-print group-hover:opacity-100 md:opacity-0 transition-opacity duration-150"
+        className="mt-2 no-print transition-opacity duration-150"
         aria-label={`Download label for shipment ${shipment.stsJob} as image`}
       >
         <Download className="mr-2 h-4 w-4" />

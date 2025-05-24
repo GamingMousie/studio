@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import './globals.css';
-import { cn } from '@/lib/utils';
+// Removed cn import as it's no longer used here
 import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/layout/Header';
 import { WarehouseProvider } from '@/contexts/WarehouseContext';
@@ -24,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(GeistSans.variable, GeistMono.variable)}>
-      {/* 
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      {/*
         Font variable classes are applied to <html>.
         The 'antialiased' class is applied to <body>.
         The font-family is applied via CSS variables in globals.css.
